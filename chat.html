@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Afnan AI - الدردشة</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="chat.css">
+</head>
+<body class="antialiased">
+
+    <!-- HEADER -->
+    <header class="fixed top-0 left-0 right-0 h-20 z-30 px-6 flex items-center justify-between">
+        <div id="chatHeader" class="flex items-center gap-3">
+            <img src="https://via.placeholder.com/150" class="chat-header-avatar" alt="">
+            <div class="chat-header-text">
+                <h3>جاري التحميل...</h3>
+            </div>
+        </div>
+        <button onclick="goBack()" class="w-10 h-10 rounded-full flex items-center justify-center active:scale-90">
+            <i data-lucide="arrow-left" class="text-black w-6 h-6"></i>
+        </button>
+    </header>
+
+    <!-- CHAT CONTAINER -->
+    <div class="chat-container">
+        <!-- Messages -->
+        <div id="messagesContainer" class="messages-container no-scrollbar"></div>
+
+        <!-- Input Area -->
+        <div class="input-container">
+            <button onclick="openGiftSelector()" class="gift-button" title="إرسال هدية">
+                🎁
+            </button>
+            <textarea id="messageInput" class="input-field" placeholder="اكتب رسالة..." rows="1"></textarea>
+            <button onclick="sendMessage()" class="send-button">
+                ➤
+            </button>
+        </div>
+    </div>
+
+    <!-- Follow Request Modal -->
+    <div id="followModal" class="follow-modal">
+        <div class="follow-modal-content">
+            <div class="follow-modal-icon">👥</div>
+            <h3 class="follow-modal-title">طلب متابعة</h3>
+            <p class="follow-modal-text">يريد هذا المستخدم متابعتك. هل تقبل؟</p>
+            <div class="follow-modal-buttons">
+                <button onclick="acceptFollowRequest()" class="follow-modal-accept">قبول</button>
+                <button onclick="rejectFollowRequest()" class="follow-modal-reject">رفض</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Initialize -->
+    <script src="chat.js"></script>
+</body>
+</html>
