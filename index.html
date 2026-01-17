@@ -30,62 +30,121 @@
         }
 
         .glass {
-            background: rgba(255, 255, 255, 0.75);
+            background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(20px) saturate(180%);
             -webkit-backdrop-filter: blur(20px) saturate(180%);
             border: 1px solid rgba(255, 255, 255, 0.6);
             box-shadow: 
-                0 4px 6px -1px rgba(0, 0, 0, 0.04),
-                0 2px 4px -1px rgba(0, 0, 0, 0.02),
-                inset 0 1px 0 0 rgba(255, 255, 255, 0.4);
+                0 10px 30px -5px rgba(0, 0, 0, 0.1),
+                0 4px 10px -2px rgba(0, 0, 0, 0.05),
+                inset 0 1px 0 0 rgba(255, 255, 255, 0.8);
         }
 
-        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        .fade-in { animation: fadeIn 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+        
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; transform: translateY(20px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* Loading Spinner */
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 3px solid #3b82f6;
+            width: 24px;
+            height: 24px;
+            -webkit-animation: spin 1s linear infinite; /* Safari */
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .btn-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-hover:active {
+            transform: scale(0.96);
         }
     </style>
 </head>
-<body class="antialiased selection:bg-blue-100 selection:text-blue-900">
+<body class="antialiased flex items-center justify-center min-h-screen relative">
+
+    <!-- Background Elements -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute -top-[10%] -right-[10%] w-[50%] h-[50%] bg-blue-400/10 rounded-full blur-3xl animate-pulse"></div>
+        <div class="absolute top-[40%] -left-[10%] w-[40%] h-[40%] bg-purple-400/10 rounded-full blur-3xl"></div>
+        <div class="absolute -bottom-[10%] right-[20%] w-[40%] h-[40%] bg-indigo-400/10 rounded-full blur-3xl"></div>
+    </div>
 
     <!-- ================= AUTH SCREEN ================= -->
-    <div class="fixed inset-0 z-50 flex flex-col items-center justify-center p-6 fade-in">
-        <div class="glass p-8 rounded-[40px] w-full max-w-sm text-center shadow-2xl relative overflow-hidden">
-            <div class="absolute -top-10 -right-10 w-32 h-32 bg-blue-400/20 rounded-full blur-2xl"></div>
-            <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-purple-400/20 rounded-full blur-2xl"></div>
+    <div class="w-full max-w-sm p-6 relative z-10 fade-in">
+        <div class="glass p-8 rounded-[40px] text-center w-full relative overflow-hidden group">
+            
+            <!-- Logo Area -->
+            <div class="relative z-10 mb-8">
+                <div class="w-24 h-24 bg-white rounded-3xl mx-auto mb-6 flex items-center justify-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/50 group-hover:scale-105 transition-transform duration-500">
+                    <div class="relative w-12 h-12">
+                         <!-- Abstract AI Logo using CSS -->
+                         <div class="absolute inset-0 bg-gradient-to-tr from-blue-600 to-purple-600 rounded-xl rotate-3 opacity-90"></div>
+                         <div class="absolute inset-0 bg-gradient-to-bl from-blue-500 to-indigo-500 rounded-xl -rotate-3 opacity-90 flex items-center justify-center text-white">
+                             <i data-lucide="sparkles" class="w-6 h-6"></i>
+                         </div>
+                    </div>
+                </div>
+                <h1 class="text-3xl font-black mb-2 text-gray-800 tracking-tight">Afnan AI</h1>
+                <p class="text-gray-500 font-medium text-sm leading-relaxed">بوابتك الذكية للمستقبل.<br>سجل الدخول للمتابعة.</p>
+            </div>
+            
+            <!-- Buttons Area -->
+            <div class="space-y-4 relative z-10">
+                <!-- Twitter Button -->
+                <button id="twitterBtn" onclick="handleLogin('twitter')" class="btn-hover w-full py-4 rounded-2xl bg-black text-white font-bold text-lg shadow-xl shadow-black/5 flex items-center justify-center gap-3 group/btn hover:bg-gray-900 relative overflow-hidden">
+                    <div class="absolute inset-0 bg-white/10 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300"></div>
+                    <svg class="w-5 h-5 relative z-10" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.213c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+                    </svg>
+                    <span class="relative z-10">المتابعة عبر X</span>
+                </button>
 
-            <div class="relative z-10">
-                <div class="w-20 h-20 bg-white/50 rounded-2xl mx-auto mb-6 flex items-center justify-center shadow-inner">
-                    <span class="text-4xl">🤖</span>
-                </div>
-                <h1 class="text-3xl font-black mb-2 bg-clip-text text-transparent bg-gradient-to-r from-gray-800 to-gray-600">Afnan AI</h1>
-                <p class="text-gray-500 mb-8 font-medium">تجربة المستقبل، ببساطة وأناقة.</p>
-                
-                <div class="space-y-3">
-                    <button onclick="loginWithTwitter()" class="w-full py-4 rounded-2xl bg-black text-white font-bold text-lg shadow-lg hover:bg-gray-900 transition transform hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-3">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.213c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
-                        </svg>
-                        دخول عبر تويتر
-                    </button>
-                    <button onclick="loginWithGoogle()" class="w-full py-4 rounded-2xl bg-white border border-gray-200 text-gray-700 font-bold text-lg shadow-sm hover:bg-gray-50 transition transform hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-3">
-                        <svg class="w-5 h-5" viewBox="0 0 24 24">
-                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
-                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                        </svg>
-                        دخول عبر جوجل
-                    </button>
-                </div>
+                <!-- Google Button -->
+                <button id="googleBtn" onclick="handleLogin('google')" class="btn-hover w-full py-4 rounded-2xl bg-white border border-gray-100 text-gray-700 font-bold text-lg shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:bg-gray-50 flex items-center justify-center gap-3">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
+                    <span>المتابعة عبر Google</span>
+                </button>
+            </div>
+
+            <!-- Loading Overlay -->
+            <div id="loadingOverlay" class="absolute inset-0 bg-white/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center hidden rounded-[40px]">
+                <div class="loader mb-4"></div>
+                <p class="text-sm font-semibold text-gray-600 animate-pulse">جاري التحويل الآمن...</p>
+            </div>
+            
+            <div class="mt-8 text-xs text-gray-400">
+                باستخدامك للمنصة أنت توافق على <a href="#" class="underline hover:text-blue-500">الشروط والأحكام</a>
             </div>
         </div>
     </div>
 
     <script type="module">
+        // استيراد الدوال اللازمة لدعم Redirect بدلاً من Popup
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, TwitterAuthProvider, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { 
+            getAuth, 
+            TwitterAuthProvider, 
+            GoogleAuthProvider, 
+            signInWithRedirect, 
+            getRedirectResult,
+            onAuthStateChanged
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBnmqWRY6lV54meFvO89QeXwtd28w81FcY",
@@ -99,30 +158,72 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        
+        // إعداد اللغة للعربية في واجهة فايربيس
+        auth.languageCode = 'ar';
+
         const twitterProvider = new TwitterAuthProvider();
         const googleProvider = new GoogleAuthProvider();
 
-        window.loginWithTwitter = async () => {
+        const loadingOverlay = document.getElementById('loadingOverlay');
+
+        function showLoading() {
+            loadingOverlay.classList.remove('hidden');
+        }
+
+        function hideLoading() {
+            loadingOverlay.classList.add('hidden');
+        }
+
+        // دالة موحدة للتعامل مع تسجيل الدخول
+        window.handleLogin = async (providerName) => {
+            showLoading();
+            const provider = providerName === 'twitter' ? twitterProvider : googleProvider;
+            
             try {
-                await signInWithPopup(auth, twitterProvider);
-                window.location.href = 'afnan.html';
+                // استخدام signInWithRedirect وهو الأنسب للموبايل والـ WebViews
+                // هذا سيقوم بفتح الصفحة في المتصفح الافتراضي إذا كان التطبيق معداً لذلك
+                // أو سيقوم بإعادة توجيه الـ WebView نفسه
+                await signInWithRedirect(auth, provider);
             } catch (error) {
-                console.error('خطأ في تسجيل الدخول:', error);
-                alert('حدث خطأ أثناء تسجيل الدخول. حاول مرة أخرى.');
+                console.error('خطأ في بدء عملية الدخول:', error);
+                hideLoading();
+                alert('عذراً، حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى.');
             }
         };
 
-        window.loginWithGoogle = async () => {
+        // التحقق من نتيجة تسجيل الدخول عند العودة للصفحة
+        // هذه الخطوة ضرورية جداً مع signInWithRedirect
+        const checkRedirect = async () => {
             try {
-                await signInWithPopup(auth, googleProvider);
-                window.location.href = 'afnan.html';
+                const result = await getRedirectResult(auth);
+                if (result) {
+                    // المستخدم عاد بنجاح من صفحة الدخول
+                    const user = result.user;
+                    console.log("تم تسجيل الدخول بنجاح:", user.displayName);
+                    window.location.href = 'afnan.html';
+                }
             } catch (error) {
-                console.error('خطأ في تسجيل الدخول:', error);
-                alert('حدث خطأ أثناء تسجيل الدخول. حاول مرة أخرى.');
+                console.error('فشل استرجاع بيانات الدخول:', error);
+                // التعامل مع حالات محددة مثل إغلاق المستخدم للنافذة قبل الاكمال
             }
         };
 
+        // مراقب حالة المستخدم
+        // مفيد إذا كان المستخدم مسجل دخول بالفعل (مثلاً تم حفظ الجلسة)
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                console.log("المستخدم مسجل دخول بالفعل");
+                window.location.href = 'afnan.html';
+            } else {
+                // المستخدم غير مسجل، نتحقق مما إذا كان عائداً من Redirect
+                checkRedirect();
+            }
+        });
+
+        // تهيئة الأيقونات
         lucide.createIcons();
     </script>
 </body>
 </html>
+
