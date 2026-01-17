@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>الملف الشخصي</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Noto Sans Arabic', sans-serif; }
+        body { background: #ffffff; color: #1e293b; padding-bottom: 90px; }
+        .avatar-section { position: relative; width: 110px; height: 110px; margin: 40px auto 15px auto; }
+        .avatar-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+        .frame-img { position: absolute; top: -16%; left: -16%; width: 132%; height: 132%; pointer-events: none; z-index: 10; }
+        .level-icons { display: flex; justify-content: center; gap: 15px; margin-top: 8px; }
+        .level-icon { width: 32px; height: 32px; object-fit: contain; }
+        .thin-line { width: 90%; height: 0.5px; background: #f1f5f9; margin: 25px auto; }
+        .action-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 0 20px; }
+        .action-btn { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; }
+        .icon-circle { width: 54px; height: 54px; border-radius: 50%; background: #f8fafc; display: flex; align-items: center; justify-content: center; }
+        .action-label { font-size: 11px; font-weight: 700; color: #64748b; }
+        .nav-bar { position: fixed; bottom: 0; width: 100%; background: white; height: 75px; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #f8fafc; z-index: 100; }
+    </style>
+</head>
+<body>
+
+    <div class="text-center">
+        <div class="avatar-section">
+            <img id="my-avatar" src="https://via.placeholder.com/150" class="avatar-img">
+            <img id="my-frame" src="" class="frame-img hidden">
+        </div>
+        <h2 id="my-name" class="text-xl font-extrabold text-gray-900">...</h2>
+        <p class="text-gray-400 text-xs font-bold mt-1">ID: <span id="my-id">000000</span></p>
+        <div class="level-icons" id="levels-container">
+            <img id="lvl-magic-icon" src="" class="level-icon">
+            <img id="lvl-wealth-icon" src="" class="level-icon">
+        </div>
+    </div>
+
+    <div class="thin-line"></div>
+
+    <div class="action-grid">
+        <div onclick="location.href='wallet.html'" class="action-btn">
+            <div class="icon-circle text-yellow-500"><i data-lucide="wallet"></i></div>
+            <span class="action-label">المحفظة</span>
+        </div>
+        <div onclick="location.href='store.html'" class="action-btn">
+            <div class="icon-circle text-purple-500"><i data-lucide="shopping-bag"></i></div>
+            <span class="action-label">المتجر</span>
+        </div>
+        <div onclick="location.href='bag.html'" class="action-btn">
+            <div class="icon-circle text-blue-500"><i data-lucide="backpack"></i></div>
+            <span class="action-label">الحقيبة</span>
+        </div>
+        <div onclick="location.href='host.html'" class="action-btn">
+            <div class="icon-circle text-red-500"><i data-lucide="mic"></i></div>
+            <span class="action-label">مركز المضيف</span>
+        </div>
+    </div>
+
+    <nav class="nav-bar">
+        <button onclick="location.href='afnan.html'" class="flex flex-col items-center text-gray-300">
+            <i data-lucide="layout-grid"></i>
+            <span class="text-[10px] font-bold">الرئيسية</span>
+        </button>
+        <button onclick="location.href='chat.html'" class="flex flex-col items-center text-gray-300">
+            <i data-lucide="message-circle"></i>
+            <span class="text-[10px] font-bold">الدردشة</span>
+        </button>
+        <button class="flex flex-col items-center text-black">
+            <i data-lucide="user-circle"></i>
+            <span class="text-[10px] font-bold">حسابي</span>
+        </button>
+    </nav>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const initAuth = async () => {
+          if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+            await signInWithCustomToken(auth, __initial_auth_token);
+          } else {
+            await signInAnonymously(auth);
+          }
+        };
+        initAuth();
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                onSnapshot(doc(db, 'artifacts', 'rtx3090-28439', 'users', user.uid), async (snap) => {
+                    const data = snap.data();
+                    if (!data) return;
+                    document.getElementById('my-name').innerText = data.displayName || "مستخدم";
+                    document.getElementById('my-id').innerText = data.customId || "000000";
+                    document.getElementById('my-avatar').src = data.photoURL || "https://via.placeholder.com/150";
+
+                    const mLevel = await getDoc(doc(db, 'artifacts', 'rtx3090-28439', 'public', 'data', 'magicLevels', String(data.magicLevel || 1)));
+                    const wLevel = await getDoc(doc(db, 'artifacts', 'rtx3090-28439', 'public', 'data', 'wealthLevels', String(data.wealthLevel || 1)));
+                    
+                    document.getElementById('lvl-magic-icon').src = mLevel.data()?.image || "";
+                    document.getElementById('lvl-wealth-icon').src = wLevel.data()?.image || "";
+
+                    if (data.activeFrame) {
+                        const fSnap = await getDoc(doc(db, 'artifacts', 'rtx3090-28439', 'public', 'data', 'frames', data.activeFrame));
+                        document.getElementById('my-frame').src = fSnap.data()?.image;
+                        document.getElementById('my-frame').classList.remove('hidden');
+                    } else {
+                        document.getElementById('my-frame').classList.add('hidden');
+                    }
+                }, (err) => console.error(err));
+            }
+        });
+
+        lucide.createIcons();
+    </script>
+</body>
+</html>
+
