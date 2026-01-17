@@ -3,474 +3,192 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Afnan Private Chat</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <title>Afnan Private - Premium</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Noto Sans Arabic', sans-serif; }
-        body { background: #f1f5f9; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+        body { background: #ffffff; color: #000000; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
 
-        /* Banner Animation */
+        /* Global Banner Animation: Top-Right -> Top-Left (3s) */
         #globalBanner {
             position: fixed;
-            top: 20px;
+            top: 15px;
             right: -100%;
-            z-index: 1000;
-            transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+            z-index: 9999;
             pointer-events: none;
+            display: flex;
+            align-items: center;
         }
         #globalBanner.active {
-            right: 20px;
-            animation: slideAway 3s forwards;
+            animation: slideAcross 3s cubic-bezier(0.19, 1, 0.22, 1) forwards;
         }
-        @keyframes slideAway {
-            0% { right: -100%; opacity: 0; transform: scale(0.5); }
-            15% { right: 20px; opacity: 1; transform: scale(1); }
-            85% { right: 20px; opacity: 1; transform: translateX(0); }
-            100% { right: 110%; opacity: 0; transform: translateX(-100px); }
-        }
-
-        /* Message Bubbles */
-        .msg-me { 
-            border-radius: 18px 18px 4px 18px; 
-            background: linear-gradient(135deg, #3b82f6, #2563eb); 
-            color: white; 
-            margin-left: auto;
-            max-width: 70%;
-            position: relative;
-        }
-        .msg-them { 
-            border-radius: 18px 18px 18px 4px; 
-            background: white; 
-            border: 1px solid #e2e8f0; 
-            margin-right: auto;
-            max-width: 70%;
-            position: relative;
+        @keyframes slideAcross {
+            0% { right: -100%; opacity: 0; }
+            10% { right: 20px; opacity: 1; }
+            90% { right: 20px; opacity: 1; transform: translateX(0); }
+            100% { right: 100%; opacity: 0; transform: translateX(-500px); }
         }
 
-        /* Gift Bubbles */
-        .gift-bubble {
-            position: relative;
-            display: inline-block;
-        }
-        .gift-me { 
-            align-self: flex-end;
-            text-align: right;
-        }
-        .gift-them { 
-            align-self: flex-start;
-            text-align: left;
-        }
+        /* Messaging Layout */
+        .msg-me { align-self: flex-end; background: #000000; color: #ffffff; border-radius: 15px 15px 2px 15px; }
+        .msg-them { align-self: flex-start; background: #f3f4f6; color: #000000; border-radius: 15px 15px 15px 2px; }
+        
+        /* Gift Alignment */
+        .gift-me { align-self: flex-end; }
+        .gift-them { align-self: flex-start; }
 
-        /* Modals */
-        .modal-slide {
-            position: fixed; 
-            inset: 0; 
-            background: white; 
-            z-index: 200;
-            transform: translateX(100%); 
-            transition: transform 0.4s ease;
+        .modal-view {
+            position: fixed; inset: 0; background: #ffffff; z-index: 500;
+            transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .modal-slide.active { 
-            transform: translateX(0); 
-        }
+        .modal-view.active { transform: translateY(0); }
 
-        /* Tabs */
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .tab-button.active { 
-            border-bottom: 2px solid #3b82f6; 
-            color: #3b82f6;
-        }
-
-        /* Profile Stats */
-        .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 20px;
-            color: white;
-            padding: 20px;
-            position: relative;
-            overflow: hidden;
-        }
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
-            background-size: 50px 50px;
-            opacity: 0.3;
-        }
-
-        /* Scrollbar */
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        .thin-scrollbar::-webkit-scrollbar {
-            width: 4px;
-        }
-        .thin-scrollbar::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-        .thin-scrollbar::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 10px;
-        }
-        .thin-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-
-        /* Chat Message Animation */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .message-item {
-            animation: fadeIn 0.3s ease-out;
-        }
+        .btn-black { background: #000000; color: #ffffff; transition: all 0.2s; }
+        .btn-black:active { transform: scale(0.95); opacity: 0.8; }
     </style>
 </head>
 <body>
 
     <!-- Global Banner -->
-    <div id="globalBanner" class="flex items-center">
-        <div class="relative w-[320px] h-[85px]">
-            <div class="absolute inset-0 bg-gradient-to-l from-blue-500 to-purple-600 rounded-2xl shadow-xl transform rotate-1"></div>
-            <div class="absolute inset-0 bg-gradient-to-l from-blue-600 to-purple-700 rounded-2xl shadow-lg"></div>
-            <div class="relative z-10 flex items-center justify-between h-full px-8">
-                <div class="flex items-center gap-2">
-                    <div class="relative">
-                        <img id="bSender" class="w-10 h-10 rounded-full border-4 border-white shadow-lg">
-                        <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-green-400 rounded-full border-2 border-white"></div>
-                    </div>
-                    <i data-lucide="arrow-left" class="w-6 h-6 text-white/80"></i>
-                </div>
-                <img id="bGift" class="w-16 h-16 object-contain transform hover:scale-110 transition-transform duration-300">
-                <div class="flex items-center gap-2">
-                    <i data-lucide="arrow-right" class="w-6 h-6 text-white/80"></i>
-                    <div class="relative">
-                        <img id="bReceiver" class="w-10 h-10 rounded-full border-4 border-white shadow-lg">
-                        <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-green-400 rounded-full border-2 border-white"></div>
-                    </div>
-                </div>
+    <div id="globalBanner">
+        <div class="relative w-[320px] h-[80px] bg-black rounded-2xl border border-gray-800 shadow-2xl flex items-center px-4 overflow-hidden">
+            <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
+            <img id="bSender" class="w-10 h-10 rounded-full border border-white/50 relative z-10">
+            <div class="flex-1 flex justify-center relative z-10">
+                <img id="bGift" class="w-14 h-14 object-contain animate-bounce">
             </div>
-            <div class="absolute bottom-2 left-1/2 transform -translate-x-1/2 text-white text-[10px] font-bold bg-black/20 px-3 py-1 rounded-full">
-                🎁 هدية جديدة!
-            </div>
+            <img id="bReceiver" class="w-10 h-10 rounded-full border border-white/50 relative z-10">
         </div>
     </div>
 
-    <!-- Header Search -->
-    <header class="h-16 bg-gradient-to-l from-blue-600 to-purple-600 px-4 flex items-center gap-3">
-        <div class="flex-1 bg-white/20 backdrop-blur-sm rounded-full flex items-center px-4 py-2">
-            <i data-lucide="search" class="w-4 h-4 text-white"></i>
-            <input type="text" id="userSearch" placeholder="ابحث عن ID المستخدم..." 
-                   class="bg-transparent border-none focus:ring-0 text-sm flex-1 mr-2 placeholder-white/70 text-white">
-            <button onclick="performSearch()" class="text-white text-xs font-bold bg-white/20 px-3 py-1 rounded-full hover:bg-white/30 transition">بحث</button>
+    <!-- Header & Search -->
+    <header class="p-4 border-b bg-white flex flex-col gap-4">
+        <div class="flex items-center justify-between">
+            <h1 class="text-2xl font-black tracking-tighter">AFNAN</h1>
+            <div class="flex gap-2">
+                <button class="p-2 bg-gray-100 rounded-full"><i data-lucide="bell" class="w-5 h-5"></i></button>
+                <button class="p-2 bg-black text-white rounded-full" onclick="toggleSearch(true)"><i data-lucide="search" class="w-5 h-5"></i></button>
+            </div>
         </div>
-        <button class="relative p-2 bg-white/20 rounded-full hover:bg-white/30 transition">
-            <i data-lucide="bell" class="w-5 h-5 text-white"></i>
-            <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-[10px] text-white rounded-full flex items-center justify-center">3</span>
-        </button>
     </header>
 
-    <!-- Main Tabs -->
-    <div class="flex border-b bg-white">
-        <button onclick="switchTab('friends')" id="friendsTab" class="flex-1 py-3 text-sm font-bold tab-button active">
-            الأصدقاء
-        </button>
-        <button onclick="switchTab('requests')" id="requestsTab" class="flex-1 py-3 text-sm font-bold tab-button text-gray-400">
-            طلبات الصداقة
-        </button>
-        <button onclick="switchTab('rooms')" id="roomsTab" class="flex-1 py-3 text-sm font-bold tab-button text-gray-400">
-            الغرف
-        </button>
-    </div>
-
-    <!-- Friends List -->
-    <div id="friendsTabContent" class="tab-content active flex-1 overflow-y-auto thin-scrollbar">
-        <div id="friendsList" class="p-4 space-y-3">
-            <!-- Friends loaded here -->
+    <!-- Search Modal -->
+    <div id="searchBar" class="hidden p-4 bg-gray-50 border-b animate-in fade-in slide-in-from-top-2">
+        <div class="flex gap-2">
+            <input type="text" id="userSearchInput" placeholder="ادخل ID المستخدم (مثال: 123456)..." class="flex-1 px-4 py-2 rounded-xl border focus:ring-2 focus:ring-black outline-none text-sm">
+            <button onclick="findUser()" class="btn-black px-6 py-2 rounded-xl text-sm font-bold">بحث</button>
         </div>
     </div>
 
-    <!-- Friend Requests Tab -->
-    <div id="requestsTabContent" class="tab-content flex-1 overflow-y-auto thin-scrollbar">
-        <div id="friendRequests" class="p-4 space-y-3">
-            <!-- Friend requests loaded here -->
-        </div>
-    </div>
+    <!-- Friends/Chats List -->
+    <main id="friendsList" class="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar">
+        <!-- Load from users -> friends -->
+    </main>
 
-    <!-- Rooms Tab -->
-    <div id="roomsTabContent" class="tab-content flex-1 overflow-y-auto thin-scrollbar">
-        <div class="p-4">
-            <div class="grid grid-cols-2 gap-3">
-                <!-- Rooms loaded here -->
-            </div>
-        </div>
-    </div>
-
-    <!-- Chat View -->
-    <div id="chatModal" class="modal-slide flex flex-col">
-        <!-- Chat Header -->
-        <header class="h-16 border-b bg-white flex items-center justify-between px-4">
+    <!-- Chat Modal -->
+    <div id="chatModal" class="modal-view flex flex-col">
+        <header class="h-16 border-b flex items-center justify-between px-4">
             <div class="flex items-center gap-3">
-                <button onclick="closeChat()" class="p-2 hover:bg-gray-100 rounded-full transition">
-                    <i data-lucide="arrow-right"></i>
-                </button>
+                <button onclick="closeChat()"><i data-lucide="arrow-right"></i></button>
                 <div class="flex items-center gap-2 cursor-pointer" onclick="openProfile(currentFriend.uid)">
-                    <img id="cAvatar" src="" class="w-10 h-10 rounded-full border-2 border-blue-100">
+                    <img id="cAvatar" src="" class="w-10 h-10 rounded-full bg-gray-100 border">
                     <div>
                         <div id="cName" class="font-bold text-sm">...</div>
-                        <div class="flex items-center gap-1 text-[9px] text-green-500 font-bold">
-                            <i data-lucide="lock" class="w-3 h-3"></i> رسائل مشفرة تماماً
+                        <div class="flex items-center gap-1 text-[8px] text-gray-400 font-bold uppercase tracking-widest">
+                            <i data-lucide="lock" class="w-3 h-3 text-green-500"></i> E2EE ENCRYPTED
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="flex items-center gap-2">
-                <button onclick="blockUser()" class="p-2 hover:bg-red-50 rounded-full transition" title="حظر المستخدم">
-                    <i data-lucide="shield-ban" class="w-5 h-5 text-red-500"></i>
-                </button>
-                <button onclick="openProfile(currentFriend.uid)" class="p-2 hover:bg-gray-100 rounded-full transition" title="المزيد">
-                    <i data-lucide="more-vertical"></i>
-                </button>
-            </div>
+            <button onclick="openProfile(currentFriend.uid)"><i data-lucide="menu"></i></button>
         </header>
 
-        <!-- Chat Messages -->
-        <div id="chatBox" class="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-blue-50/30 to-purple-50/30 thin-scrollbar"></div>
+        <div id="chatBox" class="flex-1 overflow-y-auto p-4 flex flex-col gap-4 bg-white no-scrollbar"></div>
 
-        <!-- Chat Input -->
-        <div class="p-3 bg-white border-t flex items-center gap-2">
-            <button onclick="toggleGiftBox(true)" class="p-2 hover:bg-gray-100 rounded-full transition" title="إرسال هدية">
-                <img src="https://i.postimg.cc/Y0MLWDL5/sv.webp" class="w-8 h-8">
-            </button>
-            <input type="text" id="mInput" placeholder="اكتب رسالة مشفرة..." 
-                   class="flex-1 bg-gray-100 rounded-full px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                   onkeypress="if(event.key === 'Enter') sendEncryptedMsg()">
-            <button onclick="sendEncryptedMsg()" class="bg-gradient-to-l from-blue-600 to-purple-600 text-white p-3 rounded-full hover:opacity-90 transition">
-                <i data-lucide="send" class="w-5 h-5"></i>
-            </button>
+        <div class="p-4 border-t flex items-center gap-3 bg-white">
+            <button onclick="openGiftPicker()" class="p-2 bg-gray-100 rounded-full"><i data-lucide="gift" class="w-6 h-6"></i></button>
+            <input type="text" id="mInput" placeholder="اكتب رسالة مشفرة..." class="flex-1 bg-gray-50 rounded-2xl px-4 py-3 text-sm focus:outline-none border-none">
+            <button onclick="sendEncryptedMsg()" class="bg-black text-white p-3 rounded-2xl"><i data-lucide="send" class="w-5 h-5"></i></button>
         </div>
     </div>
 
-    <!-- Full Profile View -->
-    <div id="profileModal" class="modal-slide overflow-y-auto thin-scrollbar">
-        <!-- Profile Header -->
-        <div class="h-48 bg-gradient-to-br from-indigo-600 to-purple-600 relative">
-            <button onclick="closeProfile()" class="absolute top-4 right-4 bg-white/20 p-2 rounded-full text-white hover:bg-white/30 transition">
-                <i data-lucide="x"></i>
-            </button>
+    <!-- Profile View (As requested: Fixed issues) -->
+    <div id="profileModal" class="modal-view overflow-y-auto no-scrollbar">
+        <div class="p-4 flex items-center justify-between border-b">
+            <button onclick="closeProfile()"><i data-lucide="chevron-down"></i></button>
+            <span class="font-black text-sm">الملف الشخصي</span>
+            <button id="blockBtn" class="text-red-500"><i data-lucide="slash"></i></button>
         </div>
-        
-        <!-- Profile Content -->
-        <div class="px-6 -mt-16 text-center">
-            <!-- Avatar -->
-            <div class="relative inline-block">
-                <img id="pAvatar" src="" class="w-32 h-32 rounded-full border-4 border-white shadow-2xl mx-auto">
-                <div id="pLevelBadge" class="absolute -bottom-2 -right-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-xs font-black px-3 py-1 rounded-full border-2 border-white shadow-lg">LV 1</div>
+
+        <div class="p-8 text-center">
+            <div class="relative inline-block group">
+                <img id="pAvatar" src="" class="w-32 h-32 rounded-full border-4 border-black shadow-2xl mx-auto object-cover transition-transform group-active:scale-95 cursor-pointer">
+                <div id="pMagicBadge" class="absolute -bottom-2 -right-2 bg-purple-600 text-white text-[10px] px-2 py-1 rounded-full border-2 border-white font-black shadow-lg">Magic LV 0</div>
             </div>
             
-            <!-- User Info -->
             <h2 id="pName" class="text-2xl font-black mt-4">...</h2>
-            <div class="text-gray-500 text-sm" id="pUserId">ID: ---</div>
-            
-            <!-- Stats -->
-            <div class="grid grid-cols-2 gap-3 mt-6 px-4">
-                <div class="stat-card">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <div class="text-sm opacity-80">المستوى</div>
-                            <div class="text-2xl font-black" id="pMagicLevel">1</div>
-                            <div class="text-[10px] opacity-80">✨ سحر</div>
-                        </div>
-                        <i data-lucide="sparkles" class="w-8 h-8 opacity-80"></i>
-                    </div>
+            <p id="pId" class="text-xs text-gray-400 font-bold mt-1 tracking-widest uppercase">ID: 000000</p>
+
+            <div class="flex justify-center gap-4 mt-6">
+                <div class="bg-gray-50 p-3 rounded-2xl w-24 border">
+                    <p class="text-[10px] text-gray-400 font-bold uppercase">الثروة</p>
+                    <p id="pWealthLv" class="text-lg font-black">1</p>
                 </div>
-                <div class="stat-card">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <div class="text-sm opacity-80">الثروة</div>
-                            <div class="text-2xl font-black" id="pWealthLevel">1</div>
-                            <div class="text-[10px] opacity-80">💎 جواهر</div>
-                        </div>
-                        <i data-lucide="gem" class="w-8 h-8 opacity-80"></i>
-                    </div>
+                <div class="bg-gray-50 p-3 rounded-2xl w-24 border">
+                    <p class="text-[10px] text-gray-400 font-bold uppercase">السحر</p>
+                    <p id="pMagicLv" class="text-lg font-black">1</p>
                 </div>
             </div>
 
-            <!-- Action Buttons -->
-            <div class="mt-8 flex gap-3 px-4">
-                <button onclick="toggleFollow()" id="followBtn" 
-                        class="flex-1 py-3 bg-gradient-to-l from-blue-600 to-purple-600 text-white rounded-2xl font-bold shadow-lg hover:shadow-xl transition-shadow">
-                    متابعة
-                </button>
-                <button onclick="toggleGiftBox(true)" 
-                        class="flex-1 py-3 bg-gradient-to-l from-gray-100 to-gray-200 text-gray-800 rounded-2xl font-bold shadow hover:shadow-md transition-shadow">
-                    إرسال هدية
-                </button>
+            <div class="mt-8 flex gap-2">
+                <button id="friendActionBtn" class="flex-1 btn-black py-4 rounded-2xl font-black text-sm shadow-xl">تحميل...</button>
+                <button onclick="openGiftPicker()" class="p-4 bg-gray-100 rounded-2xl"><i data-lucide="gift"></i></button>
             </div>
 
-            <!-- Profile Tabs -->
-            <div class="mt-10">
-                <div class="flex border-b mb-6 px-4">
-                    <button onclick="switchProfileTab('gifts')" class="tab-profile flex-1 pb-3 font-bold text-sm tab-button active">
-                        الهدايا المستلمة
-                    </button>
-                    <button onclick="switchProfileTab('relationship')" class="tab-profile flex-1 pb-3 text-gray-400 text-sm tab-button">
-                        العلاقة
-                    </button>
-                    <button onclick="switchProfileTab('stats')" class="tab-profile flex-1 pb-3 text-gray-400 text-sm tab-button">
-                        الإحصائيات
-                    </button>
-                </div>
-                
-                <!-- Gifts Tab -->
-                <div id="giftsTab" class="tab-profile-content active px-4">
-                    <div id="pGiftsGrid" class="grid grid-cols-4 gap-3 py-2">
-                        <!-- Gifts will be loaded here -->
-                    </div>
-                </div>
-                
-                <!-- Relationship Tab -->
-                <div id="relationshipTab" class="tab-profile-content px-4">
-                    <div class="text-center py-8 text-gray-500">
-                        <i data-lucide="heart" class="w-12 h-12 mx-auto mb-4 text-gray-300"></i>
-                        <p>لم يتم إضافة معلومات العلاقة بعد</p>
-                    </div>
-                </div>
-                
-                <!-- Stats Tab -->
-                <div id="statsTab" class="tab-profile-content px-4">
-                    <div class="space-y-4">
-                        <div class="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
-                            <span class="text-sm">عدد الهدايا المرسلة</span>
-                            <span class="font-bold" id="statsSentGifts">0</span>
-                        </div>
-                        <div class="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
-                            <span class="text-sm">عدد الهدايا المستلمة</span>
-                            <span class="font-bold" id="statsReceivedGifts">0</span>
-                        </div>
-                        <div class="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
-                            <span class="text-sm">تاريخ الانضمام</span>
-                            <span class="font-bold text-sm" id="statsJoinDate">---</span>
-                        </div>
-                    </div>
+            <!-- Received Gifts Area -->
+            <div class="mt-10 text-right">
+                <h3 class="font-black text-lg mb-4 border-r-4 border-black pr-3">خزانة الهدايا</h3>
+                <div id="pGiftsGrid" class="grid grid-cols-4 gap-3 bg-gray-50 p-4 rounded-3xl min-h-[120px] border border-dashed border-gray-300">
+                    <!-- Real Sync from Firestore -->
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Gift Picker Modal -->
-    <div id="giftPicker" class="fixed inset-0 z-[300] bg-black/50 hidden flex flex-col justify-end" onclick="toggleGiftBox(false)">
-        <div class="bg-white rounded-t-[40px] p-6 max-h-[80vh] flex flex-col" onclick="event.stopPropagation()">
+    <!-- Gift Store (B&W Design) -->
+    <div id="giftPicker" class="fixed inset-0 z-[600] bg-black/80 backdrop-blur-sm hidden flex flex-col justify-end" onclick="closeGiftPicker()">
+        <div class="bg-white rounded-t-[40px] p-6 max-h-[70vh] flex flex-col" onclick="event.stopPropagation()">
             <div class="flex justify-between items-center mb-6">
                 <div>
-                    <h3 class="font-black text-lg">🎁 متجر الهدايا</h3>
-                    <p class="text-sm text-gray-400 mt-1">اختر هدية لإرسالها</p>
+                    <h3 class="font-black text-xl">المتجر الملكي</h3>
+                    <p class="text-xs text-gray-400">رصيدك: <span id="uBalance" class="text-black font-bold">0</span> 💰</p>
                 </div>
-                <button onclick="toggleGiftBox(false)" class="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
+                <button onclick="closeGiftPicker()" class="p-2 bg-gray-100 rounded-full"><i data-lucide="x"></i></button>
             </div>
             
-            <!-- Gift Categories -->
-            <div class="flex gap-2 mb-6 overflow-x-auto no-scrollbar pb-2">
-                <button onclick="switchGiftCategory('all')" class="gift-cat px-4 py-2 bg-gradient-to-l from-blue-600 to-purple-600 text-white rounded-full text-sm font-bold whitespace-nowrap active">
-                    جميع الهدايا
-                </button>
-                <button onclick="switchGiftCategory('wealth')" class="gift-cat px-4 py-2 bg-gray-100 text-gray-600 rounded-full text-sm font-bold whitespace-nowrap">
-                    هدايا الثروة
-                </button>
-                <button onclick="switchGiftCategory('magic')" class="gift-cat px-4 py-2 bg-gray-100 text-gray-600 rounded-full text-sm font-bold whitespace-nowrap">
-                    هدايا السحر
-                </button>
+            <div class="flex gap-2 mb-4">
+                <button class="flex-1 py-2 bg-black text-white rounded-full text-[10px] font-bold uppercase tracking-wider">هدايا الثروة</button>
+                <button class="flex-1 py-2 bg-gray-100 rounded-full text-[10px] font-bold uppercase tracking-wider">هدايا السحر</button>
             </div>
-            
-            <!-- Gift Grid -->
-            <div id="giftGrid" class="grid grid-cols-3 gap-4 overflow-y-auto thin-scrollbar flex-1 pb-4">
-                <!-- Gifts loaded here -->
-            </div>
-            
-            <!-- Selected Gift Preview -->
-            <div id="selectedGiftPreview" class="hidden p-4 bg-gradient-to-l from-blue-50 to-purple-50 rounded-2xl mb-4">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <img id="selectedGiftImage" class="w-12 h-12 object-contain">
-                        <div>
-                            <div id="selectedGiftName" class="font-bold"></div>
-                            <div id="selectedGiftPrice" class="text-sm text-gray-600"></div>
-                        </div>
-                    </div>
-                    <button onclick="processGift()" id="confirmSendBtn" 
-                            class="px-6 py-2 bg-gradient-to-l from-blue-600 to-purple-600 text-white rounded-full font-bold hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed">
-                        إرسال
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- Friend Request Modal -->
-    <div id="friendRequestModal" class="fixed inset-0 z-[400] bg-black/50 hidden items-center justify-center">
-        <div class="bg-white rounded-3xl p-6 w-[90%] max-w-md" onclick="event.stopPropagation()">
-            <div class="text-center mb-6">
-                <div class="w-16 h-16 bg-gradient-to-l from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i data-lucide="user-plus" class="w-8 h-8 text-blue-600"></i>
-                </div>
-                <h3 class="font-black text-lg mb-2">إرسال طلب صداقة</h3>
-                <p class="text-gray-500 text-sm" id="requestUserName">...</p>
+            <div id="giftGrid" class="grid grid-cols-4 gap-3 overflow-y-auto no-scrollbar pb-10">
+                <!-- Gifts from Firestore -->
             </div>
-            <div class="space-y-3">
-                <button onclick="sendFriendRequest()" class="w-full py-3 bg-gradient-to-l from-blue-600 to-purple-600 text-white rounded-xl font-bold">
-                    إرسال طلب صداقة
-                </button>
-                <button onclick="toggleFriendRequestModal(false)" class="w-full py-3 bg-gray-100 text-gray-600 rounded-xl font-bold">
-                    إلغاء
-                </button>
-            </div>
+
+            <button id="sendGiftBtn" onclick="executeGiftSend()" class="w-full py-4 bg-gray-200 text-gray-400 rounded-2xl font-black disabled:opacity-50">اختر قطعة فنية</button>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-        import { 
-            getAuth, 
-            onAuthStateChanged, 
-            signInAnonymously 
-        } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-        import { 
-            getFirestore, 
-            doc, 
-            getDoc, 
-            setDoc, 
-            updateDoc, 
-            increment, 
-            collection, 
-            onSnapshot, 
-            query, 
-            where, 
-            getDocs,
-            arrayUnion,
-            arrayRemove,
-            serverTimestamp as fsServerTimestamp
-        } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-        import { 
-            getDatabase, 
-            ref, 
-            push, 
-            onValue, 
-            set, 
-            serverTimestamp,
-            remove,
-            off
-        } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-database.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, onSnapshot, query, where, getDocs, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+        import { getDatabase, ref, push, onValue, set, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-database.js";
 
-        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBnmqWRY6lV54meFvO89QeXwtd28w81FcY",
             authDomain: "rtx3090-28439.firebaseapp.com",
@@ -478,915 +196,264 @@
             databaseURL: "https://rtx3090-28439-default-rtdb.firebaseio.com/"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
         const rtdb = getDatabase(app);
 
-        // Global Variables
         let userMe = null;
         let currentFriend = null;
         let selectedGift = null;
-        let chatSub = null;
-        let friendRequestsListener = null;
-        let roomsListener = null;
+        let chatUnsub = null;
 
-        // E2EE Encryption Key
-        const E2EE_KEY = "AFNAN_PRIVATE_KEY_2024";
+        const CIPHER_KEY = "AFNAN_SECURE_777";
 
-        // XOR Encryption/Decryption
-        const xORCipher = (text, key) => {
-            return text.split('').map((char, i) => 
-                String.fromCharCode(char.charCodeAt(0) ^ key.charCodeAt(i % key.length))
-            ).join('');
-        };
+        // Simple E2EE Helper
+        const encrypt = (t) => t.split('').map(c => String.fromCharCode(c.charCodeAt(0) ^ CIPHER_KEY.charCodeAt(0))).join('');
+        const decrypt = (t) => encrypt(t);
 
-        // Initialize Authentication
-        signInAnonymously(auth).catch(error => {
-            console.error("Anonymous sign-in failed:", error);
-        });
-
-        // Auth State Observer
-        onAuthStateChanged(auth, async (user) => {
+        onAuthStateChanged(auth, (user) => {
             if (user) {
-                // Check if user document exists, create if not
-                const userRef = doc(db, "users", user.uid);
-                const userSnap = await getDoc(userRef);
-                
-                if (!userSnap.exists()) {
-                    // Create new user document
-                    await setDoc(userRef, {
-                        uid: user.uid,
-                        displayName: `مستخدم_${Math.floor(Math.random() * 10000)}`,
-                        photoURL: "https://i.pravatar.cc/150?u=" + user.uid,
-                        customId: Math.floor(100000 + Math.random() * 900000).toString(),
-                        balance: 1000000, // Starting balance
-                        jewels: 0,
-                        magicLevel: 1,
-                        wealthLevel: 1,
-                        magicGiftsReceived: 0,
-                        wealthGiftsReceived: 0,
-                        purchasedFrames: [],
-                        purchasedBadges: [],
-                        activeFrame: null,
-                        activeBadges: [],
-                        friends: [],
-                        friendRequests: [],
-                        sentRequests: [],
-                        blocked: [],
-                        following: [],
-                        followers: [],
-                        receivedGifts: {},
-                        receivedGiftsImages: {},
-                        createdAt: fsServerTimestamp()
-                    });
-                }
-
-                // Listen for user updates
-                onSnapshot(userRef, (snap) => {
+                // Real-time user data sync
+                onSnapshot(doc(db, "users", user.uid), (snap) => {
                     userMe = { uid: user.uid, ...snap.data() };
                     document.getElementById('uBalance').innerText = userMe.balance.toLocaleString();
-                    loadFriends();
-                    loadFriendRequests();
-                    loadRooms();
+                    renderFriends();
                 });
 
-                // Listen for Global Banners
-                onValue(ref(rtdb, 'globalBanners'), (snap) => {
+                // Global Banner Listener (RTDB for speed)
+                onValue(ref(rtdb, 'live_banners'), (snap) => {
                     const data = snap.val();
                     if(!data) return;
-                    const list = Object.values(data);
-                    const last = list[list.length - 1];
-                    if(Date.now() - last.timestamp < 4000) showBanner(last);
+                    const last = Object.values(data).pop();
+                    if(Date.now() - last.ts < 5000) triggerBanner(last);
                 });
-
-                // Initialize app data
-                loadAppData();
             }
         });
 
-        // Load App Data (banners, etc.)
-        async function loadAppData() {
-            try {
-                const appDataRef = doc(db, "appData", "banner");
-                const snap = await getDoc(appDataRef);
-                if (snap.exists()) {
-                    // You can use this data for announcements
-                }
-            } catch (error) {
-                console.error("Error loading app data:", error);
-            }
+        async function findUser() {
+            const input = document.getElementById('userSearchInput').value.trim();
+            if(!input) return;
+            const q = query(collection(db, "users"), where("customId", "==", input));
+            const snap = await getDocs(q);
+            if(snap.empty) return alert("المستخدم غير موجود");
+            openProfile(snap.docs[0].id);
         }
 
-        // Load Friends List
-        async function loadFriends() {
-            if (!userMe) return;
+        async function renderFriends() {
+            const container = document.getElementById('friendsList');
+            container.innerHTML = '';
+            const friendsIds = userMe.friends || [];
             
-            const list = document.getElementById('friendsList');
-            list.innerHTML = '';
-            
-            const friends = userMe.friends || [];
-            
-            for(const fid of friends) {
-                try {
-                    const fSnap = await getDoc(doc(db, "users", fid));
-                    if(fSnap.exists()) {
-                        const f = fSnap.data();
-                        const d = document.createElement('div');
-                        d.className = "bg-white p-4 rounded-3xl flex items-center justify-between shadow-sm hover:shadow-md transition-shadow cursor-pointer message-item";
-                        d.onclick = () => openChat(f.uid);
-                        d.innerHTML = `
-                            <div class="flex items-center gap-3">
-                                <div class="relative">
-                                    <img src="${f.photoURL}" class="w-14 h-14 rounded-full border-2 border-blue-100">
-                                    <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white"></div>
-                                </div>
-                                <div>
-                                    <div class="font-black text-sm text-gray-800">${f.displayName}</div>
-                                    <div class="text-[10px] text-gray-400">ID: ${f.customId || '---'}</div>
-                                </div>
+            for(const fid of friendsIds) {
+                const fSnap = await getDoc(doc(db, "users", fid));
+                if(fSnap.exists()) {
+                    const f = fSnap.data();
+                    const d = document.createElement('div');
+                    d.className = "flex items-center justify-between p-4 bg-white border rounded-3xl shadow-sm cursor-pointer active:scale-95 transition-all";
+                    d.innerHTML = `
+                        <div class="flex items-center gap-4" onclick="openChat('${fid}')">
+                            <img src="${f.photoURL}" class="w-14 h-14 rounded-full border bg-gray-50">
+                            <div>
+                                <h4 class="font-black text-sm">${f.displayName}</h4>
+                                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">ID: ${f.customId}</p>
                             </div>
-                            <button onclick="event.stopPropagation(); openProfile('${f.uid}')" 
-                                    class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition">
-                                <i data-lucide="user"></i>
-                            </button>
-                        `;
-                        list.appendChild(d);
-                    }
-                } catch (error) {
-                    console.error("Error loading friend:", error);
+                        </div>
+                        <button onclick="openProfile('${fid}')" class="p-2 text-gray-300"><i data-lucide="chevron-left"></i></button>
+                    `;
+                    container.appendChild(d);
                 }
             }
             lucide.createIcons();
         }
 
-        // Load Friend Requests
-        async function loadFriendRequests() {
-            if (!userMe) return;
-            
-            const container = document.getElementById('friendRequests');
-            container.innerHTML = '';
-            
-            const requests = userMe.friendRequests || [];
-            
-            for(const requestId of requests) {
-                try {
-                    const userSnap = await getDoc(doc(db, "users", requestId));
-                    if(userSnap.exists()) {
-                        const user = userSnap.data();
-                        const d = document.createElement('div');
-                        d.className = "bg-white p-4 rounded-3xl flex items-center justify-between shadow-sm message-item";
-                        d.innerHTML = `
-                            <div class="flex items-center gap-3">
-                                <img src="${user.photoURL}" class="w-12 h-12 rounded-full border-2 border-blue-100">
-                                <div>
-                                    <div class="font-bold text-sm">${user.displayName}</div>
-                                    <div class="text-[10px] text-gray-400">ID: ${user.customId || '---'}</div>
-                                </div>
-                            </div>
-                            <div class="flex gap-2">
-                                <button onclick="handleFriendRequest('${requestId}', 'accept')" 
-                                        class="px-4 py-2 bg-green-500 text-white text-xs font-bold rounded-full hover:bg-green-600 transition">
-                                    قبول
-                                </button>
-                                <button onclick="handleFriendRequest('${requestId}', 'reject')" 
-                                        class="px-4 py-2 bg-gray-200 text-gray-600 text-xs font-bold rounded-full hover:bg-gray-300 transition">
-                                    رفض
-                                </button>
-                            </div>
-                        `;
-                        container.appendChild(d);
-                    }
-                } catch (error) {
-                    console.error("Error loading friend request:", error);
-                }
-            }
-        }
-
-        // Load Rooms
-        async function loadRooms() {
-            try {
-                const roomsRef = collection(db, "rooms");
-                const q = query(roomsRef, where("type", "==", "public"));
-                const querySnapshot = await getDocs(q);
-                
-                const container = document.querySelector('#roomsTabContent .grid');
-                container.innerHTML = '';
-                
-                querySnapshot.forEach((doc) => {
-                    const room = doc.data();
-                    const d = document.createElement('div');
-                    d.className = "bg-white rounded-3xl p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer";
-                    d.innerHTML = `
-                        <div class="flex items-center justify-between mb-3">
-                            <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg" 
-                                 style="background: ${room.color}">
-                                ${room.icon}
-                            </div>
-                            <span class="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">عامة</span>
-                        </div>
-                        <h4 class="font-bold text-sm mb-1">${room.name}</h4>
-                        <p class="text-gray-500 text-[10px] mb-3">${room.description || 'لا يوجد وصف'}</p>
-                        <div class="flex justify-between items-center text-[10px] text-gray-400">
-                            <span>${room.members || 0} عضو</span>
-                            <button class="text-blue-600 font-bold">انضم</button>
-                        </div>
-                    `;
-                    container.appendChild(d);
-                });
-            } catch (error) {
-                console.error("Error loading rooms:", error);
-            }
-        }
-
-        // Search Users
-        window.performSearch = async () => {
-            const id = document.getElementById('userSearch').value.trim();
-            if(!id) {
-                alert("الرجاء إدخال ID المستخدم");
-                return;
-            }
-            
-            try {
-                const q = query(collection(db, "users"), where("customId", "==", id));
-                const querySnap = await getDocs(q);
-                
-                if(querySnap.empty) {
-                    alert("⚠️ لم يتم العثور على مستخدم بهذا الـ ID");
-                    return;
-                }
-                
-                const userDoc = querySnap.docs[0];
-                const userData = userDoc.data();
-                
-                // Check if it's the current user
-                if(userData.uid === auth.currentUser.uid) {
-                    alert("هذا حسابك الخاص!");
-                    return;
-                }
-                
-                // Check if already friends
-                if(userMe.friends?.includes(userData.uid)) {
-                    openProfile(userData.uid);
-                    return;
-                }
-                
-                // Show friend request modal
-                document.getElementById('requestUserName').textContent = userData.displayName;
-                currentFriend = { uid: userData.uid, ...userData };
-                toggleFriendRequestModal(true);
-                
-            } catch (error) {
-                console.error("Search error:", error);
-                alert("حدث خطأ أثناء البحث");
-            }
-        };
-
-        // Open Chat
         window.openChat = async (uid) => {
-            try {
-                const snap = await getDoc(doc(db, "users", uid));
-                if (!snap.exists()) {
-                    alert("المستخدم غير موجود");
-                    return;
-                }
-                
-                currentFriend = { uid, ...snap.data() };
-                document.getElementById('cName').innerText = currentFriend.displayName;
-                document.getElementById('cAvatar').src = currentFriend.photoURL;
-                document.getElementById('chatModal').classList.add('active');
+            const snap = await getDoc(doc(db, "users", uid));
+            currentFriend = { uid, ...snap.data() };
+            document.getElementById('cName').innerText = currentFriend.displayName;
+            document.getElementById('cAvatar').src = currentFriend.photoURL;
+            document.getElementById('chatModal').classList.add('active');
 
-                // Generate chat ID
-                const cid = [auth.currentUser.uid, uid].sort().join('_');
-                
-                // Unsubscribe from previous chat
-                if(chatSub) chatSub();
-                
-                // Subscribe to chat messages
-                chatSub = onValue(ref(rtdb, `chats/${cid}/messages`), (snap) => {
-                    const box = document.getElementById('chatBox');
-                    box.innerHTML = '';
-                    const msgs = snap.val();
-                    
-                    if(!msgs) {
-                        box.innerHTML = `
-                            <div class="text-center text-gray-400 mt-10">
-                                <i data-lucide="message-circle" class="w-12 h-12 mx-auto mb-4 opacity-50"></i>
-                                <p>لا توجد رسائل بعد</p>
-                                <p class="text-xs mt-2">ابدأ محادثة جديدة</p>
-                            </div>
-                        `;
-                        return;
+            const cid = [auth.currentUser.uid, uid].sort().join('_');
+            if(chatUnsub) chatUnsub();
+            chatUnsub = onValue(ref(rtdb, `chats/${cid}/messages`), (snap) => {
+                const box = document.getElementById('chatBox');
+                box.innerHTML = '';
+                const msgs = snap.val();
+                if(!msgs) return;
+                Object.values(msgs).forEach(m => {
+                    const isMe = m.senderId === auth.currentUser.uid;
+                    const d = document.createElement('div');
+                    if(m.type === 'gift') {
+                        d.className = isMe ? 'gift-me' : 'gift-them';
+                        d.innerHTML = `<div class="p-2 bg-gray-50 rounded-2xl border flex flex-col items-center">
+                                          <img src="${m.img}" class="w-20 h-20 object-contain">
+                                          <p class="text-[9px] font-black uppercase mt-1">${m.name}</p>
+                                       </div>`;
+                    } else {
+                        d.className = isMe ? 'msg-me' : 'msg-them';
+                        d.className += " p-3 max-w-[80%] text-sm font-medium";
+                        d.innerText = decrypt(m.text);
                     }
-                    
-                    // Convert to array and sort by timestamp
-                    const messages = Object.values(msgs).sort((a, b) => 
-                        (a.timestamp || 0) - (b.timestamp || 0)
-                    );
-                    
-                    messages.forEach(m => {
-                        const isMe = m.senderId === auth.currentUser.uid;
-                        const d = document.createElement('div');
-                        d.className = `flex flex-col message-item ${isMe ? 'items-end' : 'items-start'}`;
-                        
-                        if(m.type === 'gift') {
-                            d.className += isMe ? " gift-me" : " gift-them";
-                            d.innerHTML = `
-                                <div class="gift-bubble inline-block p-3 bg-white rounded-2xl border shadow-sm">
-                                    <div class="text-[10px] text-gray-500 mb-1">🎁 ${isMe ? 'أنت أرسلت' : 'تم الإرسال'}</div>
-                                    <img src="${m.giftImage}" class="w-20 h-20 object-contain mx-auto">
-                                    <p class="text-xs font-bold text-center mt-2">${m.giftName}</p>
-                                    <div class="text-[9px] text-gray-400 text-center mt-1">${formatTime(m.timestamp)}</div>
-                                </div>
-                            `;
-                        } else {
-                            const decrypted = xORCipher(m.text, E2EE_KEY);
-                            d.innerHTML = `
-                                <div class="relative">
-                                    <div class="p-3 text-sm shadow-sm ${isMe ? 'msg-me' : 'msg-them'}">
-                                        ${decrypted}
-                                        <div class="text-[9px] opacity-70 mt-1 ${isMe ? 'text-white/80' : 'text-gray-500'} text-left">
-                                            ${formatTime(m.timestamp)}
-                                            ${isMe ? ' ✓✓' : ''}
-                                        </div>
-                                    </div>
-                                </div>
-                            `;
-                        }
-                        box.appendChild(d);
-                    });
-                    
-                    // Scroll to bottom
-                    setTimeout(() => {
-                        box.scrollTop = box.scrollHeight;
-                    }, 100);
+                    box.appendChild(d);
                 });
-                
-                lucide.createIcons();
-            } catch (error) {
-                console.error("Error opening chat:", error);
-                alert("حدث خطأ أثناء فتح المحادثة");
-            }
+                box.scrollTop = box.scrollHeight;
+            });
         };
 
-        // Send Encrypted Message
         window.sendEncryptedMsg = async () => {
             const val = document.getElementById('mInput').value.trim();
             if(!val) return;
-            
-            if(!currentFriend) {
-                alert("الرجاء اختيار محادثة أولاً");
-                return;
-            }
-            
-            document.getElementById('mInput').value = '';
-            
-            try {
-                const encrypted = xORCipher(val, E2EE_KEY);
-                const cid = [auth.currentUser.uid, currentFriend.uid].sort().join('_');
-                
-                await push(ref(rtdb, `chats/${cid}/messages`), {
-                    senderId: auth.currentUser.uid,
-                    text: encrypted,
-                    type: 'text',
-                    timestamp: serverTimestamp()
-                });
-            } catch (error) {
-                console.error("Error sending message:", error);
-                alert("حدث خطأ أثناء إرسال الرسالة");
-            }
-        };
-
-        // Open Profile
-        window.openProfile = async (uid) => {
-            try {
-                const snap = await getDoc(doc(db, "users", uid));
-                if (!snap.exists()) {
-                    alert("المستخدم غير موجود");
-                    return;
-                }
-                
-                const p = { uid, ...snap.data() };
-                currentFriend = p;
-                
-                // Update profile view
-                document.getElementById('pName').innerText = p.displayName;
-                document.getElementById('pAvatar').src = p.photoURL;
-                document.getElementById('pUserId').textContent = `ID: ${p.customId || '---'}`;
-                document.getElementById('pMagicLevel').innerText = p.magicLevel || 1;
-                document.getElementById('pWealthLevel').innerText = p.wealthLevel || 1;
-                document.getElementById('pLevelBadge').innerText = `LV ${Math.max(p.magicLevel || 1, p.wealthLevel || 1)}`;
-                
-                // Update stats
-                document.getElementById('statsSentGifts').textContent = p.sentGiftsCount || 0;
-                document.getElementById('statsReceivedGifts').textContent = 
-                    (p.magicGiftsReceived || 0) + (p.wealthGiftsReceived || 0);
-                document.getElementById('statsJoinDate').textContent = 
-                    p.createdAt ? new Date(p.createdAt.toDate()).toLocaleDateString('ar-EG') : '---';
-                
-                // Update gifts grid
-                const grid = document.getElementById('pGiftsGrid');
-                grid.innerHTML = '';
-                
-                if(p.receivedGifts && Object.keys(p.receivedGifts).length > 0) {
-                    Object.entries(p.receivedGifts).forEach(([id, qty]) => {
-                        const img = p.receivedGiftsImages?.[id] || 'https://i.postimg.cc/Y0MLWDL5/sv.webp';
-                        grid.innerHTML += `
-                            <div class="flex flex-col items-center bg-gradient-to-b from-white to-gray-50 p-3 rounded-2xl border shadow-sm hover:shadow-md transition-shadow">
-                                <img src="${img}" class="w-12 h-12 object-contain mb-2">
-                                <span class="text-xs font-bold text-gray-800">x${qty}</span>
-                            </div>
-                        `;
-                    });
-                } else {
-                    grid.innerHTML = `
-                        <div class="col-span-4 text-center py-8 text-gray-400">
-                            <i data-lucide="gift" class="w-12 h-12 mx-auto mb-4 opacity-50"></i>
-                            <p>لا توجد هدايا مستلمة بعد</p>
-                        </div>
-                    `;
-                }
-                
-                // Update follow button
-                const isFollowing = userMe.following?.includes(uid);
-                const followBtn = document.getElementById('followBtn');
-                followBtn.innerHTML = isFollowing ? 
-                    '<i data-lucide="user-minus" class="w-4 h-4 inline mr-2"></i> إلغاء المتابعة' : 
-                    '<i data-lucide="user-plus" class="w-4 h-4 inline mr-2"></i> متابعة';
-                followBtn.className = isFollowing ? 
-                    "flex-1 py-3 bg-gradient-to-l from-gray-200 to-gray-300 text-gray-700 rounded-2xl font-bold shadow hover:shadow-md transition-shadow" : 
-                    "flex-1 py-3 bg-gradient-to-l from-blue-600 to-purple-600 text-white rounded-2xl font-bold shadow-lg hover:shadow-xl transition-shadow";
-                
-                // Show profile modal
-                document.getElementById('profileModal').classList.add('active');
-                lucide.createIcons();
-            } catch (error) {
-                console.error("Error opening profile:", error);
-                alert("حدث خطأ أثناء فتح الملف الشخصي");
-            }
-        };
-
-        // Toggle Follow
-        window.toggleFollow = async () => {
-            if(!userMe || !currentFriend) return;
-            
-            try {
-                const isFollowing = userMe.following?.includes(currentFriend.uid);
-                
-                // Update current user's following list
-                await updateDoc(doc(db, "users", auth.currentUser.uid), {
-                    following: isFollowing ? 
-                        arrayRemove(currentFriend.uid) : 
-                        arrayUnion(currentFriend.uid)
-                });
-                
-                // Update friend's followers list
-                await updateDoc(doc(db, "users", currentFriend.uid), {
-                    followers: isFollowing ? 
-                        arrayRemove(auth.currentUser.uid) : 
-                        arrayUnion(auth.currentUser.uid)
-                });
-                
-                // Refresh profile
-                openProfile(currentFriend.uid);
-            } catch (error) {
-                console.error("Error toggling follow:", error);
-                alert("حدث خطأ أثناء تحديث المتابعة");
-            }
-        };
-
-        // Block User
-        window.blockUser = async () => {
-            if(!userMe || !currentFriend) return;
-            
-            if(confirm(`هل أنت متأكد من حظر ${currentFriend.displayName}؟\n\nسيتم:\n1. إزالة الصداقة\n2. منع الرسائل\n3. إخفاء المحتوى`)) {
-                try {
-                    // Add to blocked list
-                    await updateDoc(doc(db, "users", auth.currentUser.uid), {
-                        blocked: arrayUnion(currentFriend.uid),
-                        friends: arrayRemove(currentFriend.uid),
-                        following: arrayRemove(currentFriend.uid)
-                    });
-                    
-                    // Remove from friend's lists
-                    await updateDoc(doc(db, "users", currentFriend.uid), {
-                        friends: arrayRemove(auth.currentUser.uid),
-                        followers: arrayRemove(auth.currentUser.uid)
-                    });
-                    
-                    closeChat();
-                    alert("✅ تم حظر المستخدم بنجاح");
-                    loadFriends(); // Refresh friends list
-                } catch (error) {
-                    console.error("Error blocking user:", error);
-                    alert("حدث خطأ أثناء الحظر");
-                }
-            }
-        };
-
-        // Toggle Gift Box
-        window.toggleGiftBox = (show) => {
-            const giftPicker = document.getElementById('giftPicker');
-            if (show) {
-                giftPicker.classList.remove('hidden');
-                loadGifts();
-            } else {
-                giftPicker.classList.add('hidden');
-                selectedGift = null;
-                document.getElementById('selectedGiftPreview').classList.add('hidden');
-            }
-        };
-
-        // Load Gifts from Firestore
-        async function loadGifts(category = 'all') {
-            try {
-                const grid = document.getElementById('giftGrid');
-                grid.innerHTML = '<div class="col-span-3 text-center py-10"><div class="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto"></div></div>';
-                
-                let gifts = [];
-                
-                // Load gifts based on category
-                if (category === 'all' || category === 'wealth') {
-                    const wealthSnap = await getDocs(collection(db, "gifts"));
-                    wealthSnap.forEach(doc => {
-                        gifts.push({ id: doc.id, ...doc.data() });
-                    });
-                }
-                
-                if (category === 'all' || category === 'magic') {
-                    const magicSnap = await getDocs(collection(db, "luckGifts"));
-                    magicSnap.forEach(doc => {
-                        gifts.push({ id: doc.id, ...doc.data() });
-                    });
-                }
-                
-                // Filter by user level
-                const userLevel = Math.max(userMe.magicLevel || 1, userMe.wealthLevel || 1);
-                gifts = gifts.filter(g => (g.minLevel || 1) <= userLevel);
-                
-                // Display gifts
-                grid.innerHTML = '';
-                
-                if (gifts.length === 0) {
-                    grid.innerHTML = `
-                        <div class="col-span-3 text-center py-8 text-gray-400">
-                            <i data-lucide="package" class="w-12 h-12 mx-auto mb-4 opacity-50"></i>
-                            <p>لا توجد هدايا متاحة لمستواك الحالي</p>
-                            <p class="text-xs mt-2">ارفع مستواك لفتح المزيد من الهدايا</p>
-                        </div>
-                    `;
-                    return;
-                }
-                
-                gifts.forEach(g => {
-                    const canAfford = userMe.balance >= (g.price || 100000);
-                    const d = document.createElement('div');
-                    d.className = `flex flex-col items-center p-4 bg-white rounded-2xl border-2 border-transparent cursor-pointer hover:shadow-md transition-all ${!canAfford ? 'opacity-50' : ''}`;
-                    d.onclick = () => {
-                        if (!canAfford) {
-                            alert("رصيدك غير كافٍ لشراء هذه الهدية");
-                            return;
-                        }
-                        selectGift(g);
-                    };
-                    
-                    d.innerHTML = `
-                        <div class="relative">
-                            <img src="${g.image || 'https://i.postimg.cc/Y0MLWDL5/sv.webp'}" 
-                                 class="w-16 h-16 object-contain mb-3">
-                            ${g.minLevel > 1 ? `<div class="absolute -top-2 -right-2 bg-yellow-400 text-[8px] font-black px-2 py-1 rounded-full">LV ${g.minLevel}</div>` : ''}
-                        </div>
-                        <p class="text-xs font-bold text-center mb-1">${g.name}</p>
-                        <p class="text-[10px] text-gray-600 mb-2">${g.description || ''}</p>
-                        <div class="mt-auto flex items-center gap-1">
-                            <i data-lucide="coin" class="w-3 h-3 text-yellow-500"></i>
-                            <span class="text-xs font-black ${canAfford ? 'text-green-600' : 'text-red-600'}">
-                                ${(g.price || 100000).toLocaleString()}
-                            </span>
-                        </div>
-                        ${g.category === 'magic' ? '<div class="text-[8px] text-purple-600 mt-1">✨ سحر</div>' : ''}
-                        ${g.category === 'wealth' ? '<div class="text-[8px] text-blue-600 mt-1">💎 ثروة</div>' : ''}
-                    `;
-                    grid.appendChild(d);
-                });
-                
-                lucide.createIcons();
-            } catch (error) {
-                console.error("Error loading gifts:", error);
-                grid.innerHTML = `
-                    <div class="col-span-3 text-center py-8 text-red-500">
-                        <i data-lucide="alert-circle" class="w-12 h-12 mx-auto mb-4"></i>
-                        <p>حدث خطأ في تحميل الهدايا</p>
-                    </div>
-                `;
-            }
-        }
-
-        // Select Gift
-        function selectGift(gift) {
-            selectedGift = gift;
-            
-            // Update UI
-            document.querySelectorAll('#giftGrid > div').forEach(x => {
-                x.classList.remove('border-blue-500', 'bg-blue-50');
+            const cid = [auth.currentUser.uid, currentFriend.uid].sort().join('_');
+            await push(ref(rtdb, `chats/${cid}/messages`), {
+                senderId: auth.currentUser.uid,
+                text: encrypt(val),
+                type: 'text',
+                ts: serverTimestamp()
             });
-            event.currentTarget.classList.add('border-blue-500', 'bg-blue-50');
-            
-            // Update selected gift preview
-            const preview = document.getElementById('selectedGiftPreview');
-            preview.classList.remove('hidden');
-            document.getElementById('selectedGiftImage').src = gift.image;
-            document.getElementById('selectedGiftName').textContent = gift.name;
-            document.getElementById('selectedGiftPrice').textContent = 
-                `${gift.price.toLocaleString()} 💰`;
-            
-            const sendBtn = document.getElementById('confirmSendBtn');
-            sendBtn.disabled = false;
-            sendBtn.innerHTML = `إرسال (${gift.price.toLocaleString()} 💰)`;
+            document.getElementById('mInput').value = '';
+        };
+
+        window.openProfile = async (uid) => {
+            const snap = await getDoc(doc(db, "users", uid));
+            const p = { uid, ...snap.data() };
+            document.getElementById('pName').innerText = p.displayName;
+            document.getElementById('pAvatar').src = p.photoURL;
+            document.getElementById('pId').innerText = `ID: ${p.customId}`;
+            document.getElementById('pWealthLv').innerText = p.wealthLevel || 1;
+            document.getElementById('pMagicLv').innerText = p.magicLevel || 1;
+            document.getElementById('pMagicBadge').innerText = `Magic LV ${p.magicLevel || 1}`;
+
+            // Sync Received Gifts
+            const grid = document.getElementById('pGiftsGrid');
+            grid.innerHTML = '';
+            if(p.receivedGifts) {
+                Object.entries(p.receivedGifts).forEach(([gid, data]) => {
+                    grid.innerHTML += `<div class="flex flex-col items-center bg-white p-2 rounded-2xl shadow-sm border">
+                                          <img src="${data.image}" class="w-8 h-8 object-contain">
+                                          <span class="text-[9px] font-black mt-1">x${data.count}</span>
+                                       </div>`;
+                });
+            } else {
+                grid.innerHTML = '<div class="col-span-4 text-center text-[10px] text-gray-300 py-10">الخزانة فارغة</div>';
+            }
+
+            // Relationship Status / Action
+            const btn = document.getElementById('friendActionBtn');
+            if(userMe.friends?.includes(uid)) {
+                btn.innerText = "صديق (إزالة)";
+                btn.onclick = () => removeFriend(uid);
+            } else if(userMe.sentRequests?.includes(uid)) {
+                btn.innerText = "تم إرسال الطلب";
+                btn.disabled = true;
+            } else {
+                btn.innerText = "إرسال طلب صداقة";
+                btn.disabled = false;
+                btn.onclick = () => sendFriendRequest(uid);
+            }
+
+            currentFriend = p;
+            document.getElementById('profileModal').classList.add('active');
+            lucide.createIcons();
+        };
+
+        async function sendFriendRequest(uid) {
+            await updateDoc(doc(db, "users", auth.currentUser.uid), { sentRequests: arrayUnion(uid) });
+            await updateDoc(doc(db, "users", uid), { friendRequests: arrayUnion(auth.currentUser.uid) });
+            openProfile(uid);
         }
 
-        // Process Gift Sending
-        window.processGift = async () => {
-            if(!selectedGift || !currentFriend) {
-                alert("الرجاء اختيار هدية ومستلم أولاً");
-                return;
-            }
+        async function removeFriend(uid) {
+            await updateDoc(doc(db, "users", auth.currentUser.uid), { friends: arrayRemove(uid) });
+            await updateDoc(doc(db, "users", uid), { friends: arrayRemove(auth.currentUser.uid) });
+            openProfile(uid);
+        }
+
+        window.openGiftPicker = async () => {
+            document.getElementById('giftPicker').classList.remove('hidden');
+            const grid = document.getElementById('giftGrid');
+            grid.innerHTML = '<div class="col-span-4 py-10 text-center animate-pulse">...</div>';
             
-            if(userMe.balance < selectedGift.price) {
-                alert("رصيدك غير كافٍ لإرسال هذه الهدية");
-                return;
-            }
+            const q = query(collection(db, "gifts"));
+            const snap = await getDocs(q);
+            grid.innerHTML = '';
+            snap.forEach(doc => {
+                const g = { id: doc.id, ...doc.data() };
+                const d = document.createElement('div');
+                d.className = "flex flex-col items-center p-3 bg-gray-50 rounded-2xl border-2 border-transparent cursor-pointer transition-all active:scale-90";
+                d.innerHTML = `<img src="${g.image}" class="w-10 h-10 object-contain">
+                               <p class="text-[9px] font-black mt-2 uppercase text-center">${g.name}</p>
+                               <p class="text-[8px] text-gray-400 font-bold">${g.price.toLocaleString()}</p>`;
+                d.onclick = () => {
+                    selectedGift = g;
+                    document.querySelectorAll('#giftGrid > div').forEach(x => x.classList.remove('border-black', 'bg-white'));
+                    d.classList.add('border-black', 'bg-white');
+                    const btn = document.getElementById('sendGiftBtn');
+                    btn.disabled = userMe.balance < g.price;
+                    btn.innerText = userMe.balance < g.price ? "الرصيد غير كافٍ" : `إرسال (${g.price.toLocaleString()})`;
+                    btn.className = "w-full py-4 bg-black text-white rounded-2xl font-black";
+                };
+                grid.appendChild(d);
+            });
+        };
+
+        window.executeGiftSend = async () => {
+            if(!selectedGift || userMe.balance < selectedGift.price) return;
+            const targetId = currentFriend.uid;
             
             try {
-                // 1. Deduct balance from sender
-                await updateDoc(doc(db, "users", auth.currentUser.uid), {
-                    balance: increment(-selectedGift.price),
-                    sentGiftsCount: increment(1)
+                // 1. Transaction
+                await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-selectedGift.price) });
+                
+                // 2. Persistent Save to Target's receivedGifts
+                const giftRef = `receivedGifts.${selectedGift.id}`;
+                await updateDoc(doc(db, "users", targetId), {
+                    [giftRef + ".count"]: increment(1),
+                    [giftRef + ".image"]: selectedGift.image,
+                    [giftRef + ".name"]: selectedGift.name,
+                    wealthGiftsReceived: increment(1)
                 });
-                
-                // 2. Update receiver's gifts and levels
-                const giftKey = btoa(selectedGift.image).substring(0, 12);
-                const updates = {
-                    [`receivedGifts.${giftKey}`]: increment(1),
-                    [`receivedGiftsImages.${giftKey}`]: selectedGift.image,
-                    balance: increment(selectedGift.price * 0.1) // Receiver gets 10%
-                };
-                
-                // Update level based on gift category
-                if(selectedGift.category === 'magic') {
-                    updates.magicGiftsReceived = increment(1);
-                    updates.jewels = increment(10);
-                    // Check level up
-                    if(currentFriend.magicGiftsReceived >= ((currentFriend.magicLevel || 1) * 10)) {
-                        updates.magicLevel = increment(1);
-                    }
-                } else {
-                    updates.wealthGiftsReceived = increment(1);
-                    // Check level up
-                    if(currentFriend.wealthGiftsReceived >= ((currentFriend.wealthLevel || 1) * 15)) {
-                        updates.wealthLevel = increment(1);
-                    }
-                }
-                
-                await updateDoc(doc(db, "users", currentFriend.uid), updates);
-                
-                // 3. Send gift message to chat
-                const cid = [auth.currentUser.uid, currentFriend.uid].sort().join('_');
+
+                // 3. Send Signal to Chat (Real-time)
+                const cid = [auth.currentUser.uid, targetId].sort().join('_');
                 await push(ref(rtdb, `chats/${cid}/messages`), {
                     senderId: auth.currentUser.uid,
                     type: 'gift',
-                    giftImage: selectedGift.image,
-                    giftName: selectedGift.name,
-                    giftValue: selectedGift.price,
-                    timestamp: serverTimestamp()
+                    name: selectedGift.name,
+                    img: selectedGift.image,
+                    ts: serverTimestamp()
                 });
-                
-                // 4. Create global banner
-                await push(ref(rtdb, 'globalBanners'), {
-                    senderId: auth.currentUser.uid,
-                    senderImg: userMe.photoURL,
-                    senderName: userMe.displayName,
-                    receiverId: currentFriend.uid,
-                    receiverImg: currentFriend.photoURL,
-                    receiverName: currentFriend.displayName,
-                    giftImg: selectedGift.image,
-                    giftName: selectedGift.name,
-                    giftValue: selectedGift.price,
-                    timestamp: Date.now()
+
+                // 4. Global Banner
+                await push(ref(rtdb, 'live_banners'), {
+                    sImg: userMe.photoURL,
+                    rImg: currentFriend.photoURL,
+                    gImg: selectedGift.image,
+                    ts: Date.now()
                 });
-                
-                // 5. Close gift picker and show success message
-                toggleGiftBox(false);
-                showToast("✅ تم إرسال الهدية بنجاح", "success");
-                
-                // 6. Refresh data
-                if(document.getElementById('profileModal').classList.contains('active')) {
-                    openProfile(currentFriend.uid);
-                }
-                
-            } catch (error) {
-                console.error("Error sending gift:", error);
-                alert("حدث خطأ أثناء إرسال الهدية");
-            }
+
+                closeGiftPicker();
+            } catch(e) { console.error(e); }
         };
 
-        // Show Banner
-        function showBanner(data) {
+        function triggerBanner(data) {
             const b = document.getElementById('globalBanner');
-            
-            document.getElementById('bSender').src = data.senderImg;
-            document.getElementById('bReceiver').src = data.receiverImg;
-            document.getElementById('bGift').src = data.giftImg;
-            
-            // Reset animation
+            document.getElementById('bSender').src = data.sImg;
+            document.getElementById('bReceiver').src = data.rImg;
+            document.getElementById('bGift').src = data.gImg;
+
             b.classList.remove('active');
-            void b.offsetWidth;
+            void b.offsetWidth; // force reflow
             b.classList.add('active');
-            
-            // Play sound (optional)
-            // new Audio('https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3').play();
         }
 
-        // Friend Request Functions
-        async function sendFriendRequest() {
-            if(!currentFriend) return;
-            
-            try {
-                // Add to receiver's friendRequests
-                await updateDoc(doc(db, "users", currentFriend.uid), {
-                    friendRequests: arrayUnion(auth.currentUser.uid)
-                });
-                
-                // Add to sender's sentRequests
-                await updateDoc(doc(db, "users", auth.currentUser.uid), {
-                    sentRequests: arrayUnion(currentFriend.uid)
-                });
-                
-                toggleFriendRequestModal(false);
-                showToast("✅ تم إرسال طلب الصداقة", "success");
-                
-            } catch (error) {
-                console.error("Error sending friend request:", error);
-                alert("حدث خطأ أثناء إرسال طلب الصداقة");
-            }
-        }
+        window.toggleSearch = (show) => document.getElementById('searchBar').classList.toggle('hidden', !show);
+        window.closeChat = () => document.getElementById('chatModal').classList.remove('active');
+        window.closeProfile = () => document.getElementById('profileModal').classList.remove('active');
+        window.closeGiftPicker = () => document.getElementById('giftPicker').classList.add('hidden');
 
-        async function handleFriendRequest(userId, action) {
-            try {
-                if (action === 'accept') {
-                    // Add to friends lists
-                    await updateDoc(doc(db, "users", auth.currentUser.uid), {
-                        friends: arrayUnion(userId),
-                        friendRequests: arrayRemove(userId)
-                    });
-                    
-                    await updateDoc(doc(db, "users", userId), {
-                        friends: arrayUnion(auth.currentUser.uid),
-                        sentRequests: arrayRemove(auth.currentUser.uid)
-                    });
-                    
-                    showToast("✅ تمت الموافقة على طلب الصداقة", "success");
-                } else {
-                    // Remove request
-                    await updateDoc(doc(db, "users", auth.currentUser.uid), {
-                        friendRequests: arrayRemove(userId)
-                    });
-                    
-                    await updateDoc(doc(db, "users", userId), {
-                        sentRequests: arrayRemove(auth.currentUser.uid)
-                    });
-                    
-                    showToast("تم رفض طلب الصداقة", "info");
-                }
-                
-                loadFriendRequests();
-                loadFriends();
-                
-            } catch (error) {
-                console.error("Error handling friend request:", error);
-                alert("حدث خطأ أثناء معالجة الطلب");
-            }
-        }
-
-        // Tab Switching
-        window.switchTab = (tab) => {
-            // Update tab buttons
-            ['friends', 'requests', 'rooms'].forEach(t => {
-                const btn = document.getElementById(`${t}Tab`);
-                const content = document.getElementById(`${t}TabContent`);
-                
-                if(t === tab) {
-                    btn.classList.add('active');
-                    btn.classList.remove('text-gray-400');
-                    content.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                    btn.classList.add('text-gray-400');
-                    content.classList.remove('active');
-                }
-            });
-        };
-
-        window.switchProfileTab = (tab) => {
-            // Update profile tab buttons
-            document.querySelectorAll('.tab-profile').forEach(btn => {
-                btn.classList.remove('active', 'text-blue-600');
-                btn.classList.add('text-gray-400');
-            });
-            
-            document.querySelectorAll('.tab-profile-content').forEach(content => {
-                content.classList.remove('active');
-            });
-            
-            // Activate selected tab
-            document.querySelector(`[onclick="switchProfileTab('${tab}')"]`).classList.add('active', 'text-blue-600');
-            document.querySelector(`[onclick="switchProfileTab('${tab}')"]`).classList.remove('text-gray-400');
-            document.getElementById(`${tab}Tab`).classList.add('active');
-        };
-
-        window.switchGiftCategory = (category) => {
-            // Update gift category buttons
-            document.querySelectorAll('.gift-cat').forEach(btn => {
-                btn.classList.remove('active', 'bg-gradient-to-l', 'from-blue-600', 'to-purple-600', 'text-white');
-                btn.classList.add('bg-gray-100', 'text-gray-600');
-            });
-            
-            // Activate selected category
-            event.currentTarget.classList.add('active', 'bg-gradient-to-l', 'from-blue-600', 'to-purple-600', 'text-white');
-            event.currentTarget.classList.remove('bg-gray-100', 'text-gray-600');
-            
-            // Load gifts for category
-            loadGifts(category);
-        };
-
-        // Modal Controls
-        window.closeChat = () => {
-            document.getElementById('chatModal').classList.remove('active');
-            if(chatSub) {
-                chatSub();
-                chatSub = null;
-            }
-        };
-
-        window.closeProfile = () => {
-            document.getElementById('profileModal').classList.remove('active');
-        };
-
-        function toggleFriendRequestModal(show) {
-            const modal = document.getElementById('friendRequestModal');
-            modal.classList.toggle('hidden', !show);
-        }
-
-        // Helper Functions
-        function formatTime(timestamp) {
-            if(!timestamp) return 'الآن';
-            const date = new Date(timestamp);
-            const now = new Date();
-            const diff = now - date;
-            
-            if(diff < 60000) return 'الآن';
-            if(diff < 3600000) return `${Math.floor(diff/60000)} دقيقة`;
-            if(diff < 86400000) return date.toLocaleTimeString('ar-EG', {hour: '2-digit', minute:'2-digit'});
-            return date.toLocaleDateString('ar-EG');
-        }
-
-        function showToast(message, type = 'info') {
-            // Create toast element
-            const toast = document.createElement('div');
-            toast.className = `fixed top-20 left-4 z-[5000] px-6 py-3 rounded-2xl text-white font-bold text-sm shadow-xl transform transition-all duration-300 ${
-                type === 'success' ? 'bg-gradient-to-l from-green-500 to-emerald-600' :
-                type === 'error' ? 'bg-gradient-to-l from-red-500 to-rose-600' :
-                'bg-gradient-to-l from-blue-500 to-purple-600'
-            }`;
-            toast.textContent = message;
-            toast.style.animation = 'slideInLeft 0.3s ease-out';
-            
-            document.body.appendChild(toast);
-            
-            // Remove after 3 seconds
-            setTimeout(() => {
-                toast.style.animation = 'slideOutLeft 0.3s ease-out';
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        }
-
-        // Initialize Lucide Icons
         lucide.createIcons();
-        
-        // Add CSS animations for toasts
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideInLeft {
-                from { transform: translateX(-100%); opacity: 0; }
-                to { transform: translateX(0); opacity: 1; }
-            }
-            @keyframes slideOutLeft {
-                from { transform: translateX(0); opacity: 1; }
-                to { transform: translateX(-100%); opacity: 0; }
-            }
-        `;
-        document.head.appendChild(style);
     </script>
 </body>
 </html>
+
