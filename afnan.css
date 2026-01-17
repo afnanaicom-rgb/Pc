@@ -1,0 +1,250 @@
+/* ==========================================
+   Afnan AI - Gifts Page Styles
+   =========================================== */
+
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    font-family: 'Noto Sans Arabic', sans-serif;
+    touch-action: manipulation;
+}
+
+body {
+    background: radial-gradient(circle at 0% 0%, #eef2ff 0%, #fdf2f8 50%, #f0f9ff 100%);
+    color: #1f2937;
+    overflow-x: hidden;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+}
+
+/* ========== Glassmorphism Effects ========== */
+.glass {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04);
+}
+
+.glass-card {
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    transition: all 0.3s ease;
+}
+
+/* ========== Header ========== */
+header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 80px;
+    z-index: 30;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.page-title {
+    font-size: 20px;
+    font-weight: 700;
+    background: linear-gradient(to left, #111827, #4b5563);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* ========== Gift Modal ========== */
+.gift-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: flex-end;
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.gift-modal.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.gift-modal-content {
+    width: 100%;
+    background: white;
+    border-radius: 24px 24px 0 0;
+    padding: 24px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}
+
+/* ========== Gift Bubble ========== */
+.gift-bubble {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px 20px 4px 20px;
+    padding: 16px;
+    margin-bottom: 12px;
+    color: white;
+    animation: bubbleAppear 0.3s ease;
+}
+
+@keyframes bubbleAppear {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.gift-bubble-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 12px;
+}
+
+.gift-bubble-sender-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.gift-bubble-gift {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 8px;
+}
+
+.gift-bubble-icon {
+    font-size: 32px;
+}
+
+.gift-bubble-info {
+    flex: 1;
+    margin-left: 12px;
+}
+
+.gift-bubble-name {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.gift-bubble-value {
+    font-size: 12px;
+    opacity: 0.9;
+}
+
+.gift-bubble-button {
+    width: 100%;
+    padding: 8px 12px;
+    background: white;
+    color: #667eea;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.gift-bubble-button:active {
+    transform: scale(0.95);
+}
+
+/* ========== Gift Selection ========== */
+.gifts-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.gift-card {
+    text-align: center;
+    cursor: pointer;
+    padding: 12px;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+}
+
+.gift-card-icon {
+    font-size: 48px;
+    margin-bottom: 8px;
+}
+
+.gift-card-name {
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.gift-card-price {
+    font-size: 11px;
+    color: #6b7280;
+}
+
+.gift-card.selected {
+    background: rgba(102, 126, 234, 0.2);
+    transform: scale(1.05);
+}
+
+/* ========== Main Content ========== */
+main {
+    padding-top: 100px;
+    padding-bottom: 100px;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+/* ========== Buttons ========== */
+button {
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.btn-primary {
+    background: #667eea;
+    color: white;
+    padding: 12px 24px;
+}
+
+.btn-primary:hover {
+    background: #5568d3;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
