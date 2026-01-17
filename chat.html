@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Afnan AI - الدردشة</title>
     
-    <!-- Fonts -->
+    <!-- Fonts: Noto Sans Arabic -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;600;800&display=swap" rel="stylesheet">
     
     <!-- Tailwind CSS -->
@@ -13,56 +13,666 @@
     
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    
-    <!-- Styles -->
-    <link rel="stylesheet" href="chat.css">
-</head>
-<body class="antialiased">
 
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            font-family: 'Noto Sans Arabic', sans-serif;
+            touch-action: manipulation;
+        }
+
+        body {
+            background: radial-gradient(circle at 0% 0%, #eef2ff 0%, #fdf2f8 50%, #f0f9ff 100%);
+            color: #1f2937;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 
+                0 4px 6px -1px rgba(0, 0, 0, 0.04),
+                0 2px 4px -1px rgba(0, 0, 0, 0.02),
+                inset 0 1px 0 0 rgba(255, 255, 255, 0.4);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(12px) saturate(180%);
+            -webkit-backdrop-filter: blur(12px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 
+                0 2px 8px -2px rgba(0, 0, 0, 0.03),
+                inset 0 1px 0 0 rgba(255, 255, 255, 0.5);
+        }
+
+        .chat-bubble-me {
+            background: #1f2937;
+            color: white;
+            border-radius: 20px 20px 4px 20px;
+        }
+
+        .chat-bubble-them {
+            background: white;
+            color: #1f2937;
+            border-radius: 20px 20px 20px 4px;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .gift-message {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 2px solid #fbbf24;
+            border-radius: 20px;
+            padding: 12px;
+            text-align: center;
+            margin: 8px 0;
+        }
+
+        .gift-message-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 8px;
+        }
+
+        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Gift Box Styles */
+        .gift-box-container {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .gift-box-content {
+            background: white;
+            border-radius: 40px;
+            width: 90%;
+            max-width: 400px;
+            padding: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+
+        .gift-box-content.show {
+            transform: translateY(0);
+        }
+
+        .gift-item {
+            padding: 10px;
+            border-radius: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+        }
+
+        .gift-item:hover {
+            background: #f3f4f6;
+        }
+
+        .gift-item.selected {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        /* Gift Animation */
+        @keyframes giftFlyIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes giftPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .gift-animation {
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 200;
+            animation: giftFlyIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards,
+                     giftPulse 2s ease-in-out 0.5s infinite;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-blue-100 selection:text-blue-900">
+    
     <!-- HEADER -->
-    <header class="fixed top-0 left-0 right-0 h-20 z-30 px-6 flex items-center justify-between">
-        <div id="chatHeader" class="flex items-center gap-3">
-            <img src="https://via.placeholder.com/150" class="chat-header-avatar" alt="">
-            <div class="chat-header-text">
-                <h3>جاري التحميل...</h3>
-            </div>
-        </div>
-        <button onclick="goBack()" class="w-10 h-10 rounded-full flex items-center justify-center active:scale-90">
-            <i data-lucide="arrow-left" class="text-black w-6 h-6"></i>
+    <header class="fixed top-0 left-0 right-0 h-20 z-30 px-6 flex items-center justify-between glass">
+        <button onclick="goBack()" class="p-2 rounded-full hover:bg-gray-100">
+            <i data-lucide="chevron-right" class="w-6 h-6"></i>
         </button>
+        <h2 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600">الدردشة</h2>
+        <div class="w-10"></div>
     </header>
 
-    <!-- CHAT CONTAINER -->
-    <div class="chat-container">
-        <!-- Messages -->
-        <div id="messagesContainer" class="messages-container no-scrollbar"></div>
-
-        <!-- Input Area -->
-        <div class="input-container">
-            <button onclick="openGiftSelector()" class="gift-button" title="إرسال هدية">
-                🎁
+    <!-- MAIN CONTENT -->
+    <main class="pt-24 px-5 pb-6">
+        <div class="relative mb-6">
+            <input type="text" id="searchFriendsInput" placeholder="ابحث عن صديق..." 
+                   class="w-full p-4 pr-12 rounded-2xl glass-card border-0 focus:ring-0 focus:outline-none text-sm">
+            <button class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">
+                <i data-lucide="search" class="w-5 h-5"></i>
             </button>
-            <textarea id="messageInput" class="input-field" placeholder="اكتب رسالة..." rows="1"></textarea>
-            <button onclick="sendMessage()" class="send-button">
-                ➤
+        </div>
+
+        <div id="friendsList" class="space-y-3"></div>
+
+        <!-- No Friends Message -->
+        <div id="noFriendsMessage" class="hidden text-center py-12">
+            <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="users" class="w-12 h-12 text-gray-300"></i>
+            </div>
+            <h3 class="font-bold text-lg text-gray-700 mb-2">لا يوجد أصدقاء</h3>
+            <p class="text-gray-400 text-sm">أضف أصدقاء من الصفحة الرئيسية لبدء المحادثة</p>
+            <button onclick="goToMain()" class="mt-6 px-6 py-3 bg-black text-white rounded-xl font-bold text-sm hover:bg-gray-800 transition">
+                <i data-lucide="home" class="w-4 h-4 inline ml-1"></i>
+                العودة للرئيسية
+            </button>
+        </div>
+    </main>
+
+    <!-- CHAT MODAL -->
+    <div id="chatModal" class="fixed inset-0 z-40 hidden flex flex-col bg-gray-50">
+        <header class="h-20 glass flex items-center px-6 justify-between">
+            <div class="flex items-center gap-3">
+                <button onclick="closeChat()" class="p-2 rounded-full hover:bg-gray-100">
+                    <i data-lucide="chevron-right" class="w-6 h-6"></i>
+                </button>
+                <div class="flex items-center gap-2">
+                    <img id="chatUserAvatar" src="" class="w-10 h-10 rounded-full object-cover">
+                    <div>
+                        <h4 id="chatUserName" class="font-bold text-sm">...</h4>
+                        <p class="text-[10px] text-green-500 font-bold">متصل الآن</p>
+                    </div>
+                </div>
+            </div>
+            <button onclick="toggleGiftBox(true)" class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600">
+                <i data-lucide="gift" class="w-5 h-5"></i>
+            </button>
+        </header>
+        
+        <div id="chatMessages" class="flex-1 overflow-y-auto p-6 space-y-4 no-scrollbar"></div>
+        
+        <div class="p-4 glass flex gap-2 items-center">
+            <input type="text" id="chatInput" placeholder="اكتب رسالتك هنا..." 
+                   class="flex-1 p-4 rounded-2xl bg-white border-0 focus:ring-0 text-sm">
+            <button onclick="sendMessage()" class="w-12 h-12 rounded-2xl bg-black text-white flex items-center justify-center shadow-lg">
+                <i data-lucide="send" class="w-5 h-5"></i>
             </button>
         </div>
     </div>
 
-    <!-- Follow Request Modal -->
-    <div id="followModal" class="follow-modal">
-        <div class="follow-modal-content">
-            <div class="follow-modal-icon">👥</div>
-            <h3 class="follow-modal-title">طلب متابعة</h3>
-            <p class="follow-modal-text">يريد هذا المستخدم متابعتك. هل تقبل؟</p>
-            <div class="follow-modal-buttons">
-                <button onclick="acceptFollowRequest()" class="follow-modal-accept">قبول</button>
-                <button onclick="rejectFollowRequest()" class="follow-modal-reject">رفض</button>
+    <!-- GIFT BOX -->
+    <div id="giftBox" class="gift-box-container">
+        <div class="absolute inset-0" onclick="toggleGiftBox(false)"></div>
+        <div class="gift-box-content fade-in">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="font-bold text-xl">إرسال هدية</h3>
+                <button onclick="toggleGiftBox(false)" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <div class="flex gap-3 mb-6">
+                <button onclick="switchGiftTab('wealth')" id="tab-wealth" 
+                        class="flex-1 py-3 rounded-xl bg-black text-white font-bold text-sm">
+                    الهدايا
+                </button>
+                <button onclick="switchGiftTab('magic')" id="tab-magic" 
+                        class="flex-1 py-3 rounded-xl bg-gray-100 text-gray-600 font-bold text-sm">
+                    هدايا الحظ
+                </button>
+            </div>
+
+            <div class="mb-6 flex items-center justify-between p-4 bg-gray-50 rounded-2xl">
+                <div>
+                    <p class="text-xs text-gray-500 mb-1">رصيدك الحالي</p>
+                    <p class="font-bold text-lg" id="giftWalletBalance">0 💰</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-xs text-gray-500 mb-1">المستلم</p>
+                    <p class="font-bold text-sm" id="giftReceiverName">...</p>
+                </div>
+            </div>
+
+            <div id="giftGrid" class="grid grid-cols-3 gap-4 mb-6 max-h-[200px] overflow-y-auto no-scrollbar p-2"></div>
+
+            <div class="mt-4 p-4 bg-blue-50 rounded-2xl mb-4">
+                <div class="flex items-center gap-2 mb-2">
+                    <i data-lucide="info" class="w-4 h-4 text-blue-500"></i>
+                    <p class="text-xs font-bold text-blue-700">معلومات الهدية</p>
+                </div>
+                <p class="text-xs text-blue-600" id="giftInfoText">
+                    اختر هدية للإرسال
+                </p>
+            </div>
+
+            <div class="flex gap-3">
+                <button onclick="toggleGiftBox(false)" class="flex-1 py-3 rounded-xl bg-gray-100 text-gray-600 font-bold hover:bg-gray-200">
+                    إلغاء
+                </button>
+                <button onclick="confirmSendGift()" id="sendGiftBtn" 
+                        class="flex-1 py-3 rounded-xl bg-gray-300 text-gray-400 font-bold" disabled>
+                    <i data-lucide="send" class="w-4 h-4 inline ml-1"></i>
+                    إرسال
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- Initialize -->
-    <script src="chat.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, getDocs, collection, updateDoc, increment, query, where, arrayUnion } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getDatabase, ref, push, onValue, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBnmqWRY6lV54meFvO89QeXwtd28w81FcY",
+            authDomain: "rtx3090-28439.firebaseapp.com",
+            projectId: "rtx3090-28439",
+            storageBucket: "rtx3090-28439.firebasestorage.app",
+            messagingSenderId: "178612030690",
+            appId: "1:178612030690:web:883189ced2ed3a78e3e2bb",
+            databaseURL: "https://rtx3090-28439-default-rtdb.firebaseio.com/"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const rtdb = getDatabase(app);
+
+        let userData = {};
+        let currentFriend = null;
+        let chatUnsubscribe = null;
+        let storeData = { gifts: [], luckGifts: [] };
+        let selectedGift = null;
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const userSnap = await getDoc(doc(db, "users", user.uid));
+                if (userSnap.exists()) {
+                    userData = userSnap.data();
+                    await loadFriends();
+                    await loadGifts();
+                } else {
+                    signOut(auth);
+                    window.location.href = 'index.html';
+                }
+            } else {
+                window.location.href = 'index.html';
+            }
+        });
+
+        async function loadFriends() {
+            const list = document.getElementById('friendsList');
+            const noFriends = document.getElementById('noFriendsMessage');
+            
+            if (!userData.friends || userData.friends.length === 0) {
+                list.classList.add('hidden');
+                noFriends.classList.remove('hidden');
+                return;
+            }
+            
+            list.classList.remove('hidden');
+            noFriends.classList.add('hidden');
+            list.innerHTML = '';
+            
+            for (const uid of userData.friends) {
+                const snap = await getDoc(doc(db, "users", uid));
+                if (snap.exists()) {
+                    const friend = snap.data();
+                    list.innerHTML += `
+                        <div onclick="openChat('${friend.uid}')" class="glass-card p-4 rounded-3xl flex items-center justify-between cursor-pointer hover:bg-white transition">
+                            <div class="flex items-center gap-3">
+                                <img src="${friend.photoURL}" class="w-12 h-12 rounded-full object-cover">
+                                <div>
+                                    <h4 class="font-bold text-sm">${friend.displayName}</h4>
+                                    <p class="text-xs text-gray-400">ID: ${friend.customId}</p>
+                                </div>
+                            </div>
+                            <i data-lucide="message-circle" class="w-5 h-5 text-gray-300"></i>
+                        </div>`;
+                }
+            }
+            lucide.createIcons();
+        }
+
+        async function loadGifts() {
+            const giftsSnap = await getDocs(collection(db, "gifts"));
+            storeData.gifts = giftsSnap.docs.map(d => ({id: d.id, ...d.data(), type: 'wealth'}));
+            
+            const luckSnap = await getDocs(collection(db, "luckGifts"));
+            storeData.luckGifts = luckSnap.docs.map(d => ({id: d.id, ...d.data(), type: 'magic'}));
+        }
+
+        window.openChat = async (uid) => {
+            const snap = await getDoc(doc(db, "users", uid));
+            currentFriend = snap.data();
+            
+            document.getElementById('chatUserName').innerText = currentFriend.displayName;
+            document.getElementById('chatUserAvatar').src = currentFriend.photoURL;
+            document.getElementById('giftReceiverName').innerText = currentFriend.displayName;
+            
+            document.getElementById('chatModal').classList.remove('hidden');
+            
+            const chatId = [auth.currentUser.uid, uid].sort().join('_');
+            const chatRef = ref(rtdb, `chats/${chatId}/messages`);
+            
+            if (chatUnsubscribe) chatUnsubscribe();
+            
+            chatUnsubscribe = onValue(chatRef, (snapshot) => {
+                const messages = snapshot.val();
+                const container = document.getElementById('chatMessages');
+                container.innerHTML = '';
+                
+                if (messages) {
+                    Object.values(messages).sort((a, b) => a.timestamp - b.timestamp).forEach(msg => {
+                        const isMe = msg.senderId === auth.currentUser.uid;
+                        
+                        if (msg.type === 'gift') {
+                            container.innerHTML += `
+                                <div class="flex ${isMe ? 'justify-end' : 'justify-start'}">
+                                    <div class="gift-message max-w-[80%]">
+                                        <div class="gift-message-icon">
+                                            <img src="${msg.giftImage}" class="w-full h-full object-contain">
+                                        </div>
+                                        <p class="text-xs font-bold text-gray-800 mb-1">🎁 ${msg.giftName}</p>
+                                        <p class="text-[10px] text-gray-600">${isMe ? 'لقد أرسلت هدية' : 'لقد استلمت هدية'}</p>
+                                    </div>
+                                </div>`;
+                        } else {
+                            container.innerHTML += `
+                                <div class="flex ${isMe ? 'justify-end' : 'justify-start'}">
+                                    <div class="max-w-[80%] p-3 ${isMe ? 'chat-bubble-me' : 'chat-bubble-them'} text-sm font-medium">
+                                        ${msg.text}
+                                    </div>
+                                </div>`;
+                        }
+                    });
+                    container.scrollTop = container.scrollHeight;
+                }
+            });
+        };
+
+        window.sendMessage = async () => {
+            if (!currentFriend) return;
+            
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            if (!text) return;
+            
+            const chatId = [auth.currentUser.uid, currentFriend.uid].sort().join('_');
+            const chatRef = ref(rtdb, `chats/${chatId}/messages`);
+            
+            await push(chatRef, {
+                senderId: auth.currentUser.uid,
+                receiverId: currentFriend.uid,
+                text: text,
+                type: 'text',
+                timestamp: Date.now()
+            });
+            
+            input.value = '';
+        };
+
+        window.closeChat = () => {
+            document.getElementById('chatModal').classList.add('hidden');
+            if (chatUnsubscribe) {
+                chatUnsubscribe();
+                chatUnsubscribe = null;
+            }
+            currentFriend = null;
+            selectedGift = null;
+        };
+
+        window.toggleGiftBox = (show) => {
+            const giftBox = document.getElementById('giftBox');
+            const content = giftBox.querySelector('.gift-box-content');
+            
+            if (show) {
+                giftBox.style.display = 'flex';
+                setTimeout(() => content.classList.add('show'), 10);
+                switchGiftTab('wealth');
+                updateGiftBalance();
+            } else {
+                content.classList.remove('show');
+                setTimeout(() => {
+                    giftBox.style.display = 'none';
+                    selectedGift = null;
+                    updateSendButton();
+                }, 300);
+            }
+        };
+
+        window.switchGiftTab = (type) => {
+            const wealthTab = document.getElementById('tab-wealth');
+            const magicTab = document.getElementById('tab-magic');
+            const giftGrid = document.getElementById('giftGrid');
+            const giftInfo = document.getElementById('giftInfoText');
+            
+            wealthTab.className = type === 'wealth' 
+                ? 'flex-1 py-3 rounded-xl bg-black text-white font-bold text-sm' 
+                : 'flex-1 py-3 rounded-xl bg-gray-100 text-gray-600 font-bold text-sm';
+            
+            magicTab.className = type === 'magic' 
+                ? 'flex-1 py-3 rounded-xl bg-black text-white font-bold text-sm' 
+                : 'flex-1 py-3 rounded-xl bg-gray-100 text-gray-600 font-bold text-sm';
+            
+            const gifts = type === 'wealth' ? storeData.gifts : storeData.luckGifts;
+            giftGrid.innerHTML = '';
+            
+            if (gifts.length === 0) {
+                giftGrid.innerHTML = '<p class="col-span-3 text-center text-gray-400 text-xs py-8">لا توجد هدايا متاحة</p>';
+                return;
+            }
+            
+            gifts.forEach(gift => {
+                const level = type === 'wealth' ? userData.wealthLevel || 1 : userData.magicLevel || 1;
+                let giftValue = 0;
+                
+                if (type === 'wealth') {
+                    // مستوى الثروة: 1:50000, 2:100000, 3:150000, 4:225000, إلخ
+                    switch(level) {
+                        case 1: giftValue = 50000; break;
+                        case 2: giftValue = 100000; break;
+                        case 3: giftValue = 150000; break;
+                        case 4: giftValue = 225000; break;
+                        case 5: giftValue = 337500; break;
+                        default: giftValue = 50000 * Math.pow(1.5, level - 1);
+                    }
+                } else {
+                    // مستوى السحر: 1:20000, 2:40000, 3:60000, 4:100000, إلخ
+                    switch(level) {
+                        case 1: giftValue = 20000; break;
+                        case 2: giftValue = 40000; break;
+                        case 3: giftValue = 60000; break;
+                        case 4: giftValue = 100000; break;
+                        case 5: giftValue = 150000; break;
+                        default: giftValue = 20000 * level;
+                    }
+                }
+                
+                giftGrid.innerHTML += `
+                    <div onclick="selectGift('${gift.id}', '${type}', ${giftValue})" 
+                         class="gift-item flex flex-col items-center">
+                        <div class="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center p-2 mb-2">
+                            <img src="${gift.image}" class="w-full h-full object-contain">
+                        </div>
+                        <span class="text-xs font-bold text-gray-800 truncate w-full text-center mb-1">${gift.name}</span>
+                        <span class="text-[10px] text-yellow-600 font-black">${giftValue.toLocaleString()} 💰</span>
+                    </div>
+                `;
+            });
+            
+            giftInfo.textContent = type === 'wealth' 
+                ? 'الهدايا تزيد مستوى الثروة عند الاستلام' 
+                : 'هدايا الحظ تزيد مستوى السحر عند الاستلام';
+        };
+
+        window.selectGift = (giftId, type, price) => {
+            selectedGift = { id: giftId, type: type, price: price };
+            
+            document.querySelectorAll('.gift-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            
+            event.currentTarget.classList.add('selected');
+            
+            updateSendButton();
+        };
+
+        function updateSendButton() {
+            const sendBtn = document.getElementById('sendGiftBtn');
+            if (selectedGift) {
+                sendBtn.disabled = false;
+                sendBtn.className = 'flex-1 py-3 rounded-xl bg-black text-white font-bold hover:bg-gray-800';
+            } else {
+                sendBtn.disabled = true;
+                sendBtn.className = 'flex-1 py-3 rounded-xl bg-gray-300 text-gray-400 font-bold';
+            }
+        }
+
+        window.confirmSendGift = async () => {
+            if (!selectedGift || !currentFriend) return;
+            
+            if (userData.balance < selectedGift.price) {
+                alert('رصيدك غير كافٍ لإرسال هذه الهدية!');
+                return;
+            }
+            
+            // خصم السعر من المرسل
+            await updateDoc(doc(db, "users", auth.currentUser.uid), {
+                balance: increment(-selectedGift.price)
+            });
+            
+            // تحديث بيانات المرسل
+            const senderSnap = await getDoc(doc(db, "users", auth.currentUser.uid));
+            userData = senderSnap.data();
+            updateGiftBalance();
+            
+            // إرسال الهدية في المحادثة
+            const gifts = selectedGift.type === 'wealth' ? storeData.gifts : storeData.luckGifts;
+            const gift = gifts.find(g => g.id === selectedGift.id);
+            
+            const chatId = [auth.currentUser.uid, currentFriend.uid].sort().join('_');
+            const chatRef = ref(rtdb, `chats/${chatId}/messages`);
+            
+            await push(chatRef, {
+                senderId: auth.currentUser.uid,
+                receiverId: currentFriend.uid,
+                giftId: gift.id,
+                giftName: gift.name,
+                giftImage: gift.image,
+                giftType: selectedGift.type,
+                giftValue: selectedGift.price,
+                type: 'gift',
+                timestamp: Date.now()
+            });
+            
+            // تحديث مستوى المستلم
+            const receiverRef = doc(db, "users", currentFriend.uid);
+            const receiverSnap = await getDoc(receiverRef);
+            
+            if (receiverSnap.exists()) {
+                const receiverData = receiverSnap.data();
+                
+                if (selectedGift.type === 'magic') {
+                    // زيادة مستوى السحر
+                    const currentMagic = receiverData.magicLevel || 1;
+                    const magicGifts = receiverData.magicGiftsReceived || 0;
+                    const newMagicGifts = magicGifts + 1;
+                    
+                    let newMagicLevel = currentMagic;
+                    if (newMagicGifts >= currentMagic * 10) {
+                        newMagicLevel = currentMagic + 1;
+                    }
+                    
+                    await updateDoc(receiverRef, {
+                        magicGiftsReceived: newMagicGifts,
+                        magicLevel: newMagicLevel,
+                        balance: increment(Math.floor(selectedGift.price / 10))
+                    });
+                } else {
+                    // زيادة مستوى الثروة
+                    const currentWealth = receiverData.wealthLevel || 1;
+                    const wealthGifts = receiverData.wealthGiftsReceived || 0;
+                    const newWealthGifts = wealthGifts + 1;
+                    
+                    let newWealthLevel = currentWealth;
+                    if (newWealthGifts >= currentWealth * 5) {
+                        newWealthLevel = currentWealth + 1;
+                    }
+                    
+                    await updateDoc(receiverRef, {
+                        wealthGiftsReceived: newWealthGifts,
+                        wealthLevel: newWealthLevel,
+                        balance: increment(selectedGift.price)
+                    });
+                }
+            }
+            
+            // عرض رسالة تأكيد متحركة
+            showGiftAnimation(gift);
+            
+            // إغلاق صندوق الهدايا
+            toggleGiftBox(false);
+        };
+
+        function updateGiftBalance() {
+            document.getElementById('giftWalletBalance').textContent = (userData.balance || 0).toLocaleString() + ' 💰';
+        }
+
+        function showGiftAnimation(gift) {
+            const anim = document.createElement('div');
+            anim.className = 'gift-animation';
+            anim.innerHTML = `
+                <div class="bg-white rounded-[30px] p-8 shadow-2xl border-4 border-yellow-300">
+                    <img src="${gift.image}" class="w-48 h-48 object-contain mb-4">
+                    <p class="font-black text-2xl text-center text-gray-900 mb-2">🎁 تم إرسال الهدية!</p>
+                    <p class="text-gray-600 text-center">تم إرسال ${gift.name} بنجاح</p>
+                </div>
+            `;
+            
+            document.body.appendChild(anim);
+            
+            setTimeout(() => {
+                anim.remove();
+            }, 1500);
+        }
+
+        window.goBack = () => {
+            window.location.href = 'afnan.html';
+        };
+
+        window.goToMain = () => {
+            window.location.href = 'afnan.html';
+        };
+
+        lucide.createIcons();
+    </script>
 </body>
 </html>
