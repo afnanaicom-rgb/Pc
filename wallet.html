@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المحفظة</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Noto Sans Arabic', sans-serif; background: #f8fafc; }
+        .top-bar { height: 60px; display: flex; align-items: center; padding: 0 20px; background: white; border-bottom: 1px solid #f1f5f9; position: sticky; top: 0; z-index: 50; }
+        .wallet-card { background: white; border-radius: 24px; padding: 25px; margin: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); }
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+        <button onclick="history.back()" class="p-2"><i data-lucide="chevron-right"></i></button>
+        <h1 class="flex-1 text-center font-black text-lg mr-[-40px]">المحفظة</h1>
+    </div>
+
+    <div class="wallet-card text-center">
+        <p class="text-xs text-gray-400 font-bold mb-6 uppercase tracking-widest">إجمالي الرصيد</p>
+        
+        <div class="flex flex-col gap-6">
+            <div class="flex items-center justify-between bg-yellow-50 p-4 rounded-2xl border border-yellow-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center text-white"><i data-lucide="coins"></i></div>
+                    <span class="font-bold text-yellow-800 text-lg">الذهب</span>
+                </div>
+                <span id="gold-val" class="font-black text-2xl text-yellow-600">0</span>
+            </div>
+
+            <div class="flex items-center justify-between bg-blue-50 p-4 rounded-2xl border border-blue-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white"><i data-lucide="gem"></i></div>
+                    <span class="font-bold text-blue-800 text-lg">الجواهر</span>
+                </div>
+                <span id="jewel-val" class="font-black text-2xl text-blue-600">0</span>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const initAuth = async () => {
+          if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+            await signInWithCustomToken(auth, __initial_auth_token);
+          } else {
+            await signInAnonymously(auth);
+          }
+        };
+        initAuth();
+
+        onAuthStateChanged(auth, user => {
+            if (user) {
+                onSnapshot(doc(db, 'artifacts', 'rtx3090-28439', 'users', user.uid), snap => {
+                    const data = snap.data();
+                    if(data) {
+                        document.getElementById('gold-val').innerText = (data.balance || 0).toLocaleString();
+                        document.getElementById('jewel-val').innerText = (data.jewels || 0).toLocaleString();
+                    }
+                }, err => console.error(err));
+            }
+        });
+        lucide.createIcons();
+    </script>
+</body>
+</html>
+
