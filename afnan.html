@@ -82,8 +82,8 @@
 
         .user-frame {
             position: absolute;
-            width: 130%;
-            height: 130%;
+            width: 145%; /* أكبر من الصورة */
+            height: 145%;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
@@ -105,6 +105,11 @@
             -webkit-backdrop-filter: blur(20px) saturate(180%);
             border-top: 1px solid rgba(255, 255, 255, 0.6);
             box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .bottom-tab-bar.hidden {
+            transform: translateY(100%);
         }
 
         .tab-button {
@@ -208,6 +213,16 @@
             margin-right: 20%;
         }
 
+        /* --- Typing Indicator --- */
+        .typing-indicator {
+            display: inline-block;
+            padding: 8px 12px;
+            background: #f3f4f6;
+            border-radius: 15px;
+            font-size: 12px;
+            color: #6b7280;
+        }
+
         /* --- General Animations --- */
         .fade-in { animation: fadeIn 0.5s ease-out forwards; }
         @keyframes fadeIn {
@@ -235,11 +250,7 @@
             object-fit: contain;
         }
 
-        /* --- Hide Scrollbar --- */
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-        /* --- Bottom Sheet --- */
+        /* --- Bottom Sheets --- */
         .bottom-sheet {
             position: fixed;
             bottom: 0;
@@ -252,6 +263,8 @@
             z-index: 100;
             transform: translateY(100%);
             transition: transform 0.3s ease-out;
+            max-height: 50vh; /* ربع الشاشة */
+            overflow-y: auto;
         }
 
         .bottom-sheet.open {
@@ -272,6 +285,42 @@
             border-radius: 2px;
         }
 
+        /* --- Emoji Picker --- */
+        .emoji-picker {
+            max-height: 50vh;
+            overflow-y: auto;
+        }
+
+        .emoji-category {
+            margin-bottom: 15px;
+        }
+
+        .emoji-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 5px;
+            padding: 10px;
+        }
+
+        .emoji-item {
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 40px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-radius: 8px;
+        }
+
+        .emoji-item:hover {
+            background: #f3f4f6;
+        }
+
+        /* --- Hide Scrollbar --- */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
         /* --- Hidden Sections --- */
         .page-section {
             display: none;
@@ -286,7 +335,7 @@
     <!-- ================= MAIN APP ================= -->
     <div id="main-app" class="min-h-screen pb-20">
         
-        <!-- HEADER - Changes based on active page -->
+        <!-- HEADER -->
         <header id="main-header" class="fixed top-0 left-0 right-0 h-20 z-30 px-6 flex items-center justify-between glass">
             <!-- Content will be filled by JavaScript -->
         </header>
@@ -296,17 +345,8 @@
             
             <!-- ================= HOME PAGE ================= -->
             <section id="page-home" class="page-section active">
-                <!-- HOME BANNER -->
-                <div id="homeBanner" class="w-full h-48 rounded-[32px] glass-card mb-6 relative overflow-hidden flex items-center justify-center shadow-sm group"></div>
-                
-                <!-- GIFT BOX BUTTON -->
-                <div onclick="openGiftBox()" class="glass-card p-6 rounded-3xl flex flex-col items-center justify-center gap-4 cursor-pointer hover:bg-white transition mb-8">
-                    <div class="w-20 h-20 bg-gradient-to-r from-yellow-200 to-yellow-400 rounded-2xl flex items-center justify-center">
-                        <i data-lucide="gift" class="w-10 h-10 text-yellow-700"></i>
-                    </div>
-                    <span class="font-bold text-lg text-gray-800">صندوق الهدايا</span>
-                    <span class="text-sm text-gray-500">افتح لتحصل على هدايا يومية</span>
-                </div>
+                <!-- HOME BANNER (مصغر) -->
+                <div id="homeBanner" class="w-full h-32 rounded-[32px] glass-card mb-6 relative overflow-hidden flex items-center justify-center shadow-sm group"></div>
             </section>
 
             <!-- ================= FRIENDS PAGE ================= -->
@@ -333,6 +373,16 @@
                 <!-- Entrance Animation Container (Hidden by default) -->
                 <div id="entranceAnimation" class="entrance-container hidden"></div>
 
+                <!-- Typing Indicator -->
+                <div id="typingIndicator" class="hidden mb-4">
+                    <div class="typing-indicator inline-block">
+                        <span class="mr-2">يكتب الآن...</span>
+                        <span class="dot">.</span>
+                        <span class="dot">.</span>
+                        <span class="dot">.</span>
+                    </div>
+                </div>
+
                 <!-- CHAT MESSAGES -->
                 <div id="chatMessages" class="space-y-4 mb-6">
                     <!-- Messages will be loaded here -->
@@ -346,7 +396,8 @@
                         </button>
                         <div class="flex-1 relative">
                             <input type="text" id="messageInput" placeholder="اكتب رسالة..." 
-                                   class="w-full p-4 pr-14 rounded-2xl glass border-0 focus:ring-0 focus:outline-none text-sm">
+                                   class="w-full p-4 pr-14 rounded-2xl glass border-0 focus:ring-0 focus:outline-none text-sm"
+                                   oninput="handleTyping()">
                             <button onclick="sendMessage()" class="absolute left-3 top-1/2 transform -translate-y-1/2">
                                 <i data-lucide="send" class="w-5 h-5 text-blue-500"></i>
                             </button>
@@ -374,7 +425,7 @@
                     </div>
                 </div>
 
-                <!-- STATS (Only 3 items) -->
+                <!-- STATS -->
                 <div class="stats-grid mb-8">
                     <div class="stat-item glass-card">
                         <div class="stat-value" id="friendsCount">0</div>
@@ -390,8 +441,8 @@
                     </div>
                 </div>
 
-                <!-- LEVELS (Images only, no text) -->
-                <div class="flex gap-3 mb-8">
+                <!-- LEVELS (Images only) -->
+                <div class="flex gap-3 mb-4">
                     <div class="flex-1 glass-card p-3 rounded-2xl flex flex-col items-center justify-center">
                         <div class="w-24 h-24 flex items-center justify-center overflow-hidden">
                             <img id="magicLevelImg" src="" class="w-full h-full object-contain">
@@ -402,6 +453,11 @@
                             <img id="wealthLevelImg" src="" class="w-full h-full object-contain">
                         </div>
                     </div>
+                </div>
+
+                <!-- ACTIVE BADGES (تحت اليفل مباشرة) -->
+                <div class="mb-8">
+                    <div id="activeBadgesGrid" class="badges-grid mb-4"></div>
                 </div>
 
                 <!-- PROFILE ACTIONS -->
@@ -442,6 +498,16 @@
                                 <i data-lucide="gift" class="w-5 h-5 text-red-500"></i>
                             </div>
                             <span class="font-bold text-gray-700">جدار الهدايا</span>
+                        </div>
+                        <i data-lucide="chevron-left" class="w-5 h-5 text-gray-400"></i>
+                    </div>
+
+                    <div onclick="switchPage('blocked-users')" class="glass-card p-4 rounded-3xl flex items-center justify-between cursor-pointer hover:bg-white transition">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-2xl bg-gray-900 flex items-center justify-center">
+                                <i data-lucide="shield" class="w-5 h-5 text-white"></i>
+                            </div>
+                            <span class="font-bold text-gray-700">المستخدمون المحظورون</span>
                         </div>
                         <i data-lucide="chevron-left" class="w-5 h-5 text-gray-400"></i>
                     </div>
@@ -489,6 +555,7 @@
 
             <!-- ================= WALLET PAGE ================= -->
             <section id="page-wallet" class="page-section">
+                <!-- WORK BALANCE -->
                 <div class="glass-card rounded-[40px] p-8 text-center mb-8 relative overflow-hidden">
                     <div class="absolute -top-20 -left-20 w-48 h-48 bg-yellow-200/30 rounded-full blur-3xl"></div>
                     <div class="relative z-10">
@@ -500,6 +567,18 @@
                     </div>
                 </div>
                 
+                <!-- DIAMONDS -->
+                <div class="glass-card rounded-[40px] p-8 text-center mb-8 relative overflow-hidden">
+                    <div class="absolute -top-20 -left-20 w-48 h-48 bg-purple-200/30 rounded-full blur-3xl"></div>
+                    <div class="relative z-10">
+                        <p class="text-gray-500 text-sm font-semibold mb-2">الألماس</p>
+                        <h2 class="text-6xl font-black text-gray-900 tracking-tight mb-2" id="diamondAmount">0</h2>
+                        <span class="inline-flex items-center gap-1 bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs font-bold">
+                            <i data-lucide="gem" class="w-3 h-3"></i> ألماس
+                        </span>
+                    </div>
+                </div>
+
                 <h3 class="font-bold text-xl mb-4 mr-2">شحن الرصيد</h3>
                 <div class="grid grid-cols-2 gap-4 mb-6">
                     <div onclick="recharge(85000)" class="glass-card p-6 rounded-3xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-white transition">
@@ -535,17 +614,7 @@
 
             <!-- ================= STORE PAGE ================= -->
             <section id="page-store" class="page-section">
-                <!-- BALANCE CARD -->
-                <div class="glass-card rounded-[40px] p-6 text-center mb-8 relative overflow-hidden">
-                    <div class="absolute -top-20 -left-20 w-48 h-48 bg-yellow-200/30 rounded-full blur-3xl"></div>
-                    <div class="relative z-10">
-                        <p class="text-gray-500 text-sm font-semibold mb-2">رصيدك الحالي</p>
-                        <h2 class="text-4xl font-black text-gray-900 tracking-tight mb-2" id="storeBalance">0</h2>
-                        <span class="inline-flex items-center gap-1 bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs font-bold">
-                            <i data-lucide="coins" class="w-3 h-3"></i> عملة ذهبية
-                        </span>
-                    </div>
-                </div>
+                <!-- BALANCE CARD (Removed) -->
 
                 <!-- STORE TABS -->
                 <div class="flex gap-3 mb-6 overflow-x-auto no-scrollbar pb-2">
@@ -571,10 +640,18 @@
                     <!-- Active entrances will be loaded here -->
                 </div>
             </section>
+
+            <!-- ================= BLOCKED USERS PAGE ================= -->
+            <section id="page-blocked-users" class="page-section">
+                <h3 class="font-bold text-xl mb-6 text-gray-800">المستخدمون المحظورون</h3>
+                <div id="blockedUsersList" class="space-y-3">
+                    <!-- Blocked users will be loaded here -->
+                </div>
+            </section>
         </main>
 
         <!-- BOTTOM TAB BAR -->
-        <nav class="bottom-tab-bar flex items-center justify-between px-4">
+        <nav id="bottomTabBar" class="bottom-tab-bar flex items-center justify-between px-4">
             <button onclick="switchPage('home')" class="tab-button active">
                 <i data-lucide="home" class="tab-icon"></i>
                 <span class="tab-label">الرئيسية</span>
@@ -588,43 +665,6 @@
                 <span class="tab-label">الملف</span>
             </button>
         </nav>
-
-        <!-- GIFT BOX BOTTOM SHEET -->
-        <div id="giftBoxSheet" class="bottom-sheet">
-            <div class="sheet-header">
-                <div class="sheet-handle"></div>
-            </div>
-            <div class="p-6">
-                <h3 class="font-bold text-xl mb-6 text-center">صندوق الهدايا</h3>
-                <div id="giftBoxContent" class="grid grid-cols-3 gap-4 mb-6">
-                    <!-- Gifts will be loaded here -->
-                    <div class="glass-card p-4 rounded-2xl flex flex-col items-center justify-center">
-                        <div class="w-16 h-16 bg-yellow-100 rounded-xl flex items-center justify-center mb-2">
-                            <i data-lucide="coin" class="w-8 h-8 text-yellow-600"></i>
-                        </div>
-                        <span class="text-xs font-bold text-center">5,000</span>
-                        <span class="text-[10px] text-gray-500">عملة ذهبية</span>
-                    </div>
-                    <div class="glass-card p-4 rounded-2xl flex flex-col items-center justify-center">
-                        <div class="w-16 h-16 bg-purple-100 rounded-xl flex items-center justify-center mb-2">
-                            <i data-lucide="diamond" class="w-8 h-8 text-purple-600"></i>
-                        </div>
-                        <span class="text-xs font-bold text-center">10</span>
-                        <span class="text-[10px] text-gray-500">ألماس</span>
-                    </div>
-                    <div class="glass-card p-4 rounded-2xl flex flex-col items-center justify-center">
-                        <div class="w-16 h-16 bg-green-100 rounded-xl flex items-center justify-center mb-2">
-                            <i data-lucide="gift" class="w-8 h-8 text-green-600"></i>
-                        </div>
-                        <span class="text-xs font-bold text-center">هدية</span>
-                        <span class="text-[10px] text-gray-500">عشوائية</span>
-                    </div>
-                </div>
-                <button onclick="claimGiftBox()" class="w-full py-4 bg-black text-white rounded-2xl font-bold hover:bg-gray-800 transition">
-                    فتح الصندوق
-                </button>
-            </div>
-        </div>
     </div>
 
     <!-- ================= MODALS ================= -->
@@ -651,11 +691,13 @@
         </div>
     </div>
 
-    <!-- GIFT PICKER MODAL -->
-    <div id="giftPickerModal" class="fixed inset-0 z-[60] hidden flex items-center justify-center px-4">
-        <div class="absolute inset-0 bg-black/20 backdrop-blur-sm" onclick="closeGiftPicker()"></div>
-        <div class="relative w-full max-w-sm glass-deep rounded-[40px] p-6 shadow-2xl fade-in">
-            <h3 class="text-center font-bold text-xl mb-6">إرسال هدية</h3>
+    <!-- GIFT PICKER MODAL (Bottom Sheet) -->
+    <div id="giftPickerModal" class="bottom-sheet">
+        <div class="sheet-header">
+            <div class="sheet-handle"></div>
+        </div>
+        <div class="p-6">
+            <h3 class="font-bold text-xl mb-6 text-center">اختر هدية</h3>
             <div id="giftGrid" class="grid grid-cols-3 gap-3 mb-6">
                 <!-- Gifts will be loaded here -->
             </div>
@@ -666,10 +708,65 @@
         </div>
     </div>
 
+    <!-- EMOJI PICKER MODAL (Bottom Sheet) -->
+    <div id="emojiPickerModal" class="bottom-sheet">
+        <div class="sheet-header">
+            <div class="sheet-handle"></div>
+        </div>
+        <div class="p-4 emoji-picker">
+            <h3 class="font-bold text-lg mb-4 text-center">الإيموجيات</h3>
+            <div id="emojiGrid" class="emoji-grid">
+                <!-- Emojis will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- GIFT BOX BOTTOM SHEET -->
+    <div id="giftBoxSheet" class="bottom-sheet">
+        <div class="sheet-header">
+            <div class="sheet-handle"></div>
+        </div>
+        <div class="p-6">
+            <h3 class="font-bold text-xl mb-6 text-center">صندوق الهدايا</h3>
+            <div id="giftBoxContent" class="grid grid-cols-3 gap-4 mb-6">
+                <!-- Gifts will be loaded here -->
+                <div class="glass-card p-4 rounded-2xl flex flex-col items-center justify-center">
+                    <div class="w-16 h-16 bg-yellow-100 rounded-xl flex items-center justify-center mb-2">
+                        <i data-lucide="coin" class="w-8 h-8 text-yellow-600"></i>
+                    </div>
+                    <span class="text-xs font-bold text-center">5,000</span>
+                    <span class="text-[10px] text-gray-500">عملة ذهبية</span>
+                </div>
+                <div class="glass-card p-4 rounded-2xl flex flex-col items-center justify-center">
+                    <div class="w-16 h-16 bg-purple-100 rounded-xl flex items-center justify-center mb-2">
+                        <i data-lucide="diamond" class="w-8 h-8 text-purple-600"></i>
+                    </div>
+                    <span class="text-xs font-bold text-center">10</span>
+                    <span class="text-[10px] text-gray-500">ألماس</span>
+                </div>
+                <div class="glass-card p-4 rounded-2xl flex flex-col items-center justify-center">
+                    <div class="w-16 h-16 bg-green-100 rounded-xl flex items-center justify-center mb-2">
+                        <i data-lucide="gift" class="w-8 h-8 text-green-600"></i>
+                    </div>
+                    <span class="text-xs font-bold text-center">هدية</span>
+                    <span class="text-[10px] text-gray-500">عشوائية</span>
+                </div>
+            </div>
+            <button onclick="claimGiftBox()" class="w-full py-4 bg-black text-white rounded-2xl font-bold hover:bg-gray-800 transition">
+                فتح الصندوق
+            </button>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, getDocs, increment, query, where, arrayUnion, arrayRemove, orderBy, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { 
+            getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, 
+            collection, getDocs, increment, query, where, arrayUnion, 
+            arrayRemove, orderBy, addDoc, serverTimestamp, deleteDoc,
+            writeBatch
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBnmqWRY6lV54meFvO89QeXwtd28w81FcY",
@@ -686,12 +783,14 @@
         const db = getFirestore(app);
 
         let userData = {};
-        let storeData = { frames: [], badges: [], entrances: [], magicLevels: {}, wealthLevels: {} };
+        let storeData = { frames: [], badges: [], entrances: [], gifts: [], magicLevels: {}, wealthLevels: {} };
         let currentPage = 'home';
         let selectedGift = null;
         let currentChatId = null;
         let chatPartner = null;
         let chatUnsubscribe = null;
+        let typingTimeout = null;
+        let isTyping = false;
 
         // Initialize app
         onAuthStateChanged(auth, async (user) => {
@@ -703,6 +802,7 @@
                         await loadFriendRequests();
                         await loadFriends();
                         await loadGiftsWall();
+                        await loadBlockedUsers();
                     } else {
                         await createUserDoc(user);
                     }
@@ -717,16 +817,6 @@
 
         // Page Navigation
         window.switchPage = (page) => {
-            // Update active tab
-            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-            if (page === 'home') {
-                document.querySelectorAll('.tab-button')[0].classList.add('active');
-            } else if (page === 'friends') {
-                document.querySelectorAll('.tab-button')[1].classList.add('active');
-            } else if (page === 'profile') {
-                document.querySelectorAll('.tab-button')[2].classList.add('active');
-            }
-            
             // Hide all pages
             document.querySelectorAll('.page-section').forEach(section => {
                 section.classList.remove('active');
@@ -739,12 +829,30 @@
             // Update header
             updateHeader();
             
+            // Show/hide bottom tab bar
+            const bottomTabBar = document.getElementById('bottomTabBar');
+            if (page === 'chat') {
+                bottomTabBar.classList.add('hidden');
+            } else {
+                bottomTabBar.classList.remove('hidden');
+            }
+            
+            // Update active tab buttons
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            if (page === 'home') {
+                document.querySelectorAll('.tab-button')[0]?.classList.add('active');
+            } else if (page === 'friends') {
+                document.querySelectorAll('.tab-button')[1]?.classList.add('active');
+            } else if (page === 'profile') {
+                document.querySelectorAll('.tab-button')[2]?.classList.add('active');
+            }
+            
             // Load page-specific content
             if (page === 'store') {
                 loadStoreItems('frames');
-                document.getElementById('storeBalance').innerText = (userData.balance || 0).toLocaleString();
             } else if (page === 'wallet') {
                 document.getElementById('walletAmount').innerText = (userData.balance || 0).toLocaleString();
+                document.getElementById('diamondAmount').innerText = (userData.diamonds || 0).toLocaleString();
             } else if (page === 'friends') {
                 loadFriendRequests();
                 loadFriends();
@@ -752,6 +860,8 @@
                 loadFullProfileData();
             } else if (page === 'bag') {
                 loadBagItems();
+            } else if (page === 'blocked-users') {
+                loadBlockedUsers();
             } else if (page === 'chat') {
                 // Stop previous chat listener
                 if (chatUnsubscribe) {
@@ -786,13 +896,15 @@
                     
                 case 'chat':
                     headerHTML = `
-                        <button onclick="switchPage('friends')" class="w-10 h-10 rounded-full flex items-center justify-center active:scale-90 transition">
+                        <button onclick="closeChat()" class="w-10 h-10 rounded-full flex items-center justify-center active:scale-90 transition">
                             <i data-lucide="arrow-right" class="text-black w-5 h-5"></i>
                         </button>
                         <h2 id="chatTitle" class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600">الدردشة</h2>
-                        <button onclick="openChatInfo()" class="w-10 h-10 rounded-full flex items-center justify-center active:scale-90 transition">
-                            <i data-lucide="info" class="text-black w-5 h-5"></i>
-                        </button>
+                        <div class="flex items-center gap-3">
+                            <button onclick="openChatInfo()" class="w-10 h-10 rounded-full flex items-center justify-center active:scale-90 transition">
+                                <i data-lucide="info" class="text-black w-5 h-5"></i>
+                            </button>
+                        </div>
                     `;
                     break;
                     
@@ -846,6 +958,16 @@
                         <div class="w-10 h-10"></div>
                     `;
                     break;
+                    
+                case 'blocked-users':
+                    headerHTML = `
+                        <button onclick="switchPage('profile')" class="w-10 h-10 rounded-full flex items-center justify-center active:scale-90 transition">
+                            <i data-lucide="arrow-right" class="text-black w-5 h-5"></i>
+                        </button>
+                        <h2 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600">المستخدمون المحظورون</h2>
+                        <div class="w-10 h-10"></div>
+                    `;
+                    break;
             }
             
             header.innerHTML = headerHTML;
@@ -860,6 +982,7 @@
                 email: user.email,
                 uid: user.uid,
                 balance: 1000,
+                diamonds: 0,
                 magicLevel: 1,
                 wealthLevel: 1,
                 customId: Math.floor(100000 + Math.random() * 900000).toString(),
@@ -872,6 +995,7 @@
                 friends: [],
                 friendRequests: [],
                 sentRequests: [],
+                blockedUsers: [],
                 receivedGifts: [],
                 dailyGiftClaimed: false,
                 createdAt: new Date()
@@ -879,20 +1003,27 @@
         }
 
         async function loadGlobalData() {
-            const fSnap = await getDocs(collection(db, "frames"));
-            storeData.frames = fSnap.docs.map(d => ({id: d.id, ...d.data()}));
-            
-            const bSnap = await getDocs(collection(db, "badges"));
-            storeData.badges = bSnap.docs.map(d => ({id: d.id, ...d.data()}));
-            
-            const eSnap = await getDocs(collection(db, "entrances"));
-            storeData.entrances = eSnap.docs.map(d => ({id: d.id, ...d.data()}));
-            
-            const mlSnap = await getDocs(collection(db, "magicLevels"));
-            mlSnap.docs.forEach(d => storeData.magicLevels[d.id] = d.data());
-            
-            const wlSnap = await getDocs(collection(db, "wealthLevels"));
-            wlSnap.docs.forEach(d => storeData.wealthLevels[d.id] = d.data());
+            try {
+                const fSnap = await getDocs(collection(db, "frames"));
+                storeData.frames = fSnap.docs.map(d => ({id: d.id, ...d.data()}));
+                
+                const bSnap = await getDocs(collection(db, "badges"));
+                storeData.badges = bSnap.docs.map(d => ({id: d.id, ...d.data()}));
+                
+                const eSnap = await getDocs(collection(db, "entrances"));
+                storeData.entrances = eSnap.docs.map(d => ({id: d.id, ...d.data()}));
+                
+                const gSnap = await getDocs(collection(db, "gifts"));
+                storeData.gifts = gSnap.docs.map(d => ({id: d.id, ...d.data()}));
+                
+                const mlSnap = await getDocs(collection(db, "magicLevels"));
+                mlSnap.docs.forEach(d => storeData.magicLevels[d.id] = d.data());
+                
+                const wlSnap = await getDocs(collection(db, "wealthLevels"));
+                wlSnap.docs.forEach(d => storeData.wealthLevels[d.id] = d.data());
+            } catch (error) {
+                console.error("Error loading global data:", error);
+            }
         }
 
         async function updateUI() {
@@ -941,10 +1072,28 @@
             } else {
                 frameEl.classList.add('hidden');
             }
+
+            // Active badges
+            const activeBadgesGrid = document.getElementById('activeBadgesGrid');
+            activeBadgesGrid.innerHTML = '';
+            if (userData.activeBadges && userData.activeBadges.length > 0) {
+                userData.activeBadges.forEach(badgeId => {
+                    const badge = storeData.badges.find(b => b.id === badgeId);
+                    if (badge) {
+                        activeBadgesGrid.innerHTML += `
+                            <div class="flex items-center justify-center">
+                                <img src="${badge.image}" class="w-8 h-8 object-contain" title="${badge.name}">
+                            </div>
+                        `;
+                    }
+                });
+            } else {
+                activeBadgesGrid.innerHTML = '<p class="text-center text-gray-400 text-sm col-span-5 py-4">لا توجد شارات نشطة</p>';
+            }
             
             // Wallet amount
             document.getElementById('walletAmount').innerText = (userData.balance || 0).toLocaleString();
-            document.getElementById('storeBalance').innerText = (userData.balance || 0).toLocaleString();
+            document.getElementById('diamondAmount').innerText = (userData.diamonds || 0).toLocaleString();
         }
 
         async function loadFullProfileData() {
@@ -1122,6 +1271,7 @@
                 activeBadges: isActive ? arrayRemove(id) : arrayUnion(id)
             });
             loadBagItems();
+            await updateUI();
         };
 
         window.equipEntrance = async (id) => {
@@ -1146,12 +1296,17 @@
                 const isFollowing = userData.friends?.includes(user.uid);
                 const hasSentRequest = userData.sentRequests?.includes(user.uid);
                 const hasReceivedRequest = userData.friendRequests?.includes(user.uid);
+                const isBlocked = userData.blockedUsers?.includes(user.uid);
                 
                 let buttonText = 'متابعة';
                 let buttonClass = 'bg-black text-white';
                 let buttonAction = `sendFriendRequest('${user.uid}')`;
                 
-                if (isFollowing) {
+                if (isBlocked) {
+                    buttonText = 'محظور';
+                    buttonClass = 'bg-red-100 text-red-600';
+                    buttonAction = `unblockUser('${user.uid}')`;
+                } else if (isFollowing) {
                     buttonText = 'متابع';
                     buttonClass = 'bg-gray-100 text-gray-500';
                     buttonAction = `unfollowUser('${user.uid}')`;
@@ -1174,9 +1329,16 @@
                                 <p class="text-xs text-gray-400">ID: ${user.customId}</p>
                             </div>
                         </div>
-                        <button onclick="${buttonAction}" class="px-4 py-2 rounded-xl ${buttonClass} font-bold text-xs">
-                            ${buttonText}
-                        </button>
+                        <div class="flex gap-2">
+                            <button onclick="${buttonAction}" class="px-4 py-2 rounded-xl ${buttonClass} font-bold text-xs">
+                                ${buttonText}
+                            </button>
+                            ${!isFollowing && !hasReceivedRequest ? `
+                            <button onclick="blockUser('${user.uid}')" class="px-3 py-2 rounded-xl bg-red-50 text-red-600 font-bold text-xs">
+                                <i data-lucide="slash" class="w-3 h-3"></i>
+                            </button>
+                            ` : ''}
+                        </div>
                     </div>`;
             }
         };
@@ -1225,18 +1387,87 @@
         };
 
         window.unfollowUser = async (uid) => {
-            await updateDoc(doc(db, "users", auth.currentUser.uid), {
-                friends: arrayRemove(uid)
-            });
-            
-            await updateDoc(doc(db, "users", uid), {
-                friends: arrayRemove(auth.currentUser.uid)
-            });
-            
-            searchUser();
-            loadFriends();
-            await updateUI();
+            if (confirm('هل تريد إلغاء المتابعة؟')) {
+                await updateDoc(doc(db, "users", auth.currentUser.uid), {
+                    friends: arrayRemove(uid)
+                });
+                
+                await updateDoc(doc(db, "users", uid), {
+                    friends: arrayRemove(auth.currentUser.uid)
+                });
+                
+                searchUser();
+                loadFriends();
+                await updateUI();
+            }
         };
+
+        window.blockUser = async (uid) => {
+            if (confirm('هل تريد حظر هذا المستخدم؟')) {
+                // Remove from friends if exists
+                await updateDoc(doc(db, "users", auth.currentUser.uid), {
+                    friends: arrayRemove(uid),
+                    sentRequests: arrayRemove(uid),
+                    friendRequests: arrayRemove(uid),
+                    blockedUsers: arrayUnion(uid)
+                });
+                
+                // Remove from other user's lists
+                await updateDoc(doc(db, "users", uid), {
+                    friends: arrayRemove(auth.currentUser.uid),
+                    sentRequests: arrayRemove(auth.currentUser.uid),
+                    friendRequests: arrayRemove(auth.currentUser.uid)
+                });
+                
+                alert('تم حظر المستخدم');
+                searchUser();
+                loadFriendRequests();
+                loadFriends();
+                await updateUI();
+            }
+        };
+
+        window.unblockUser = async (uid) => {
+            await updateDoc(doc(db, "users", auth.currentUser.uid), {
+                blockedUsers: arrayRemove(uid)
+            });
+            
+            alert('تم إلغاء حظر المستخدم');
+            searchUser();
+            loadBlockedUsers();
+        };
+
+        async function loadBlockedUsers() {
+            const list = document.getElementById('blockedUsersList');
+            if (!list) return;
+            list.innerHTML = '';
+            
+            const blockedUsers = userData.blockedUsers || [];
+            for (const uid of blockedUsers) {
+                const snap = await getDoc(doc(db, "users", uid));
+                if (snap.exists()) {
+                    const user = snap.data();
+                    list.innerHTML += `
+                        <div class="glass-card p-4 rounded-3xl flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <img src="${user.photoURL}" class="w-12 h-12 rounded-full object-cover">
+                                <div>
+                                    <h4 class="font-bold text-sm">${user.displayName}</h4>
+                                    <p class="text-xs text-gray-400">ID: ${user.customId}</p>
+                                </div>
+                            </div>
+                            <button onclick="unblockUser('${user.uid}')" class="px-3 py-1 bg-green-100 text-green-600 rounded-lg text-xs font-bold">
+                                إلغاء الحظر
+                            </button>
+                        </div>
+                    `;
+                }
+            }
+            
+            if (blockedUsers.length === 0) {
+                list.innerHTML = '<p class="text-center text-gray-400 text-sm py-4">لا يوجد مستخدمين محظورين</p>';
+            }
+        }
 
         async function loadFriendRequests() {
             const list = document.getElementById('friendRequestsList');
@@ -1264,6 +1495,7 @@
                                 <div class="flex gap-2">
                                     <button onclick="acceptFriendRequest('${user.uid}')" class="px-3 py-1 bg-green-100 text-green-600 rounded-lg text-xs font-bold">قبول</button>
                                     <button onclick="rejectFriendRequest('${user.uid}')" class="px-3 py-1 bg-red-100 text-red-600 rounded-lg text-xs font-bold">رفض</button>
+                                    <button onclick="blockUser('${user.uid}')" class="px-3 py-1 bg-gray-100 text-gray-600 rounded-lg text-xs font-bold">حظر</button>
                                 </div>
                             </div>
                         </div>`;
@@ -1272,15 +1504,17 @@
         }
 
         window.rejectFriendRequest = async (uid) => {
-            await updateDoc(doc(db, "users", auth.currentUser.uid), {
-                friendRequests: arrayRemove(uid)
-            });
-            
-            await updateDoc(doc(db, "users", uid), {
-                sentRequests: arrayRemove(auth.currentUser.uid)
-            });
-            
-            loadFriendRequests();
+            if (confirm('هل تريد رفض طلب الصداقة؟')) {
+                await updateDoc(doc(db, "users", auth.currentUser.uid), {
+                    friendRequests: arrayRemove(uid)
+                });
+                
+                await updateDoc(doc(db, "users", uid), {
+                    sentRequests: arrayRemove(auth.currentUser.uid)
+                });
+                
+                loadFriendRequests();
+            }
         };
 
         async function loadFriends() {
@@ -1334,6 +1568,8 @@
                 
                 // Load messages
                 loadChatMessages(chatId);
+                // Listen for typing
+                listenForTyping(chatId);
             }
         };
 
@@ -1406,6 +1642,57 @@
             messagesContainer.innerHTML += messageHTML;
         }
 
+        window.handleTyping = () => {
+            if (!currentChatId || !chatPartner) return;
+            
+            // Clear previous timeout
+            if (typingTimeout) clearTimeout(typingTimeout);
+            
+            // Send typing status
+            sendTypingStatus(true);
+            
+            // Set timeout to stop typing indicator
+            typingTimeout = setTimeout(() => {
+                sendTypingStatus(false);
+            }, 1500);
+        };
+
+        async function sendTypingStatus(isTyping) {
+            if (!currentChatId || !chatPartner) return;
+            
+            const typingRef = doc(db, "chats", currentChatId, "typing", auth.currentUser.uid);
+            if (isTyping) {
+                await setDoc(typingRef, {
+                    isTyping: true,
+                    timestamp: serverTimestamp()
+                });
+            } else {
+                await deleteDoc(typingRef);
+            }
+        }
+
+        function listenForTyping(chatId) {
+            const typingRef = collection(db, "chats", chatId, "typing");
+            onSnapshot(typingRef, (snapshot) => {
+                const typingIndicator = document.getElementById('typingIndicator');
+                let someoneTyping = false;
+                
+                snapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    // Check if it's the other person typing
+                    if (docSnap.id !== auth.currentUser.uid && data.isTyping) {
+                        someoneTyping = true;
+                    }
+                });
+                
+                if (someoneTyping) {
+                    typingIndicator.classList.remove('hidden');
+                } else {
+                    typingIndicator.classList.add('hidden');
+                }
+            });
+        }
+
         window.sendMessage = async () => {
             const input = document.getElementById('messageInput');
             const text = input.value.trim();
@@ -1414,6 +1701,9 @@
                 alert('يرجى اختيار صديق للدردشة أولاً');
                 return;
             }
+            
+            // Stop typing indicator
+            await sendTypingStatus(false);
             
             // Add message to Firestore
             const messagesRef = collection(db, "chats", currentChatId, "messages");
@@ -1425,6 +1715,170 @@
             });
             
             input.value = '';
+        };
+
+        window.closeChat = () => {
+            switchPage('friends');
+            if (chatUnsubscribe) {
+                chatUnsubscribe();
+                chatUnsubscribe = null;
+            }
+            currentChatId = null;
+            chatPartner = null;
+        };
+
+        // Gift Functions
+        window.openGiftPicker = async () => {
+            const modal = document.getElementById('giftPickerModal');
+            modal.classList.add('open');
+            
+            const grid = document.getElementById('giftGrid');
+            grid.innerHTML = '';
+            
+            storeData.gifts.forEach(gift => {
+                grid.innerHTML += `
+                    <div onclick="selectGift('${gift.id}')" class="glass-card p-3 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:bg-white transition">
+                        <img src="${gift.image}" class="w-12 h-12 object-contain mb-2">
+                        <span class="text-xs font-bold text-center">${gift.name}</span>
+                        <span class="text-[10px] text-gray-500">${gift.price} 💰</span>
+                    </div>
+                `;
+            });
+        };
+
+        window.selectGift = (giftId) => {
+            selectedGift = storeData.gifts.find(g => g.id === giftId);
+            document.querySelectorAll('#giftGrid > div').forEach(div => {
+                div.classList.remove('border-2', 'border-black');
+            });
+            event.currentTarget.classList.add('border-2', 'border-black');
+        };
+
+        window.sendGift = async () => {
+            if (!selectedGift) return alert('يرجى اختيار هدية');
+            if (!chatPartner) return alert('يرجى اختيار صديق لإرسال الهدية');
+            
+            if (userData.balance < selectedGift.price) {
+                alert('رصيدك غير كافٍ');
+                return;
+            }
+            
+            try {
+                // Deduct balance from sender
+                await updateDoc(doc(db, "users", auth.currentUser.uid), {
+                    balance: increment(-selectedGift.price)
+                });
+                
+                // Calculate diamond value based on gift type
+                let diamondValue = 0;
+                if (selectedGift.type === 'fixed') {
+                    diamondValue = selectedGift.value / 1000000; // 1 diamond per 1,000,000
+                } else if (selectedGift.type === 'luck') {
+                    diamondValue = (selectedGift.value * 0.05) / 1000000; // 5% of value
+                }
+                
+                // Add diamonds to receiver
+                await updateDoc(doc(db, "users", chatPartner.uid), {
+                    diamonds: increment(diamondValue),
+                    receivedGifts: arrayUnion({
+                        id: selectedGift.id,
+                        name: selectedGift.name,
+                        image: selectedGift.image,
+                        value: selectedGift.value,
+                        type: selectedGift.type,
+                        senderId: auth.currentUser.uid,
+                        senderName: userData.displayName,
+                        receivedAt: new Date(),
+                        diamondValue: diamondValue
+                    })
+                });
+                
+                // Send gift message
+                const messagesRef = collection(db, "chats", currentChatId, "messages");
+                await addDoc(messagesRef, {
+                    type: 'gift',
+                    giftId: selectedGift.id,
+                    giftName: selectedGift.name,
+                    giftImage: selectedGift.image,
+                    senderId: auth.currentUser.uid,
+                    senderName: userData.displayName,
+                    timestamp: serverTimestamp()
+                });
+                
+                alert('تم إرسال الهدية بنجاح!');
+                closeGiftPicker();
+                
+            } catch (error) {
+                console.error('Error sending gift:', error);
+                alert('حدث خطأ أثناء إرسال الهدية');
+            }
+        };
+
+        window.closeGiftPicker = () => {
+            const modal = document.getElementById('giftPickerModal');
+            modal.classList.remove('open');
+            selectedGift = null;
+        };
+
+        // Emoji Picker Functions
+        window.openEmojiPicker = () => {
+            const modal = document.getElementById('emojiPickerModal');
+            modal.classList.add('open');
+            
+            const emojiGrid = document.getElementById('emojiGrid');
+            emojiGrid.innerHTML = '';
+            
+            // Basic emojis
+            const emojis = [
+                '😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣',
+                '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰',
+                '😘', '😗', '😙', '😚', '😋', '😛', '😝', '😜',
+                '🤪', '🤨', '🧐', '🤓', '😎', '🥸', '🤩', '🥳',
+                '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '😣',
+                '😖', '😫', '😩', '🥺', '😢', '😭', '😤', '😠',
+                '😡', '🤬', '🤯', '😳', '🥵', '🥶', '😱', '😨',
+                '😰', '😥', '😓', '🤗', '🤔', '🤭', '🤫', '🤥',
+                '😶', '😐', '😑', '😬', '🙄', '😯', '😦', '😧',
+                '😮', '😲', '🥱', '😴', '🤤', '😪', '😵', '🤐',
+                '🥴', '🤢', '🤮', '🤧', '😷', '🤒', '🤕', '🤑',
+                '🤠', '😈', '👿', '👹', '👺', '🤡', '💩', '👻',
+                '💀', '☠️', '👽', '👾', '🤖', '🎃', '😺', '😸',
+                '😹', '😻', '😼', '😽', '🙀', '😿', '😾', '👋',
+                '🤚', '🖐️', '✋', '🖖', '👌', '🤌', '🤏', '✌️',
+                '🤞', '🤟', '🤘', '🤙', '👈', '👉', '👆', '👇',
+                '🖕', '👍', '👎', '✊', '👊', '🤛', '🤜', '👏',
+                '🙌', '👐', '🤲', '🤝', '🙏', '✍️', '💅', '🤳',
+                '💪', '🦾', '🦵', '🦿', '🦶', '👂', '🦻', '👃',
+                '🧠', '🦷', '🦴', '👀', '👁️', '👅', '👄', '💋',
+                '🩸', '❤️', '🧡', '💛', '💚', '💙', '💜', '🖤',
+                '🤍', '🤎', '💔', '❣️', '💕', '💞', '💓', '💗',
+                '💖', '💘', '💝', '💟', '☮️', '✝️', '☪️', '🕉️',
+                '☸️', '✡️', '🔯', '🕎', '☯️', '☦️', '🛐', '⛎',
+                '♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏',
+                '♐', '♑', '♒', '♓', '🆔', '⚛️', '🉑', '☢️',
+                '☣️', '📴', '📳', '🈶', '🈚', '🈸', '🈺', '🈷️',
+                '✴️', '🆚', '💮', '🉐', '㊙️', '㊗️', '🈴', '🈵',
+                '🈹', '🈲', '🅰️', '🅱️', '🆎', '🆑', '🅾️', '🆘',
+                '❌', '⭕', '🛑', '⛔', '📛', '🚫', '💯', '💢',
+                '♨️', '🚷', '🚯', '🚳', '🚱', '🔞', '📵', '🚭'
+            ];
+            
+            emojis.forEach(emoji => {
+                const emojiElement = document.createElement('div');
+                emojiElement.className = 'emoji-item';
+                emojiElement.textContent = emoji;
+                emojiElement.onclick = () => {
+                    const input = document.getElementById('messageInput');
+                    input.value += emoji;
+                    modal.classList.remove('open');
+                };
+                emojiGrid.appendChild(emojiElement);
+            });
+        };
+
+        window.closeEmojiPicker = () => {
+            const modal = document.getElementById('emojiPickerModal');
+            modal.classList.remove('open');
         };
 
         // Gift Box Functions
@@ -1447,17 +1901,17 @@
             // Add rewards
             const rewards = {
                 coins: 5000,
-                jewels: 10,
+                diamonds: 0.01, // Small amount of diamonds
                 randomGift: true
             };
             
             await updateDoc(doc(db, "users", auth.currentUser.uid), {
                 balance: increment(rewards.coins),
-                jewels: increment(rewards.jewels),
+                diamonds: increment(rewards.diamonds),
                 dailyGiftClaimed: true
             });
             
-            alert(`🎉 مبروك! حصلت على:\n${rewards.coins} عملة ذهبية\n${rewards.jewels} ألماس\nهدية عشوائية`);
+            alert(`🎉 مبروك! حصلت على:\n${rewards.coins} عملة ذهبية\n${rewards.diamonds} ألماس\nهدية عشوائية`);
             closeGiftBox();
         };
 
@@ -1497,14 +1951,10 @@
 
         window.openChatInfo = () => {
             if (chatPartner) {
-                alert(`معلومات الدردشة مع: ${chatPartner.displayName}`);
+                alert(`معلومات الدردشة مع: ${chatPartner.displayName}\nID: ${chatPartner.customId}`);
             } else {
                 alert('معلومات الدردشة');
             }
-        };
-
-        window.openEmojiPicker = () => {
-            alert('قريباً: منتقي الإيموجي');
         };
 
         window.confirmLogout = () => {
@@ -1517,20 +1967,26 @@
 
         // Home Page Functions
         async function loadBanner() {
-            const bDoc = await getDoc(doc(db, "appData", "banner"));
-            const container = document.getElementById('homeBanner');
-            if (bDoc.exists()) {
-                const b = bDoc.data();
-                container.innerHTML = `<div class="absolute inset-0 bg-gradient-to-r ${b.gradient} opacity-80"></div><img src="${b.image}" class="absolute inset-0 w-full h-full object-cover opacity-50 mix-blend-overlay">`;
-            } else {
-                container.innerHTML = `<div class="absolute inset-0 bg-gradient-to-r from-blue-100 to-purple-100 opacity-80"></div>`;
+            try {
+                const bDoc = await getDoc(doc(db, "appData", "banner"));
+                const container = document.getElementById('homeBanner');
+                if (bDoc.exists()) {
+                    const b = bDoc.data();
+                    container.innerHTML = `<div class="absolute inset-0 bg-gradient-to-r ${b.gradient} opacity-80"></div><img src="${b.image}" class="absolute inset-0 w-full h-full object-cover opacity-50 mix-blend-overlay">`;
+                } else {
+                    container.innerHTML = `<div class="absolute inset-0 bg-gradient-to-r from-blue-100 to-purple-100 opacity-80"></div>`;
+                }
+            } catch (error) {
+                console.error("Error loading banner:", error);
             }
         }
 
-        // Close gift box when clicking outside
-        document.getElementById('giftBoxSheet').addEventListener('click', (e) => {
-            if (e.target.id === 'giftBoxSheet') {
-                closeGiftBox();
+        // Close bottom sheets when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.bottom-sheet') && !e.target.closest('[onclick*="open"]')) {
+                document.querySelectorAll('.bottom-sheet').forEach(sheet => {
+                    sheet.classList.remove('open');
+                });
             }
         });
 
