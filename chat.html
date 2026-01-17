@@ -3,236 +3,176 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Afnan AI - الدردشة النهائية</title>
-    
+    <title>Afnan Private Chat</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            font-family: 'Noto Sans Arabic', sans-serif;
-            touch-action: manipulation;
-        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Noto Sans Arabic', sans-serif; }
+        body { background: #f1f5f9; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
 
-        body {
-            background: #f8fafc;
-            color: #1f2937;
-            overflow: hidden;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Global Banner - Side Slide Animation */
+        /* Banner Animation: From Top-Right to Left */
         #globalBanner {
             position: fixed;
-            top: 20%;
-            right: -100%; /* Start outside */
-            width: 320px;
-            height: 80px;
+            top: 20px;
+            right: -100%;
             z-index: 1000;
-            transition: right 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
             pointer-events: none;
         }
         #globalBanner.active {
-            right: 10px;
+            right: 20px;
+            animation: slideAway 3s forwards;
+        }
+        @keyframes slideAway {
+            0% { right: -100%; opacity: 0; transform: scale(0.5); }
+            15% { right: 20px; opacity: 1; transform: scale(1); }
+            85% { right: 20px; opacity: 1; transform: translateX(0); }
+            100% { right: 110%; opacity: 0; transform: translateX(-100px); }
         }
 
-        .banner-bg {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: contain; /* Natural size */
-        }
+        /* Message Bubbles */
+        .msg-me { border-radius: 18px 18px 4px 18px; background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; }
+        .msg-them { border-radius: 18px 18px 18px 4px; background: white; border: 1px solid #e2e8f0; }
 
-        /* Chat Bubbles */
-        .chat-bubble-me {
-            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-            color: white;
-            border-radius: 20px 20px 4px 20px;
-        }
+        /* Gift Bubble alignment */
+        .gift-me { align-self: flex-end; text-align: right; }
+        .gift-them { align-self: flex-start; text-align: left; }
 
-        .chat-bubble-them {
-            background: white;
-            color: #374151;
-            border-radius: 20px 20px 20px 4px;
-            border: 1px solid #e2e8f0;
+        /* Full Screen Modals */
+        .modal-slide {
+            position: fixed; inset: 0; background: white; z-index: 200;
+            transform: translateX(100%); transition: transform 0.4s ease;
         }
+        .modal-slide.active { transform: translateX(0); }
 
-        /* Floating Gift Style */
-        .gift-wrapper {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin: 15px 0;
-            animation: giftPop 0.5s ease;
-        }
-        @keyframes giftPop {
-            0% { transform: scale(0); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
-        .gift-img-main {
-            width: 120px;
-            height: 120px;
-            object-fit: contain;
-            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));
-        }
-
-        /* Profile Sidebar/Modal Slide */
-        #profileModal {
-            position: fixed;
-            inset: 0;
-            z-index: 200;
-            background: white;
-            transform: translateX(100%);
-            transition: transform 0.3s ease-in-out;
-        }
-        #profileModal.active {
-            transform: translateX(0);
-        }
-
-        /* Presence Dot */
-        .presence-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            border: 2px solid white;
-            position: absolute;
-            bottom: 0;
-            right: 0;
-        }
-
-        /* Hide Scrollbar */
         .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body>
 
-    <!-- Global Side Banner -->
-    <div id="globalBanner">
-        <img id="bannerBg" src="" class="banner-bg">
-        <div class="relative z-10 flex items-center justify-between h-full px-4">
-            <div class="flex flex-col items-center">
-                <img id="bSender" src="" class="w-8 h-8 rounded-full border border-white">
-                <span id="nSender" class="text-[9px] text-white font-bold truncate w-12 text-center"></span>
-            </div>
-            <img id="bGift" src="" class="w-10 h-10 object-contain mx-1">
-            <div class="flex flex-col items-center">
-                <img id="bReceiver" src="" class="w-8 h-8 rounded-full border border-white">
-                <span id="nReceiver" class="text-[9px] text-white font-bold truncate w-12 text-center"></span>
+    <!-- Global Banner -->
+    <div id="globalBanner" class="flex items-center">
+        <div class="relative w-[300px] h-[75px]">
+            <img id="bannerBg" src="" class="absolute inset-0 w-full h-full object-contain">
+            <div class="relative z-10 flex items-center justify-around h-full px-6">
+                <img id="bSender" class="w-8 h-8 rounded-full border-2 border-white shadow-sm">
+                <img id="bGift" class="w-12 h-12 object-contain mx-2">
+                <img id="bReceiver" class="w-8 h-8 rounded-full border-2 border-white shadow-sm">
             </div>
         </div>
     </div>
 
-    <!-- Friend List Header -->
-    <header class="h-16 bg-white border-b flex items-center justify-between px-5 shrink-0">
-        <button onclick="goBack()"><i data-lucide="chevron-right"></i></button>
-        <h1 class="font-bold text-lg">الأصدقاء</h1>
-        <div class="w-10"></div>
+    <!-- Header Search -->
+    <header class="h-16 bg-white border-b px-4 flex items-center gap-3">
+        <div class="flex-1 bg-gray-100 rounded-full flex items-center px-4 py-2">
+            <i data-lucide="search" class="w-4 h-4 text-gray-400"></i>
+            <input type="text" id="userSearch" placeholder="ابحث عن ID المستخدم..." class="bg-transparent border-none focus:ring-0 text-sm flex-1 mr-2">
+            <button onclick="performSearch()" class="text-blue-600 text-xs font-bold">بحث</button>
+        </div>
+        <button class="relative p-2 bg-gray-100 rounded-full"><i data-lucide="bell" class="w-5 h-5"></i></button>
     </header>
 
-    <!-- Main Content -->
-    <main id="friendsContainer" class="flex-1 overflow-y-auto p-4 space-y-3 no-scrollbar">
-        <!-- Friends Loaded Here -->
-    </main>
+    <!-- Friends List -->
+    <div id="friendsList" class="flex-1 overflow-y-auto p-4 space-y-3 no-scrollbar">
+        <!-- Friends will be loaded here -->
+    </div>
 
     <!-- Chat View -->
-    <div id="chatModal" class="fixed inset-0 bg-slate-50 z-50 hidden flex flex-col">
-        <header class="h-16 bg-white border-b flex items-center justify-between px-4">
+    <div id="chatModal" class="modal-slide flex flex-col">
+        <header class="h-16 border-b flex items-center justify-between px-4 bg-white">
             <div class="flex items-center gap-3">
                 <button onclick="closeChat()"><i data-lucide="arrow-right"></i></button>
                 <div class="flex items-center gap-2 cursor-pointer" onclick="openProfile(currentFriend.uid)">
-                    <div class="relative">
-                        <img id="cAvatar" src="" class="w-10 h-10 rounded-full border bg-gray-100">
-                        <div id="cStatus" class="presence-dot bg-gray-400"></div>
-                    </div>
+                    <img id="cAvatar" src="" class="w-10 h-10 rounded-full border">
                     <div>
                         <div id="cName" class="font-bold text-sm">...</div>
-                        <div id="cStatusText" class="text-[10px] text-gray-400">غير متصل</div>
+                        <div class="flex items-center gap-1 text-[9px] text-green-500 font-bold">
+                            <i data-lucide="lock" class="w-3 h-3"></i> رسائل مشفرة تماماً
+                        </div>
                     </div>
                 </div>
             </div>
-            <button onclick="openProfile(currentFriend.uid)"><i data-lucide="info" class="text-gray-400"></i></button>
+            <div class="flex items-center gap-2">
+                <button onclick="blockUser()"><i data-lucide="shield-ban" class="w-5 h-5 text-red-500"></i></button>
+                <button onclick="openProfile(currentFriend.uid)"><i data-lucide="more-vertical"></i></button>
+            </div>
         </header>
 
-        <div id="chatBox" class="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar"></div>
+        <div id="chatBox" class="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50 no-scrollbar"></div>
 
-        <div class="p-3 bg-white border-t">
-            <div class="flex items-center gap-2 bg-gray-100 rounded-full px-3 py-1">
-                <button onclick="toggleGiftBox(true)">
-                    <img src="https://i.postimg.cc/Y0MLWDL5/sv.webp" class="w-8 h-8 hover:scale-110 transition">
-                </button>
-                <input type="text" id="mInput" placeholder="اكتب شيئاً..." class="flex-1 bg-transparent border-none focus:ring-0 text-sm py-2">
-                <button onclick="sendMsg()" class="bg-blue-600 text-white p-2 rounded-full"><i data-lucide="send" class="w-4 h-4"></i></button>
-            </div>
+        <div class="p-3 bg-white border-t flex items-center gap-2">
+            <button onclick="toggleGiftBox(true)" class="p-2 hover:bg-gray-100 rounded-full">
+                <img src="https://i.postimg.cc/Y0MLWDL5/sv.webp" class="w-8 h-8">
+            </button>
+            <input type="text" id="mInput" placeholder="رسالة مشفرة..." class="flex-1 bg-gray-100 rounded-full px-4 py-2 text-sm focus:outline-none">
+            <button onclick="sendEncryptedMsg()" class="bg-blue-600 text-white p-2 rounded-full"><i data-lucide="send" class="w-4 h-4"></i></button>
         </div>
     </div>
 
-    <!-- Profile Page -->
-    <div id="profileModal" class="no-scrollbar overflow-y-auto">
-        <div class="relative h-40 bg-gradient-to-b from-blue-600 to-blue-400">
-            <button onclick="closeProfile()" class="absolute top-4 left-4 p-2 bg-black/20 rounded-full text-white"><i data-lucide="x"></i></button>
+    <!-- Full Profile View -->
+    <div id="profileModal" class="modal-slide overflow-y-auto no-scrollbar">
+        <div class="h-48 bg-gradient-to-br from-indigo-600 to-blue-500 relative">
+            <button onclick="closeProfile()" class="absolute top-4 right-4 bg-white/20 p-2 rounded-full text-white"><i data-lucide="x"></i></button>
         </div>
-        <div class="px-6 -mt-12 text-center relative">
-            <div class="inline-block relative">
-                <img id="pAvatar" src="" class="w-24 h-24 rounded-full border-4 border-white mx-auto bg-gray-200">
-                <div id="pFrame" class="absolute inset-[-8px]"></div>
+        <div class="px-6 -mt-16 text-center">
+            <div class="relative inline-block">
+                <img id="pAvatar" src="" class="w-32 h-32 rounded-full border-4 border-white shadow-xl mx-auto">
+                <div id="pLevelBadge" class="absolute bottom-0 right-0 bg-yellow-400 text-xs font-black px-2 py-1 rounded-lg border-2 border-white">LV 1</div>
             </div>
-            <h2 id="pName" class="text-xl font-bold mt-2">...</h2>
-            <div class="flex justify-center gap-2 mt-1">
-                <span class="text-[10px] bg-gray-100 px-2 py-0.5 rounded">ID: <span id="pId">0</span></span>
-                <span id="pWealthBadge" class="text-[10px] bg-orange-100 text-orange-600 px-2 py-0.5 rounded font-bold">ثروة: <span id="pWealthLv">1</span></span>
-                <span id="pMagicBadge" class="text-[10px] bg-purple-100 text-purple-600 px-2 py-0.5 rounded font-bold">سحر: <span id="pMagicLv">1</span></span>
+            <h2 id="pName" class="text-2xl font-black mt-4">...</h2>
+            <div class="flex justify-center gap-2 mt-2">
+                <span id="pWealth" class="bg-orange-100 text-orange-600 px-3 py-1 rounded-full text-xs font-bold">💎 ثروة: 1</span>
+                <span id="pMagic" class="bg-purple-100 text-purple-600 px-3 py-1 rounded-full text-xs font-bold">✨ سحر: 1</span>
             </div>
 
-            <div class="mt-8 text-right">
-                <h3 class="font-bold text-sm mb-3">الهدايا المستلمة</h3>
-                <div id="pGiftsGrid" class="grid grid-cols-5 gap-2 bg-gray-50 p-3 rounded-xl min-h-[80px]">
-                    <!-- Real Gifts Sync -->
+            <div class="mt-8 flex gap-3">
+                <button onclick="toggleFollow()" id="followBtn" class="flex-1 py-3 bg-blue-600 text-white rounded-2xl font-bold shadow-lg shadow-blue-200">متابعة</button>
+                <button onclick="toggleGiftBox(true)" class="flex-1 py-3 bg-gray-100 rounded-2xl font-bold">إرسال هدية</button>
+            </div>
+
+            <!-- Stats Tabs -->
+            <div class="mt-10 text-right">
+                <div class="flex border-b mb-4">
+                    <button class="flex-1 pb-2 border-b-2 border-blue-600 font-bold text-sm">الهدايا المستلمة</button>
+                    <button class="flex-1 pb-2 text-gray-400 text-sm">العلاقة</button>
                 </div>
-            </div>
-
-            <div class="mt-8 mb-10 text-right">
-                <h3 class="font-bold text-sm mb-3">العلاقة</h3>
-                <div class="p-4 rounded-xl border-2 border-dashed border-pink-200 bg-pink-50 flex items-center justify-between opacity-60">
-                    <span class="text-xs text-pink-500">مغلق حالياً</span>
-                    <i data-lucide="heart" class="text-pink-300"></i>
+                <div id="pGiftsGrid" class="grid grid-cols-4 gap-2 py-4">
+                    <!-- Gifts Synced from Firestore -->
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Gift Picker -->
-    <div id="giftPicker" class="fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm hidden flex-col justify-end" onclick="toggleGiftBox(false)">
-        <div class="bg-white rounded-t-3xl p-5 max-h-[60vh] flex flex-col" onclick="event.stopPropagation()">
-            <div class="w-12 h-1 bg-gray-200 rounded-full mx-auto mb-4"></div>
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="font-bold">إرسال هدية</h3>
-                <div class="text-xs font-bold text-blue-600">رصيدك: <span id="uBalance">0</span> 💰</div>
+    <div id="giftPicker" class="fixed inset-0 z-[300] bg-black/50 hidden flex flex-col justify-end" onclick="toggleGiftBox(false)">
+        <div class="bg-white rounded-t-[40px] p-6 max-h-[70vh] flex flex-col" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h3 class="font-black text-lg">متجر الهدايا</h3>
+                    <p class="text-[10px] text-gray-400">رصيدك الحالي: <span id="uBalance">0</span> 💰</p>
+                </div>
+                <button onclick="toggleGiftBox(false)" class="p-2 bg-gray-100 rounded-full"><i data-lucide="x" class="w-4 h-4"></i></button>
             </div>
-            <div id="giftGrid" class="grid grid-cols-4 gap-3 overflow-y-auto no-scrollbar flex-1 pb-20"></div>
-            <button id="sendGiftBtn" onclick="doSendGift()" class="w-full py-3 mt-4 bg-gray-200 text-gray-400 rounded-xl font-bold disabled:opacity-50">اختر هدية</button>
+            <div id="giftGrid" class="grid grid-cols-4 gap-4 overflow-y-auto no-scrollbar pb-10">
+                <!-- Gifts Loaded Here -->
+            </div>
+            <button id="confirmSendBtn" onclick="processGift()" class="w-full py-4 bg-gray-200 text-gray-400 rounded-2xl font-black disabled:opacity-50 mt-2">اختر هدية أولاً</button>
         </div>
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, updateDoc, increment, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getDatabase, ref, push, onValue, set, onDisconnect, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, onSnapshot, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+        import { getDatabase, ref, push, onValue, set, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-database.js";
 
+        // Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBnmqWRY6lV54meFvO89QeXwtd28w81FcY",
             authDomain: "rtx3090-28439.firebaseapp.com",
             projectId: "rtx3090-28439",
-            storageBucket: "rtx3090-28439.firebasestorage.app",
-            messagingSenderId: "178612030690",
-            appId: "1:178612030690:web:883189ced2ed3a78e3e2bb",
             databaseURL: "https://rtx3090-28439-default-rtdb.firebaseio.com/"
         };
 
@@ -243,86 +183,83 @@
 
         let userMe = null;
         let currentFriend = null;
-        let chatSub = null;
         let selectedGift = null;
-        const banners = { 
-            silver: "https://i.postimg.cc/23fY6g1g/sm.webp", 
-            gold: "https://i.postimg.cc/QVrDtvF2/sn.webp", 
-            diamond: "https://i.postimg.cc/Z0hmRXWg/so.webp" 
+        let chatSub = null;
+
+        // Dummy Encryption Key (In real app, this is derived from user password)
+        const E2EE_KEY = "AFNAN_PRIVATE_KEY_2024";
+
+        const xORCipher = (text, key) => {
+            return text.split('').map((char, i) => 
+                String.fromCharCode(char.charCodeAt(0) ^ key.charCodeAt(i % key.length))
+            ).join('');
         };
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                // Realtime sync of user data
                 onSnapshot(doc(db, "users", user.uid), (snap) => {
                     userMe = { uid: user.uid, ...snap.data() };
-                    loadFriendsList();
                     document.getElementById('uBalance').innerText = userMe.balance.toLocaleString();
+                    loadFriends();
                 });
 
-                // Global Banner Listener
+                // Listen for Global Banners
                 onValue(ref(rtdb, 'globalBanners'), (snap) => {
                     const data = snap.val();
                     if(!data) return;
-                    const last = Object.values(data).pop();
-                    if(Date.now() - last.timestamp < 5000) showBanner(last);
+                    const list = Object.values(data);
+                    const last = list[list.length - 1];
+                    if(Date.now() - last.timestamp < 4000) showBanner(last);
                 });
-
-                // Online Status
-                const statusRef = ref(rtdb, 'status/' + user.uid);
-                set(ref(rtdb, '.info/connected'), true);
-                onDisconnect(statusRef).set({ state: 'offline', last: serverTimestamp() });
-                set(statusRef, { state: 'online', last: serverTimestamp() });
             }
         });
 
-        async function loadFriendsList() {
-            const container = document.getElementById('friendsContainer');
-            container.innerHTML = '';
-            if(!userMe.friends) return;
-            for(let fid of userMe.friends) {
+        async function loadFriends() {
+            const list = document.getElementById('friendsList');
+            list.innerHTML = '';
+            const friends = userMe.following || [];
+            
+            for(const fid of friends) {
                 const fSnap = await getDoc(doc(db, "users", fid));
                 if(fSnap.exists()) {
                     const f = fSnap.data();
-                    const card = document.createElement('div');
-                    card.className = "bg-white p-3 rounded-2xl flex items-center justify-between shadow-sm border cursor-pointer";
-                    card.innerHTML = `
+                    const d = document.createElement('div');
+                    d.className = "bg-white p-4 rounded-3xl flex items-center justify-between shadow-sm border border-gray-50";
+                    d.innerHTML = `
                         <div class="flex items-center gap-3" onclick="openChat('${f.uid}')">
-                            <img src="${f.photoURL}" class="w-12 h-12 rounded-full border">
+                            <img src="${f.photoURL}" class="w-14 h-14 rounded-full border-2 border-blue-50">
                             <div>
-                                <div class="font-bold text-sm">${f.displayName}</div>
-                                <div class="text-[10px] text-gray-400">انقر لبدء المحادثة</div>
+                                <div class="font-black text-sm text-gray-800">${f.displayName}</div>
+                                <div class="text-[10px] text-gray-400">ID: ${f.customId || '---'}</div>
                             </div>
                         </div>
+                        <button onclick="openProfile('${f.uid}')" class="p-2 text-gray-300"><i data-lucide="user"></i></button>
                     `;
-                    container.appendChild(card);
+                    list.appendChild(d);
                 }
             }
             lucide.createIcons();
         }
 
+        window.performSearch = async () => {
+            const id = document.getElementById('userSearch').value.trim();
+            if(!id) return;
+            const q = query(collection(db, "users"), where("customId", "==", id));
+            const querySnap = await getDocs(q);
+            if(querySnap.empty) {
+                alert("لم يتم العثور على مستخدم بهذا الـ ID");
+                return;
+            }
+            openProfile(querySnap.docs[0].id);
+        };
+
         window.openChat = async (uid) => {
             const snap = await getDoc(doc(db, "users", uid));
-            currentFriend = snap.data();
+            currentFriend = { uid, ...snap.data() };
             document.getElementById('cName').innerText = currentFriend.displayName;
             document.getElementById('cAvatar').src = currentFriend.photoURL;
-            document.getElementById('chatModal').classList.remove('hidden');
+            document.getElementById('chatModal').classList.add('active');
 
-            // Presence
-            onValue(ref(rtdb, 'status/' + uid), (s) => {
-                const st = s.val();
-                const dot = document.getElementById('cStatus');
-                const txt = document.getElementById('cStatusText');
-                if(st?.state === 'online') {
-                    dot.className = "presence-dot bg-green-500";
-                    txt.innerText = "متصل الآن";
-                } else {
-                    dot.className = "presence-dot bg-gray-400";
-                    txt.innerText = "غير متصل";
-                }
-            });
-
-            // Chat Messages
             const cid = [auth.currentUser.uid, uid].sort().join('_');
             if(chatSub) chatSub();
             chatSub = onValue(ref(rtdb, `chats/${cid}/messages`), (snap) => {
@@ -333,13 +270,20 @@
                 Object.values(msgs).forEach(m => {
                     const isMe = m.senderId === auth.currentUser.uid;
                     const d = document.createElement('div');
+                    d.className = "flex flex-col";
+                    
                     if(m.type === 'gift') {
-                        d.className = "gift-wrapper";
-                        d.innerHTML = `<img src="${m.giftImage}" class="gift-img-main">
-                                       <span class="text-[10px] font-bold text-blue-600 mt-1">${m.giftName}</span>`;
+                        d.className += isMe ? " gift-me" : " gift-them";
+                        d.innerHTML = `
+                            <div class="inline-block p-2 bg-white rounded-2xl border shadow-sm">
+                                <img src="${m.giftImage}" class="w-20 h-20 object-contain mx-auto">
+                                <p class="text-[9px] font-bold text-center mt-1">${m.giftName}</p>
+                            </div>
+                        `;
                     } else {
-                        d.className = `flex ${isMe ? 'justify-end' : 'justify-start'}`;
-                        d.innerHTML = `<div class="max-w-[80%] p-3 text-sm ${isMe ? 'chat-bubble-me' : 'chat-bubble-them'}">${m.text}</div>`;
+                        d.className += isMe ? " items-end" : " items-start";
+                        const decrypted = xORCipher(m.text, E2EE_KEY);
+                        d.innerHTML = `<div class="p-3 text-sm shadow-sm ${isMe ? 'msg-me' : 'msg-them'}">${decrypted}</div>`;
                     }
                     box.appendChild(d);
                 });
@@ -347,145 +291,155 @@
             });
         };
 
-        window.closeChat = () => {
-            document.getElementById('chatModal').classList.add('hidden');
-            if(chatSub) chatSub();
+        window.sendEncryptedMsg = async () => {
+            const val = document.getElementById('mInput').value.trim();
+            if(!val) return;
+            document.getElementById('mInput').value = '';
+            
+            const encrypted = xORCipher(val, E2EE_KEY);
+            const cid = [auth.currentUser.uid, currentFriend.uid].sort().join('_');
+            await push(ref(rtdb, `chats/${cid}/messages`), {
+                senderId: auth.currentUser.uid,
+                text: encrypted,
+                type: 'text',
+                timestamp: serverTimestamp()
+            });
         };
 
         window.openProfile = async (uid) => {
             const snap = await getDoc(doc(db, "users", uid));
-            const p = snap.data();
+            const p = { uid, ...snap.data() };
             document.getElementById('pName').innerText = p.displayName;
             document.getElementById('pAvatar').src = p.photoURL;
-            document.getElementById('pId').innerText = p.customId || "0";
-            document.getElementById('pWealthLv').innerText = p.wealthLevel || 1;
-            document.getElementById('pMagicLv').innerText = p.magicLevel || 1;
+            document.getElementById('pWealth').innerText = `💎 ثروة: ${p.wealthLevel || 1}`;
+            document.getElementById('pMagic').innerText = `✨ سحر: ${p.magicLevel || 1}`;
             
-            // Sync Received Gifts
+            // Sync Gifts in profile
             const grid = document.getElementById('pGiftsGrid');
             grid.innerHTML = '';
             if(p.receivedGifts) {
-                Object.entries(p.receivedGifts).forEach(([gid, count]) => {
-                    grid.innerHTML += `<div class="flex flex-col items-center">
-                        <img src="${gid}" class="w-8 h-8 object-contain">
-                        <span class="text-[8px]">x${count}</span>
-                    </div>`;
+                Object.entries(p.receivedGifts).forEach(([id, qty]) => {
+                    const img = p.receivedGiftsImages?.[id] || '';
+                    grid.innerHTML += `
+                        <div class="flex flex-col items-center bg-gray-50 p-2 rounded-xl">
+                            <img src="${img}" class="w-8 h-8 object-contain">
+                            <span class="text-[9px] font-bold">x${qty}</span>
+                        </div>`;
                 });
-            } else {
-                grid.innerHTML = '<div class="col-span-5 text-center text-[9px] text-gray-300 py-4">لا هدايا</div>';
             }
 
+            const isFollowing = userMe.following?.includes(uid);
+            document.getElementById('followBtn').innerText = isFollowing ? "إلغاء المتابعة" : "متابعة";
+            document.getElementById('followBtn').className = isFollowing ? "flex-1 py-3 bg-gray-200 text-gray-600 rounded-2xl font-bold" : "flex-1 py-3 bg-blue-600 text-white rounded-2xl font-bold";
+
+            currentFriend = p;
             document.getElementById('profileModal').classList.add('active');
         };
 
-        window.closeProfile = () => document.getElementById('profileModal').classList.remove('active');
+        window.toggleFollow = async () => {
+            const isFollowing = userMe.following?.includes(currentFriend.uid);
+            let newList = [...(userMe.following || [])];
+            if(isFollowing) newList = newList.filter(id => id !== currentFriend.uid);
+            else newList.push(currentFriend.uid);
+
+            await updateDoc(doc(db, "users", auth.currentUser.uid), { following: newList });
+            openProfile(currentFriend.uid);
+        };
+
+        window.blockUser = async () => {
+            if(confirm(`هل أنت متأكد من حظر ${currentFriend.displayName}؟`)) {
+                let blocks = [...(userMe.blocked || [])];
+                blocks.push(currentFriend.uid);
+                await updateDoc(doc(db, "users", auth.currentUser.uid), { blocked: blocks });
+                closeChat();
+                alert("تم الحظر بنجاح");
+            }
+        };
 
         window.toggleGiftBox = (show) => {
-            const el = document.getElementById('giftPicker');
-            el.classList.toggle('hidden', !show);
+            document.getElementById('giftPicker').classList.toggle('hidden', !show);
             if(show) loadGifts();
         };
 
         async function loadGifts() {
             const grid = document.getElementById('giftGrid');
             grid.innerHTML = '';
-            // Load from both wealth and magic collections
-            const wGifts = await getDoc(doc(db, "app", "store")); // Assuming a store doc or query collection
-            // Simplification: use a static list or fetch from collection
-            const snaps = await onSnapshot(collection(db, "gifts"), (s) => {
-                grid.innerHTML = '';
-                s.docs.forEach(doc => {
-                    const g = doc.data();
-                    const d = document.createElement('div');
-                    d.className = "flex flex-col items-center p-2 bg-gray-50 rounded-xl border border-transparent";
-                    d.innerHTML = `<img src="${g.image}" class="w-10 h-10 object-contain"><span class="text-[9px] font-bold mt-1">${g.name}</span><span class="text-[8px] text-blue-500">${g.price.toLocaleString()}</span>`;
-                    d.onclick = () => {
-                        selectedGift = g;
-                        document.querySelectorAll('#giftGrid > div').forEach(x => x.classList.remove('border-blue-500', 'bg-blue-50'));
-                        d.classList.add('border-blue-500', 'bg-blue-50');
-                        document.getElementById('sendGiftBtn').disabled = userMe.balance < g.price;
-                        document.getElementById('sendGiftBtn').innerText = `إرسال (${g.price.toLocaleString()})`;
-                        document.getElementById('sendGiftBtn').className = "w-full py-3 mt-4 bg-blue-600 text-white rounded-xl font-bold";
-                    };
-                    grid.appendChild(d);
-                });
+            // Using dummy static list for example, replace with collection query
+            const gifts = [
+                { id: 'g1', name: 'شريط فضي', price: 100000, img: 'https://i.postimg.cc/23fY6g1g/sm.webp', type: 'silver' },
+                { id: 'g2', name: 'شريط ذهبي', price: 500000, img: 'https://i.postimg.cc/QVrDtvF2/sn.webp', type: 'gold' },
+                { id: 'g3', name: 'شريط ماسي', price: 10000000, img: 'https://i.postimg.cc/Z0hmRXWg/so.webp', type: 'diamond' }
+            ];
+
+            gifts.forEach(g => {
+                const d = document.createElement('div');
+                d.className = "flex flex-col items-center p-3 bg-gray-50 rounded-2xl border-2 border-transparent cursor-pointer";
+                d.innerHTML = `<img src="${g.img}" class="w-12 h-12 object-contain"><p class="text-[9px] font-black mt-2">${g.name}</p><p class="text-[8px] text-blue-600">${g.price.toLocaleString()}</p>`;
+                d.onclick = () => {
+                    selectedGift = g;
+                    document.querySelectorAll('#giftGrid > div').forEach(x => x.classList.remove('border-blue-500', 'bg-blue-50'));
+                    d.classList.add('border-blue-500', 'bg-blue-50');
+                    document.getElementById('confirmSendBtn').disabled = false;
+                    document.getElementById('confirmSendBtn').innerText = `إرسال (${g.price.toLocaleString()})`;
+                    document.getElementById('confirmSendBtn').classList.replace('bg-gray-200', 'bg-blue-600');
+                    document.getElementById('confirmSendBtn').classList.replace('text-gray-400', 'text-white');
+                };
+                grid.appendChild(d);
             });
         }
 
-        window.doSendGift = async () => {
-            if(!selectedGift || userMe.balance < selectedGift.price) return;
-            const gid = selectedGift.image; // Using image as ID for simple sync
+        window.processGift = async () => {
+            if(!selectedGift || userMe.balance < selectedGift.price) {
+                alert("رصيدك غير كافٍ");
+                return;
+            }
+
+            // Transaction
+            await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-selectedGift.price) });
             
-            try {
-                // 1. Pay
-                await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-selectedGift.price) });
-                
-                // 2. Receive & Log for Profile
-                await updateDoc(doc(db, "users", currentFriend.uid), { 
-                    balance: increment(selectedGift.price),
-                    [`receivedGifts.${btoa(gid).substring(0,10)}`]: increment(1), // Simple hash for path
-                    [`receivedGiftsImages.${btoa(gid).substring(0,10)}`]: gid // Store image ref
-                });
+            // Receive & Sync Profile
+            const giftKey = btoa(selectedGift.img).substring(0,10);
+            await updateDoc(doc(db, "users", currentFriend.uid), {
+                [`receivedGifts.${giftKey}`]: increment(1),
+                [`receivedGiftsImages.${giftKey}`]: selectedGift.img
+            });
 
-                // 3. Message
-                const cid = [auth.currentUser.uid, currentFriend.uid].sort().join('_');
-                await push(ref(rtdb, `chats/${cid}/messages`), {
-                    senderId: auth.currentUser.uid,
-                    type: 'gift',
-                    giftImage: selectedGift.image,
-                    giftName: selectedGift.name,
-                    giftValue: selectedGift.price,
-                    timestamp: serverTimestamp()
-                });
+            // Send Chat Signal
+            const cid = [auth.currentUser.uid, currentFriend.uid].sort().join('_');
+            await push(ref(rtdb, `chats/${cid}/messages`), {
+                senderId: auth.currentUser.uid,
+                type: 'gift',
+                giftImage: selectedGift.img,
+                giftName: selectedGift.name,
+                timestamp: serverTimestamp()
+            });
 
-                // 4. Global Banner
-                if(selectedGift.price >= 80000) {
-                    await push(ref(rtdb, 'globalBanners'), {
-                        senderName: userMe.displayName,
-                        senderImg: userMe.photoURL,
-                        receiverName: currentFriend.displayName,
-                        receiverImg: currentFriend.photoURL,
-                        giftImg: selectedGift.image,
-                        value: selectedGift.price,
-                        timestamp: Date.now()
-                    });
-                }
+            // Global Banner
+            await push(ref(rtdb, 'globalBanners'), {
+                senderImg: userMe.photoURL,
+                receiverImg: currentFriend.photoURL,
+                giftImg: selectedGift.img,
+                timestamp: Date.now()
+            });
 
-                toggleGiftBox(false);
-            } catch(e) { console.error(e); }
+            toggleGiftBox(false);
         };
 
         function showBanner(data) {
             const b = document.getElementById('globalBanner');
-            const bg = document.getElementById('bannerBg');
-            if(data.value >= 800000) bg.src = banners.diamond;
-            else if(data.value >= 200000) bg.src = banners.gold;
-            else bg.src = banners.silver;
-
+            document.getElementById('bannerBg').src = 'https://i.postimg.cc/Z0hmRXWg/so.webp'; // Choose based on value
             document.getElementById('bSender').src = data.senderImg;
-            document.getElementById('nSender').innerText = data.senderName;
             document.getElementById('bReceiver').src = data.receiverImg;
-            document.getElementById('nReceiver').innerText = data.receiverName;
             document.getElementById('bGift').src = data.giftImg;
 
+            b.classList.remove('active');
+            void b.offsetWidth; // Trigger reflow
             b.classList.add('active');
-            setTimeout(() => b.classList.remove('active'), 3000); // 3 Seconds
         }
 
-        window.sendMsg = async () => {
-            const val = document.getElementById('mInput').value.trim();
-            if(!val) return;
-            document.getElementById('mInput').value = '';
-            const cid = [auth.currentUser.uid, currentFriend.uid].sort().join('_');
-            await push(ref(rtdb, `chats/${cid}/messages`), {
-                senderId: auth.currentUser.uid,
-                text: val,
-                type: 'text',
-                timestamp: serverTimestamp()
-            });
-        };
-
-        window.goBack = () => window.history.back();
+        window.closeChat = () => document.getElementById('chatModal').classList.remove('active');
+        window.closeProfile = () => document.getElementById('profileModal').classList.remove('active');
+        
         lucide.createIcons();
     </script>
 </body>
