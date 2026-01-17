@@ -3,12 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Afnan AI - الدردشة</title>
+    <title>Afnan AI - الدردشة المطور</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-    
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
@@ -22,7 +20,7 @@
         body {
             background: #f0f2f5;
             color: #1f2937;
-            overflow-x: hidden;
+            overflow: hidden; /* Prevent body scroll, handle in containers */
             height: 100vh;
             display: flex;
             flex-direction: column;
@@ -36,14 +34,13 @@
             border-bottom: 1px solid rgba(0,0,0,0.05);
         }
 
-        /* Text Chat Bubbles */
+        /* Chat Bubbles - Text Only */
         .chat-bubble-me {
             background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
             color: white;
             border-radius: 20px 20px 4px 20px;
             box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2);
-            padding: 10px 16px;
-            max-width: 75%;
+            position: relative;
         }
 
         .chat-bubble-them {
@@ -52,77 +49,43 @@
             border-radius: 20px 20px 20px 4px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             border: 1px solid rgba(0,0,0,0.04);
-            padding: 10px 16px;
-            max-width: 75%;
         }
 
-        /* GIFT STYLING - NO BUBBLES */
+        /* Gift Specific Styling - Floating directly on background */
         .gift-container {
             width: 100%;
             display: flex;
             justify-content: center;
-            margin: 15px 0;
-            position: relative;
-        }
-
-        .gift-standalone {
-            background: transparent;
-            border: none;
-            box-shadow: none;
-            display: flex;
-            flex-col: column;
             align-items: center;
-            animation: giftFloat 3s ease-in-out infinite;
+            margin: 20px 0;
+            animation: floatUp 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        .gift-glow {
-            filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.6));
-        }
-
-        @keyframes giftFloat {
-            0% { transform: translateY(0px) scale(1); }
-            50% { transform: translateY(-10px) scale(1.05); }
-            100% { transform: translateY(0px) scale(1); }
-        }
-
-        /* Global Banner */
-        .global-banner {
-            position: fixed;
-            top: -150px; /* Hidden initially */
-            left: 0;
-            right: 0;
-            height: 100px;
-            z-index: 9999;
-            transition: top 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        .gift-content {
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-        
-        .global-banner.active {
-            top: 0;
+            text-align: center;
+            /* No background bubbles */
         }
 
-        .banner-content {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            width: 90%;
-            max-width: 400px;
-            padding-top: 20px; /* Adjust for image spacing */
+        .gift-image-anim {
+            width: 140px;
+            height: 140px;
+            object-fit: contain;
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.2));
+            animation: pulseGift 2s infinite ease-in-out;
         }
 
-        .banner-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            border: 2px solid #ffd700;
-            object-fit: cover;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        .gift-text {
+            color: #4b5563;
+            font-size: 12px;
+            font-weight: 700;
+            margin-top: 8px;
+            background: rgba(255,255,255,0.7);
+            padding: 4px 12px;
+            border-radius: 20px;
+            backdrop-filter: blur(4px);
         }
 
         /* Scrollbar Hide */
@@ -133,7 +96,7 @@
         .gift-box-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(4px);
             z-index: 100;
             opacity: 0;
@@ -141,10 +104,7 @@
             transition: all 0.3s ease;
         }
 
-        .gift-box-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
+        .gift-box-overlay.active { opacity: 1; visibility: visible; }
 
         .gift-box-content {
             position: absolute;
@@ -162,9 +122,7 @@
             box-shadow: 0 -10px 40px rgba(0,0,0,0.1);
         }
 
-        .gift-box-overlay.active .gift-box-content {
-            transform: translateY(0);
-        }
+        .gift-box-overlay.active .gift-box-content { transform: translateY(0); }
 
         .gift-item {
             transition: all 0.2s;
@@ -173,51 +131,103 @@
         .gift-item.selected {
             border-color: #2563eb;
             background-color: #eff6ff;
+            transform: translateY(-2px);
+        }
+
+        /* Global Banner Animation */
+        #globalBanner {
+            transform: translateY(-150%);
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        #globalBanner.active {
+            transform: translateY(0);
         }
 
         /* Profile Modal */
-        .profile-modal {
-            position: fixed;
-            inset: 0;
-            z-index: 200;
-            background: rgba(255, 255, 255, 0.95);
-            transform: translateY(100%);
+        #profileModal {
+            transform: translateX(100%);
             transition: transform 0.3s ease-in-out;
-            overflow-y: auto;
         }
-        .profile-modal.open {
-            transform: translateY(0);
+        #profileModal.active {
+            transform: translateX(0);
         }
+
+        /* Relationship Button Style */
+        .relationship-btn {
+            background: linear-gradient(90deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
+            border: 2px solid #ff758c;
+            color: #c72d4b;
+        }
+
+        /* Keyframes */
+        @keyframes floatUp {
+            0% { opacity: 0; transform: translateY(20px) scale(0.8); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes pulseGift {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        /* Status Indicator */
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            border: 2px solid white;
+            position: absolute;
+            bottom: 0;
+            right: 0;
+        }
+        .status-online { background-color: #22c55e; } /* Green */
+        .status-offline { background-color: #9ca3af; } /* Gray */
+
     </style>
 </head>
-<body class="antialiased">
-
-    <div id="globalBanner" class="global-banner">
-        <div class="banner-content relative">
-            <div class="flex flex-col items-center z-10">
-                <img id="bannerSenderImg" src="" class="banner-avatar">
-                <span id="bannerSenderName" class="text-[10px] text-white font-bold bg-black/50 px-2 rounded-full mt-1">...</span>
+<body class="antialiased bg-slate-50">
+    
+    <!-- Global Banner -->
+    <div id="globalBanner" class="fixed top-4 left-2 right-2 h-20 z-[60] rounded-2xl shadow-2xl flex items-center justify-between px-2 overflow-hidden pointer-events-none">
+        <!-- Dynamic Background Image will be set here -->
+        <img id="bannerBg" src="" class="absolute inset-0 w-full h-full object-cover z-0">
+        
+        <div class="relative z-10 flex items-center justify-between w-full px-2">
+            <!-- Sender -->
+            <div class="flex flex-col items-center">
+                <img id="bannerSenderImg" src="" class="w-10 h-10 rounded-full border-2 border-white shadow-md bg-white">
+                <span id="bannerSenderName" class="text-[10px] font-bold text-white mt-1 drop-shadow-md truncate max-w-[60px]"></span>
             </div>
-            
-            <div class="absolute inset-0 flex items-center justify-center">
-                <img id="bannerGiftImg" src="" class="w-16 h-16 object-contain drop-shadow-[0_0_10px_rgba(255,255,255,0.8)] animate-pulse">
+
+            <!-- Gift Info -->
+            <div class="flex flex-col items-center mx-2 flex-1">
+                <img id="bannerGiftImg" src="" class="w-12 h-12 object-contain drop-shadow-lg animate-bounce">
+                <div class="bg-black/30 backdrop-blur-md px-2 py-0.5 rounded-full mt-1">
+                    <span class="text-[10px] text-white font-bold">أرسل هدية فاخرة!</span>
+                </div>
             </div>
 
-            <div class="flex flex-col items-center z-10">
-                <img id="bannerReceiverImg" src="" class="banner-avatar">
-                <span id="bannerReceiverName" class="text-[10px] text-white font-bold bg-black/50 px-2 rounded-full mt-1">...</span>
+            <!-- Receiver -->
+            <div class="flex flex-col items-center">
+                <img id="bannerReceiverImg" src="" class="w-10 h-10 rounded-full border-2 border-white shadow-md bg-white">
+                <span id="bannerReceiverName" class="text-[10px] font-bold text-white mt-1 drop-shadow-md truncate max-w-[60px]"></span>
             </div>
         </div>
     </div>
-    
+
+    <!-- Friend List Header -->
     <header class="fixed top-0 left-0 right-0 h-16 bg-white z-30 px-5 flex items-center justify-between shadow-sm">
         <button onclick="goBack()" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100">
             <i data-lucide="chevron-right" class="w-6 h-6 text-gray-700"></i>
         </button>
         <h2 class="text-lg font-bold text-gray-800">قائمة الأصدقاء</h2>
-        <div class="w-10"></div>
+        <!-- Current User Avatar (Mini Profile) -->
+        <div onclick="openProfile(auth.currentUser.uid)" class="w-10 h-10 relative cursor-pointer">
+            <img id="myAvatar" src="https://via.placeholder.com/150" class="w-full h-full rounded-full object-cover border border-gray-200">
+            <!-- Frame would go here -->
+        </div>
     </header>
 
+    <!-- Main List Content -->
     <main class="pt-20 px-5 pb-6 flex-1 overflow-y-auto">
         <div class="relative mb-6">
             <input type="text" id="searchFriendsInput" placeholder="ابحث عن صديق..." 
@@ -237,48 +247,135 @@
         </div>
     </main>
 
-    <div id="chatModal" class="fixed inset-0 z-40 hidden flex flex-col bg-[#f8fafc]">
+    <!-- Chat Modal -->
+    <div id="chatModal" class="fixed inset-0 z-40 hidden flex flex-col bg-[#f0f2f5]">
+        <!-- Background Pattern -->
+        <div class="absolute inset-0 opacity-10 pointer-events-none" 
+             style="background-image: radial-gradient(#64748b 1px, transparent 1px); background-size: 20px 20px;"></div>
+
         <header class="h-16 glass px-4 flex items-center justify-between z-20 shadow-sm relative">
             <div class="flex items-center gap-3">
                 <button onclick="closeChat()" class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-100 transition">
                     <i data-lucide="chevron-right" class="w-6 h-6 text-gray-700"></i>
                 </button>
-                <div class="flex items-center gap-2.5 cursor-pointer" onclick="openUserProfile(currentFriend.uid)">
+                <div class="flex items-center gap-2.5 cursor-pointer" onclick="openProfile(currentFriend.uid)">
                     <div class="relative">
-                        <img id="chatUserAvatar" src="" class="w-9 h-9 rounded-full object-cover border border-gray-200">
-                        <div id="onlineStatusIndicator" class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-gray-400 border-2 border-white rounded-full"></div>
+                        <img id="chatUserAvatar" src="" class="w-10 h-10 rounded-full object-cover border border-gray-200 bg-white">
+                        <div id="chatUserStatus" class="status-dot status-offline"></div>
                     </div>
                     <div class="flex flex-col">
                         <h4 id="chatUserName" class="font-bold text-sm text-gray-900 leading-tight">...</h4>
-                        <span id="chatUserStatus" class="text-[10px] text-gray-500 font-medium">غير متصل</span>
+                        <span id="chatUserStatusText" class="text-[10px] text-gray-500 font-medium">غير متصل</span>
                     </div>
                 </div>
             </div>
+            <!-- Settings or Menu could go here -->
             <div class="w-10"></div>
         </header>
         
-        <div id="chatMessages" class="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar relative z-10 scroll-smooth bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-fixed">
-            </div>
+        <div id="chatMessages" class="flex-1 overflow-y-auto p-4 no-scrollbar relative z-10 scroll-smooth">
+            <!-- Messages will be injected here -->
+        </div>
         
+        <!-- Input Area -->
         <div class="p-4 relative z-20 bg-white border-t border-gray-100">
-            <div class="bg-gray-100 rounded-[24px] p-1.5 flex items-center gap-2 border border-gray-200">
-                
-                <button onclick="toggleGiftBox(true)" class="w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-full hover:bg-gray-200 transition">
-                    <img src="https://i.postimg.cc/Y0MLWDL5/sv.webp" class="w-8 h-8 object-contain">
+            <div class="bg-gray-100 rounded-[24px] p-2 flex items-center gap-2">
+                <!-- Gift Icon INSIDE the input bar as requested -->
+                <button onclick="toggleGiftBox(true)" class="w-10 h-10 rounded-full flex items-center justify-center transition hover:scale-105 active:scale-95 shrink-0">
+                    <img src="https://i.postimg.cc/Y0MLWDL5/sv.webp" class="w-8 h-8 object-contain" alt="Gift">
                 </button>
 
                 <input type="text" id="chatInput" placeholder="اكتب رسالة..." 
-                       class="flex-1 bg-transparent border-none focus:ring-0 text-sm text-gray-800 placeholder-gray-500 h-10 px-2"
+                       class="flex-1 bg-transparent border-none focus:ring-0 text-sm text-gray-800 placeholder-gray-400 px-2 h-10"
                        autocomplete="off"
                        onkeypress="handleKeyPress(event)">
                 
-                <button onclick="sendMessage()" class="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center shadow-lg hover:bg-gray-800 transition active:scale-95">
-                    <i data-lucide="send" class="w-4 h-4 ml-0.5"></i>
+                <button onclick="sendMessage()" class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-md hover:bg-blue-700 transition active:scale-95 shrink-0">
+                    <i data-lucide="send" class="w-5 h-5 ml-0.5"></i>
                 </button>
             </div>
         </div>
     </div>
 
+    <!-- Full Page Profile Modal -->
+    <div id="profileModal" class="fixed inset-0 z-50 bg-white flex flex-col overflow-y-auto">
+        <!-- Close Button -->
+        <button onclick="closeProfile()" class="absolute top-4 left-4 z-20 w-10 h-10 bg-black/20 backdrop-blur-md rounded-full flex items-center justify-center text-white">
+            <i data-lucide="x" class="w-6 h-6"></i>
+        </button>
+
+        <!-- Header Image & Avatar -->
+        <div class="relative h-48 bg-gradient-to-r from-blue-500 to-indigo-600">
+            <div class="absolute -bottom-12 right-1/2 transform translate-x-1/2">
+                <div class="relative">
+                    <img id="profileAvatar" src="" class="w-24 h-24 rounded-full border-4 border-white object-cover bg-gray-200">
+                    <!-- Frame Container -->
+                    <div id="profileFrame" class="absolute inset-[-10px] pointer-events-none">
+                        <!-- Frame Image gets injected here if exists -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Info -->
+        <div class="mt-14 px-6 text-center">
+            <h2 id="profileName" class="text-xl font-bold text-gray-900">User Name</h2>
+            <div class="flex items-center justify-center gap-2 mt-1">
+                <span class="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-md">ID: <span id="profileId">123456</span></span>
+                <span class="text-xs text-white bg-gradient-to-r from-yellow-400 to-orange-500 px-2 py-0.5 rounded-md font-bold">Lv. <span id="profileLevel">1</span></span>
+            </div>
+            
+            <p id="profileBio" class="text-sm text-gray-600 mt-4 leading-relaxed">
+                مرحباً! أنا أستخدم تطبيق أفنان للدردشة.
+            </p>
+
+            <div class="grid grid-cols-3 gap-4 mt-6">
+                <div class="bg-gray-50 p-3 rounded-xl">
+                    <div class="text-lg font-bold text-gray-800" id="statFriends">0</div>
+                    <div class="text-[10px] text-gray-400">صديق</div>
+                </div>
+                <div class="bg-gray-50 p-3 rounded-xl">
+                    <div class="text-lg font-bold text-gray-800" id="statSent">0</div>
+                    <div class="text-[10px] text-gray-400">أرسل</div>
+                </div>
+                <div class="bg-gray-50 p-3 rounded-xl">
+                    <div class="text-lg font-bold text-gray-800" id="statReceived">0</div>
+                    <div class="text-[10px] text-gray-400">استلم</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Received Gifts -->
+        <div class="px-6 mt-8">
+            <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <i data-lucide="gift" class="w-5 h-5 text-blue-500"></i> الهدايا المستلمة
+            </h3>
+            <div id="profileGiftsGrid" class="grid grid-cols-4 gap-3 bg-gray-50 p-4 rounded-2xl min-h-[100px]">
+                <!-- Injected Gifts -->
+            </div>
+        </div>
+
+        <!-- Relationship Section -->
+        <div class="px-6 mt-8 mb-10">
+            <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <i data-lucide="heart" class="w-5 h-5 text-pink-500"></i> الحالة العاطفية
+            </h3>
+            <button class="w-full relationship-btn py-4 rounded-2xl flex items-center justify-between px-6 opacity-80 cursor-not-allowed relative overflow-hidden">
+                <div class="flex items-center gap-3 relative z-10">
+                    <div class="w-10 h-10 bg-white/30 rounded-full flex items-center justify-center">
+                        <i data-lucide="lock" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-bold text-white">علاقة حميمة</div>
+                        <div class="text-[10px] text-white/80">ميزة غير مفعلة حالياً</div>
+                    </div>
+                </div>
+                <i data-lucide="heart-handshake" class="w-12 h-12 text-white/20 absolute -left-2 -bottom-2 rotate-12"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Gift Box Overlay -->
     <div id="giftBoxOverlay" class="gift-box-overlay" onclick="handleOverlayClick(event)">
         <div class="gift-box-content">
             <div class="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-6"></div>
@@ -306,64 +403,13 @@
         </div>
     </div>
 
-    <div id="userProfileModal" class="profile-modal">
-        <div class="relative min-h-full">
-            <button onclick="closeUserProfile()" class="absolute top-4 right-4 z-10 w-10 h-10 bg-black/20 text-white rounded-full flex items-center justify-center backdrop-blur-md">
-                <i data-lucide="x" class="w-5 h-5"></i>
-            </button>
-
-            <div class="h-48 bg-gradient-to-br from-blue-600 to-purple-700 relative">
-                <div class="absolute -bottom-16 left-1/2 transform -translate-x-1/2">
-                    <img id="profileAvatar" src="" class="w-32 h-32 rounded-full border-4 border-white shadow-xl object-cover">
-                </div>
-            </div>
-
-            <div class="pt-20 px-6 text-center pb-8">
-                <h2 id="profileName" class="text-2xl font-bold text-gray-900">...</h2>
-                <p id="profileId" class="text-sm text-gray-400 mt-1">ID: ...</p>
-                
-                <div class="flex justify-center gap-4 mt-6">
-                    <div class="bg-yellow-50 px-4 py-2 rounded-xl border border-yellow-100">
-                        <p class="text-[10px] text-yellow-600 font-bold">مستوى الثروة</p>
-                        <p id="profileWealthLvl" class="text-xl font-black text-yellow-700">LV.0</p>
-                    </div>
-                    <div class="bg-purple-50 px-4 py-2 rounded-xl border border-purple-100">
-                        <p class="text-[10px] text-purple-600 font-bold">مستوى السحر</p>
-                        <p id="profileMagicLvl" class="text-xl font-black text-purple-700">LV.0</p>
-                    </div>
-                </div>
-
-                <hr class="my-6 border-gray-100">
-
-                <div class="text-right mb-6">
-                    <h3 class="font-bold text-gray-800 mb-3 flex items-center gap-2">
-                        <i data-lucide="gift" class="w-4 h-4"></i> الهدايا المستلمة
-                    </h3>
-                    <div id="profileGiftsGrid" class="grid grid-cols-5 gap-2">
-                        <div class="col-span-5 text-center text-gray-300 text-xs py-4">جاري التحميل...</div>
-                    </div>
-                </div>
-
-                <div class="mt-8 mb-8">
-                     <div class="bg-pink-50 rounded-2xl p-4 border border-pink-100 opacity-60 grayscale">
-                        <div class="flex items-center gap-2 mb-2">
-                            <i data-lucide="heart" class="w-4 h-4 text-pink-500"></i>
-                            <h3 class="font-bold text-gray-700 text-sm">العلاقات (CV)</h3>
-                        </div>
-                        <p class="text-xs text-gray-400">خاصية قادمة قريباً</p>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </div>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, getDocs, collection, updateDoc, increment, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getDatabase, ref, push, onValue, set, onDisconnect, serverTimestamp, query, limitToLast, orderByChild } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getFirestore, doc, getDoc, getDocs, collection, updateDoc, increment, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getDatabase, ref, push, onValue, serverTimestamp, set, onDisconnect } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+        // CONFIGURATION
         const firebaseConfig = {
             apiKey: "AIzaSyBnmqWRY6lV54meFvO89QeXwtd28w81FcY",
             authDomain: "rtx3090-28439.firebaseapp.com",
@@ -374,38 +420,49 @@
             databaseURL: "https://rtx3090-28439-default-rtdb.firebaseio.com/"
         };
 
+        // INITIALIZATION
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
         const rtdb = getDatabase(app);
 
+        // GLOBAL VARS
         let userData = {};
         let currentFriend = null;
         let chatUnsubscribe = null;
         let presenceUnsubscribe = null;
         let storeData = { gifts: [], luckGifts: [] };
         let selectedGift = null;
+        
+        // BANNER IMAGES (Backgrounds)
+        const BANNER_IMGS = {
+            silver: "https://i.postimg.cc/23fY6g1g/sm.webp",
+            gold: "https://i.postimg.cc/QVrDtvF2/sn.webp",
+            diamond: "https://i.postimg.cc/Z0hmRXWg/so.webp"
+        };
 
-        // --- Auth & Presence System ---
+        // --- AUTH & PRESENCE ---
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                // 1. Fetch User Data
+                // Fetch User Data
                 const userSnap = await getDoc(doc(db, "users", user.uid));
                 if (userSnap.exists()) {
                     userData = userSnap.data();
+                    document.getElementById('myAvatar').src = userData.photoURL || 'https://via.placeholder.com/150';
                     loadFriends();
                     loadGifts();
-                    initGlobalBroadcastListener(); // Start listening for banners
+                    initGlobalBannerListener();
                     
-                    // 2. Setup Realtime Presence
+                    // Setup Real Presence
                     const connectedRef = ref(rtdb, ".info/connected");
                     const myStatusRef = ref(rtdb, "status/" + user.uid);
                     
                     onValue(connectedRef, (snap) => {
                         if (snap.val() === true) {
-                            onDisconnect(myStatusRef).set({ state: 'offline', last_changed: serverTimestamp() }).then(() => {
-                                set(myStatusRef, { state: 'online', last_changed: serverTimestamp() });
-                            });
+                            onDisconnect(myStatusRef).set({ state: 'offline', lastChanged: serverTimestamp() })
+                                .then(() => {
+                                    set(myStatusRef, { state: 'online', lastChanged: serverTimestamp() });
+                                });
                         }
                     });
                 }
@@ -414,36 +471,64 @@
             }
         });
 
-        // --- Data Loading ---
+        // --- FRIENDS & LIST ---
         async function loadFriends() {
             const list = document.getElementById('friendsList');
+            const noFriends = document.getElementById('noFriendsMessage');
+            
             if (!userData.friends || userData.friends.length === 0) {
-                list.innerHTML = '';
-                document.getElementById('noFriendsMessage').classList.remove('hidden');
+                list.classList.add('hidden');
+                noFriends.classList.remove('hidden');
                 return;
             }
             
+            list.classList.remove('hidden');
+            noFriends.classList.add('hidden');
             list.innerHTML = '';
-            document.getElementById('noFriendsMessage').classList.add('hidden');
             
             for (const uid of userData.friends) {
+                // Fetch basic friend info
                 const snap = await getDoc(doc(db, "users", uid));
                 if (snap.exists()) {
                     const friend = snap.data();
-                    // Just simple markup, we load status when opening chat to save bandwidth or could load here
-                    list.innerHTML += `
-                        <div onclick="openChat('${friend.uid}')" class="bg-white p-4 rounded-2xl flex items-center justify-between cursor-pointer shadow-sm border border-gray-100 hover:bg-gray-50 transition active:scale-[0.98]">
-                            <div class="flex items-center gap-3">
-                                <img src="${friend.photoURL || 'https://via.placeholder.com/150'}" class="w-12 h-12 rounded-full object-cover bg-gray-100">
-                                <div>
-                                    <h4 class="font-bold text-sm text-gray-900">${friend.displayName}</h4>
-                                    <p class="text-xs text-gray-400">@${friend.customId || 'user'}</p>
-                                </div>
+                    
+                    // Create element
+                    const el = document.createElement('div');
+                    el.className = "bg-white p-4 rounded-2xl flex items-center justify-between shadow-sm border border-gray-100 hover:bg-gray-50 transition active:scale-[0.98]";
+                    el.innerHTML = `
+                        <div class="flex items-center gap-3 flex-1" onclick="openChat('${friend.uid}')">
+                            <div class="relative">
+                                <img src="${friend.photoURL || 'https://via.placeholder.com/150'}" class="w-12 h-12 rounded-full object-cover bg-gray-100 border border-gray-200">
+                                <div id="status-${friend.uid}" class="status-dot status-offline border-white"></div>
                             </div>
-                            <div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
-                                <i data-lucide="message-circle" class="w-4 h-4"></i>
+                            <div>
+                                <h4 class="font-bold text-sm text-gray-900">${friend.displayName}</h4>
+                                <p class="text-xs text-gray-400">@${friend.customId || 'user'}</p>
                             </div>
-                        </div>`;
+                        </div>
+                        <div class="flex gap-2">
+                             <button onclick="openProfile('${friend.uid}')" class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-500 hover:text-blue-600">
+                                <i data-lucide="user" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    `;
+                    list.appendChild(el);
+
+                    // Listen for this friend's status
+                    const friendStatusRef = ref(rtdb, 'status/' + friend.uid);
+                    onValue(friendStatusRef, (statusSnap) => {
+                        const val = statusSnap.val();
+                        const statusDot = document.getElementById(`status-${friend.uid}`);
+                        if(statusDot) {
+                            if (val && val.state === 'online') {
+                                statusDot.classList.remove('status-offline');
+                                statusDot.classList.add('status-online');
+                            } else {
+                                statusDot.classList.remove('status-online');
+                                statusDot.classList.add('status-offline');
+                            }
+                        }
+                    });
                 }
             }
             lucide.createIcons();
@@ -451,42 +536,89 @@
 
         async function loadGifts() {
             try {
-                const giftsSnap = await getDocs(collection(db, "gifts"));
-                storeData.gifts = giftsSnap.docs.map(d => ({id: d.id, ...d.data(), type: 'wealth'}));
-                const luckSnap = await getDocs(collection(db, "luckGifts"));
-                storeData.luckGifts = luckSnap.docs.map(d => ({id: d.id, ...d.data(), type: 'magic'}));
-            } catch (e) { console.error(e); }
+                // Only load if not loaded
+                if (storeData.gifts.length === 0) {
+                    const giftsSnap = await getDocs(collection(db, "gifts"));
+                    storeData.gifts = giftsSnap.docs.map(d => ({id: d.id, ...d.data(), type: 'wealth'}));
+                    const luckSnap = await getDocs(collection(db, "luckGifts"));
+                    storeData.luckGifts = luckSnap.docs.map(d => ({id: d.id, ...d.data(), type: 'magic'}));
+                }
+            } catch (error) { console.error('Error loading gifts', error); }
         }
 
-        // --- Chat & Presence Logic ---
+        // --- GLOBAL BANNER LOGIC ---
+        function initGlobalBannerListener() {
+            // Listen to last child added to 'globalBanners' node
+            const bannersRef = ref(rtdb, 'globalBanners');
+            onValue(bannersRef, (snapshot) => {
+                const data = snapshot.val();
+                if (!data) return;
+                
+                // Get the latest banner key
+                const keys = Object.keys(data);
+                const latestKey = keys[keys.length - 1];
+                const bannerData = data[latestKey];
+                
+                // Check if this banner is recent (within last 10 seconds) to avoid spam on load
+                if (Date.now() - bannerData.timestamp < 10000) {
+                    showGlobalBanner(bannerData);
+                }
+            });
+        }
+
+        function showGlobalBanner(data) {
+            const banner = document.getElementById('globalBanner');
+            const bg = document.getElementById('bannerBg');
+            
+            // Set Background based on price tiers
+            if (data.value >= 500000) bg.src = BANNER_IMGS.diamond;
+            else if (data.value >= 150000) bg.src = BANNER_IMGS.gold;
+            else bg.src = BANNER_IMGS.silver;
+
+            // Set Content
+            document.getElementById('bannerSenderImg').src = data.senderImg;
+            document.getElementById('bannerSenderName').innerText = data.senderName;
+            document.getElementById('bannerGiftImg').src = data.giftImg;
+            document.getElementById('bannerReceiverImg').src = data.receiverImg;
+            document.getElementById('bannerReceiverName').innerText = data.receiverName;
+
+            // Animate
+            banner.classList.add('active');
+            
+            // Hide after 6 seconds
+            setTimeout(() => {
+                banner.classList.remove('active');
+            }, 6000);
+        }
+
+        // --- CHAT LOGIC ---
         window.openChat = async (uid) => {
             const snap = await getDoc(doc(db, "users", uid));
             if (!snap.exists()) return;
             
             currentFriend = snap.data();
             
-            // UI
+            // UI Update
             document.getElementById('chatUserName').innerText = currentFriend.displayName;
             document.getElementById('chatUserAvatar').src = currentFriend.photoURL || 'https://via.placeholder.com/150';
             document.getElementById('chatModal').classList.remove('hidden');
             
-            // Monitor Friend Status
-            const friendStatusRef = ref(rtdb, "status/" + uid);
+            // Listen for specific friend presence in chat header
             if(presenceUnsubscribe) presenceUnsubscribe();
-            
-            presenceUnsubscribe = onValue(friendStatusRef, (snap) => {
-                const status = snap.val();
-                const statusEl = document.getElementById('chatUserStatus');
-                const dotEl = document.getElementById('onlineStatusIndicator');
+            const statusRef = ref(rtdb, 'status/' + uid);
+            presenceUnsubscribe = onValue(statusRef, (s) => {
+                const val = s.val();
+                const statusDot = document.getElementById('chatUserStatus');
+                const statusText = document.getElementById('chatUserStatusText');
                 
-                if(status && status.state === 'online') {
-                    statusEl.innerText = 'نشط الآن';
-                    statusEl.className = 'text-[10px] text-green-600 font-bold';
-                    dotEl.className = 'absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white rounded-full';
+                if (val && val.state === 'online') {
+                    statusDot.className = "status-dot status-online";
+                    statusText.innerText = "متصل الآن";
+                    statusText.className = "text-[10px] text-green-600 font-medium";
                 } else {
-                    statusEl.innerText = 'غير نشط';
-                    statusEl.className = 'text-[10px] text-gray-400';
-                    dotEl.className = 'absolute bottom-0 right-0 w-2.5 h-2.5 bg-gray-400 border-2 border-white rounded-full';
+                    statusDot.className = "status-dot status-offline";
+                    statusText.innerText = "غير متصل";
+                    statusText.className = "text-[10px] text-gray-400 font-medium";
                 }
             });
 
@@ -507,39 +639,44 @@
             container.innerHTML = '';
             
             if (!messages) {
-                container.innerHTML = `<div class="text-center mt-10 opacity-50"><p class="text-sm">لا توجد رسائل سابقة</p></div>`;
+                container.innerHTML = `<div class="text-center mt-20 opacity-40"><p class="text-sm">ابدأ المحادثة الآن 👋</p></div>`;
                 return;
             }
 
+            // Create fragment for performance
+            const fragment = document.createDocumentFragment();
+
             Object.values(messages).sort((a, b) => a.timestamp - b.timestamp).forEach(msg => {
                 const isMe = msg.senderId === auth.currentUser.uid;
-                
+                const div = document.createElement('div');
+                div.className = `w-full flex ${isMe ? 'justify-end' : 'justify-start'} mb-4`;
+
                 if (msg.type === 'gift') {
-                    // Gift without bubble, direct on background
-                    container.innerHTML += `
-                        <div class="gift-container">
-                            <div class="gift-standalone">
-                                <img src="${msg.giftImage}" class="w-32 h-32 object-contain gift-glow">
-                                <div class="bg-black/40 backdrop-blur-sm px-3 py-1 rounded-full mt-2">
-                                    <p class="text-[10px] text-white font-bold">
-                                        ${isMe ? 'أرسلت' : 'أرسل لك'}: ${msg.giftName}
-                                    </p>
-                                </div>
+                    // NEW GIFT STYLE: Floating directly on background, no bubble
+                    div.className = "gift-container"; // Center it
+                    div.innerHTML = `
+                        <div class="gift-content">
+                            <img src="${msg.giftImage}" class="gift-image-anim" alt="Gift">
+                            <div class="gift-text">
+                                ${isMe ? 'أرسلت' : 'أرسل'} ${msg.giftName}
+                                <span class="text-yellow-500 block text-[9px]">(${parseInt(msg.giftValue).toLocaleString()})</span>
                             </div>
-                        </div>`;
+                        </div>
+                    `;
                 } else {
                     // Regular Text
-                    container.innerHTML += `
-                        <div class="flex w-full ${isMe ? 'justify-end' : 'justify-start'}">
-                            <div class="${isMe ? 'chat-bubble-me' : 'chat-bubble-them'} text-sm font-medium leading-relaxed">
-                                ${msg.text}
-                                <div class="text-[9px] opacity-60 mt-1 text-right dir-ltr">${new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
-                            </div>
-                        </div>`;
+                    div.innerHTML = `
+                        <div class="max-w-[75%] px-4 py-2.5 text-sm font-medium leading-relaxed ${isMe ? 'chat-bubble-me' : 'chat-bubble-them'}">
+                            ${msg.text}
+                            <div class="text-[9px] opacity-60 mt-1 text-right dir-ltr">${new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+                        </div>
+                    `;
                 }
+                fragment.appendChild(div);
             });
             
-            setTimeout(() => { container.scrollTop = container.scrollHeight; }, 100);
+            container.appendChild(fragment);
+            setTimeout(() => { container.scrollTop = container.scrollHeight; }, 50);
         }
 
         window.sendMessage = async () => {
@@ -550,17 +687,21 @@
             input.value = '';
             input.focus();
 
-            const chatId = [auth.currentUser.uid, currentFriend.uid].sort().join('_');
-            await push(ref(rtdb, `chats/${chatId}/messages`), {
-                senderId: auth.currentUser.uid,
-                receiverId: currentFriend.uid,
-                text: text,
-                type: 'text',
-                timestamp: Date.now()
-            });
+            try {
+                const chatId = [auth.currentUser.uid, currentFriend.uid].sort().join('_');
+                await push(ref(rtdb, `chats/${chatId}/messages`), {
+                    senderId: auth.currentUser.uid,
+                    receiverId: currentFriend.uid,
+                    text: text,
+                    type: 'text',
+                    timestamp: serverTimestamp()
+                });
+            } catch (e) { console.error(e); }
         };
-        
-        window.handleKeyPress = (e) => { if (e.key === 'Enter') sendMessage(); };
+
+        window.handleKeyPress = (e) => {
+            if (e.key === 'Enter') sendMessage();
+        };
 
         window.closeChat = () => {
             document.getElementById('chatModal').classList.add('hidden');
@@ -569,55 +710,65 @@
             currentFriend = null;
         };
 
-        // --- Gift System & Global Banner ---
-        
-        // Listener for Global Broadcasts (Runs everywhere)
-        function initGlobalBroadcastListener() {
-            const broadcastRef = query(ref(rtdb, 'global_broadcasts'), limitToLast(1));
+        // --- PROFILE LOGIC ---
+        window.openProfile = async (uid) => {
+            const modal = document.getElementById('profileModal');
             
-            onValue(broadcastRef, (snapshot) => {
-                const data = snapshot.val();
-                if(!data) return;
-                
-                const key = Object.keys(data)[0];
-                const broadcast = data[key];
-                
-                // Only show if recent (within 10 seconds) to avoid spam on page load
-                if (Date.now() - broadcast.timestamp < 10000) {
-                    showGlobalBanner(broadcast);
-                }
-            });
-        }
+            // 1. Fetch User Data
+            const userRef = doc(db, "users", uid);
+            const userSnap = await getDoc(userRef);
+            
+            if (!userSnap.exists()) return alert('المستخدم غير موجود');
+            const pData = userSnap.data();
 
-        function showGlobalBanner(data) {
-            const banner = document.getElementById('globalBanner');
+            // 2. Populate UI
+            document.getElementById('profileAvatar').src = pData.photoURL || 'https://via.placeholder.com/150';
+            document.getElementById('profileName').innerText = pData.displayName || 'مستخدم';
+            document.getElementById('profileId').innerText = pData.customId || pData.uid.substring(0, 6);
+            document.getElementById('profileLevel').innerText = pData.level || 1; // Assuming you have level field
+            document.getElementById('profileBio').innerText = pData.bio || "لا يوجد وصف متاح.";
             
-            // Set Background based on logic (Images provided)
-            let bgUrl = '';
-            const val = parseInt(data.value);
-            
-            if (val >= 300000) bgUrl = 'https://i.postimg.cc/Z0hmRXWg/so.webp';
-            else if (val >= 150000) bgUrl = 'https://i.postimg.cc/QVrDtvF2/sn.webp';
-            else bgUrl = 'https://i.postimg.cc/23fY6g1g/sm.webp';
+            // Frame Logic (Example)
+            const frameContainer = document.getElementById('profileFrame');
+            frameContainer.innerHTML = '';
+            if (pData.activeFrame) {
+                frameContainer.innerHTML = `<img src="${pData.activeFrame}" class="w-full h-full object-contain">`;
+            }
 
-            banner.style.backgroundImage = `url('${bgUrl}')`;
-            
-            // Set Content
-            document.getElementById('bannerSenderImg').src = data.senderImg;
-            document.getElementById('bannerSenderName').innerText = data.senderName;
-            document.getElementById('bannerGiftImg').src = data.giftImg;
-            document.getElementById('bannerReceiverImg').src = data.receiverImg;
-            document.getElementById('bannerReceiverName').innerText = data.receiverName;
+            // Stats (Mock or Real)
+            document.getElementById('statFriends').innerText = pData.friends ? pData.friends.length : 0;
+            // For sent/received counts, you'd usually query a subcollection. 
+            // Here we use placeholders or simple fields if you added them to user doc.
+            document.getElementById('statSent').innerText = pData.giftsSentCount || 0;
+            document.getElementById('statReceived').innerText = pData.giftsReceivedCount || 0;
 
-            // Animate
-            banner.classList.add('active');
+            // 3. Load Received Gifts (Visual only for now based on logic)
+            // Ideally query "users/{uid}/receivedGifts"
+            const giftsGrid = document.getElementById('profileGiftsGrid');
+            giftsGrid.innerHTML = '';
             
-            // Hide after 6 seconds
-            setTimeout(() => {
-                banner.classList.remove('active');
-            }, 6000);
-        }
+            // Mocking display: If user has 'receivedGifts' array in DB
+            if (pData.receivedGiftsLog && pData.receivedGiftsLog.length > 0) {
+                 pData.receivedGiftsLog.slice(0, 8).forEach(g => {
+                     giftsGrid.innerHTML += `
+                        <div class="flex flex-col items-center">
+                            <img src="${g.image}" class="w-10 h-10 object-contain">
+                            <span class="text-[8px] mt-1 text-gray-500">x${g.count || 1}</span>
+                        </div>
+                     `;
+                 });
+            } else {
+                giftsGrid.innerHTML = `<div class="col-span-4 text-center text-xs text-gray-400 py-4">لا توجد هدايا مستلمة بعد</div>`;
+            }
 
+            modal.classList.add('active');
+        };
+
+        window.closeProfile = () => {
+            document.getElementById('profileModal').classList.remove('active');
+        };
+
+        // --- GIFT LOGIC ---
         window.toggleGiftBox = (show) => {
             const overlay = document.getElementById('giftBoxOverlay');
             if (show) {
@@ -627,7 +778,10 @@
                 document.getElementById('giftWalletBalance').innerText = userData.balance.toLocaleString();
             } else {
                 overlay.classList.remove('active');
-                setTimeout(() => { selectedGift = null; updateSendButton(); }, 300);
+                setTimeout(() => {
+                    selectedGift = null;
+                    updateSendButton();
+                }, 300);
             }
         };
 
@@ -636,34 +790,39 @@
         };
 
         window.switchGiftTab = (type) => {
+            const wealthTab = document.getElementById('tab-wealth');
+            const magicTab = document.getElementById('tab-magic');
+            
+            if (type === 'wealth') {
+                wealthTab.className = "px-4 py-1.5 rounded-lg text-xs font-bold bg-white shadow-sm text-black border border-gray-100";
+                magicTab.className = "px-4 py-1.5 rounded-lg text-xs font-bold text-gray-400 hover:text-gray-600";
+            } else {
+                wealthTab.className = "px-4 py-1.5 rounded-lg text-xs font-bold text-gray-400 hover:text-gray-600";
+                magicTab.className = "px-4 py-1.5 rounded-lg text-xs font-bold bg-white shadow-sm text-black border border-gray-100";
+            }
+
             const grid = document.getElementById('giftGrid');
             const gifts = type === 'wealth' ? storeData.gifts : storeData.luckGifts;
-            const level = type === 'wealth' ? (userData.wealthLevel || 1) : (userData.magicLevel || 1);
             
-            // Visual Toggle
-            document.getElementById('tab-wealth').className = type === 'wealth' ? "px-4 py-1.5 rounded-lg text-xs font-bold bg-white shadow-sm text-black" : "px-4 py-1.5 rounded-lg text-xs font-bold text-gray-400";
-            document.getElementById('tab-magic').className = type === 'magic' ? "px-4 py-1.5 rounded-lg text-xs font-bold bg-white shadow-sm text-black" : "px-4 py-1.5 rounded-lg text-xs font-bold text-gray-400";
-
             grid.innerHTML = '';
             
             gifts.forEach(gift => {
-                // Calculate Price Logic (Simplified from prev code)
-                let val = 0;
-                if(type === 'wealth') val = level <= 5 ? [50000, 100000, 150000, 225000, 337500][level-1] : 50000 * Math.pow(1.5, level-1);
-                else val = level <= 5 ? [20000, 40000, 60000, 100000, 150000][level-1] : 20000 * level;
+                // Use dynamic pricing from Firebase object directly
+                const price = gift.price || (type === 'wealth' ? 50000 : 20000); // Fallback if missing
 
                 grid.innerHTML += `
-                    <div onclick="selectGift('${gift.id}', '${type}', ${val}, this)" 
-                         class="gift-item bg-gray-50 rounded-2xl p-2 flex flex-col items-center cursor-pointer hover:bg-gray-100">
-                        <img src="${gift.image}" class="w-10 h-10 object-contain mb-2">
+                    <div onclick="selectGift('${gift.id}', '${type}', ${price}, '${gift.image}', '${gift.name}', this)" 
+                         class="gift-item bg-gray-50 rounded-2xl p-2 flex flex-col items-center cursor-pointer hover:bg-gray-100 border border-transparent">
+                        <img src="${gift.image}" class="w-12 h-12 object-contain mb-2 drop-shadow-sm">
                         <p class="text-[10px] font-bold text-gray-700 truncate w-full text-center">${gift.name}</p>
-                        <p class="text-[9px] text-blue-600 font-bold mt-0.5">${val.toLocaleString()}</p>
-                    </div>`;
+                        <p class="text-[9px] text-yellow-600 font-bold mt-0.5">${price.toLocaleString()}</p>
+                    </div>
+                `;
             });
         };
 
-        window.selectGift = (id, type, price, elem) => {
-            selectedGift = { id, type, price };
+        window.selectGift = (id, type, price, image, name, elem) => {
+            selectedGift = { id, type, price, image, name };
             document.querySelectorAll('.gift-item').forEach(el => el.classList.remove('selected'));
             elem.classList.add('selected');
             updateSendButton();
@@ -671,121 +830,88 @@
 
         function updateSendButton() {
             const btn = document.getElementById('sendGiftBtn');
-            if (selectedGift && userData.balance >= selectedGift.price) {
-                btn.disabled = false;
-                btn.className = "w-full py-3.5 rounded-2xl bg-black text-white font-bold text-sm shadow-lg transform transition active:scale-95 flex items-center justify-center gap-2";
-                btn.innerHTML = `<span>إرسال (${selectedGift.price.toLocaleString()})</span>`;
+            if (selectedGift) {
+                const canAfford = userData.balance >= selectedGift.price;
+                btn.disabled = !canAfford;
+                if(canAfford) {
+                    btn.className = "w-full py-3.5 rounded-2xl bg-gradient-to-r from-gray-900 to-black text-white font-bold text-sm shadow-lg shadow-gray-900/20 transform transition active:scale-95 flex items-center justify-center gap-2";
+                    btn.innerHTML = `<span>إرسال (${selectedGift.price.toLocaleString()})</span> <i data-lucide="send" class="w-4 h-4"></i>`;
+                } else {
+                    btn.className = "w-full py-3.5 rounded-2xl bg-red-50 text-red-400 font-bold text-sm flex items-center justify-center gap-2 cursor-not-allowed";
+                    btn.innerHTML = `<span>رصيد غير كافٍ</span>`;
+                }
             } else {
                 btn.disabled = true;
-                btn.className = "w-full py-3.5 rounded-2xl bg-gray-200 text-gray-400 font-bold text-sm cursor-not-allowed";
-                btn.innerHTML = `<span>${selectedGift ? 'رصيد غير كافٍ' : 'اختر هدية'}</span>`;
+                btn.className = "w-full py-3.5 rounded-2xl bg-gray-100 text-gray-400 font-bold text-sm shadow-none flex items-center justify-center gap-2";
+                btn.innerHTML = `<span>اختر هدية للإرسال</span>`;
             }
+            lucide.createIcons();
         }
 
         window.confirmSendGift = async () => {
             if (!selectedGift || !currentFriend) return;
-            const price = selectedGift.price;
+            
+            const btn = document.getElementById('sendGiftBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="animate-pulse">جاري المعالجة...</span>';
+            btn.disabled = true;
             
             try {
-                // 1. Transaction
-                await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-price) });
-                userData.balance -= price;
-                
-                const list = selectedGift.type === 'wealth' ? storeData.gifts : storeData.luckGifts;
-                const giftObj = list.find(g => g.id === selectedGift.id);
+                // 1. Transaction: Deduct from Sender
+                const userRef = doc(db, "users", auth.currentUser.uid);
+                await updateDoc(userRef, { balance: increment(-selectedGift.price) });
+                userData.balance -= selectedGift.price;
 
-                // 2. Send Message
+                // 2. Transaction: Add to Receiver
+                // (Note: In a real app, use a batch or Cloud Function to ensure atomicity)
+                const receiverRef = doc(db, "users", currentFriend.uid);
+                await updateDoc(receiverRef, { 
+                    balance: increment(selectedGift.price),
+                    // Log the gift for profile display
+                    // This is a simple append, for production use arrayUnion or subcollection
+                    // receivedGiftsLog: arrayUnion({id: selectedGift.id, image: selectedGift.image, timestamp: Date.now()}) 
+                });
+
+                // 3. Send Chat Message
                 const chatId = [auth.currentUser.uid, currentFriend.uid].sort().join('_');
                 await push(ref(rtdb, `chats/${chatId}/messages`), {
                     senderId: auth.currentUser.uid,
                     receiverId: currentFriend.uid,
-                    giftId: giftObj.id,
-                    giftName: giftObj.name,
-                    giftImage: giftObj.image,
-                    giftValue: price,
+                    giftId: selectedGift.id,
+                    giftName: selectedGift.name,
+                    giftImage: selectedGift.image,
+                    giftValue: selectedGift.price,
                     type: 'gift',
-                    timestamp: Date.now()
+                    timestamp: serverTimestamp()
                 });
 
-                // 3. Global Broadcast (If > 80,000)
-                if (price >= 80000) {
-                    await push(ref(rtdb, 'global_broadcasts'), {
+                // 4. GLOBAL BANNER CHECK (> 80,000)
+                if (selectedGift.price >= 80000) {
+                    await push(ref(rtdb, 'globalBanners'), {
                         senderName: userData.displayName,
-                        senderImg: userData.photoURL || 'https://via.placeholder.com/50',
+                        senderImg: userData.photoURL || 'https://via.placeholder.com/150',
                         receiverName: currentFriend.displayName,
-                        receiverImg: currentFriend.photoURL || 'https://via.placeholder.com/50',
-                        giftImg: giftObj.image,
-                        value: price,
-                        timestamp: Date.now()
+                        receiverImg: currentFriend.photoURL || 'https://via.placeholder.com/150',
+                        giftImg: selectedGift.image,
+                        value: selectedGift.price,
+                        timestamp: serverTimestamp()
                     });
                 }
 
-                // 4. Update Receiver Balance (Logic only)
-                const receiverRef = doc(db, "users", currentFriend.uid);
-                await updateDoc(receiverRef, { 
-                    balance: increment(price),
-                    // Add gift to 'receivedGifts' collection for profile
-                    [`gifts.${giftObj.id}`]: increment(1) 
-                });
-
                 toggleGiftBox(false);
 
-            } catch (e) { console.error(e); alert('حدث خطأ'); }
-        };
-
-        // --- User Profile Modal ---
-        window.openUserProfile = async (uid) => {
-            const modal = document.getElementById('userProfileModal');
-            let profileData = currentFriend; 
-            
-            // If opening from friends list or elsewhere without chat open, fetch
-            if (!profileData || profileData.uid !== uid) {
-                const snap = await getDoc(doc(db, "users", uid));
-                if(snap.exists()) profileData = snap.data();
+            } catch (e) {
+                console.error(e);
+                alert('فشلت العملية، يرجى المحاولة لاحقاً');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
             }
-
-            // Fill Data
-            document.getElementById('profileAvatar').src = profileData.photoURL || 'https://via.placeholder.com/150';
-            document.getElementById('profileName').innerText = profileData.displayName;
-            document.getElementById('profileId').innerText = "ID: " + (profileData.customId || profileData.uid.slice(0,5));
-            document.getElementById('profileWealthLvl').innerText = "LV." + (profileData.wealthLevel || 0);
-            document.getElementById('profileMagicLvl').innerText = "LV." + (profileData.magicLevel || 0);
-            
-            // Load Gifts Grid
-            const giftsGrid = document.getElementById('profileGiftsGrid');
-            giftsGrid.innerHTML = '';
-            
-            // Check if user has gifts property (Simple implementation)
-            // In a real app, this might be a subcollection. Here assuming map in user doc or just showing generic for demo
-            if (profileData.gifts) {
-                // Merge wealth and luck gifts to find images
-                const allGifts = [...storeData.gifts, ...storeData.luckGifts];
-                Object.keys(profileData.gifts).forEach(giftId => {
-                    const count = profileData.gifts[giftId];
-                    const giftInfo = allGifts.find(g => g.id === giftId);
-                    if (giftInfo) {
-                        giftsGrid.innerHTML += `
-                            <div class="flex flex-col items-center bg-gray-50 p-2 rounded-xl">
-                                <img src="${giftInfo.image}" class="w-8 h-8 object-contain mb-1">
-                                <span class="text-[9px] font-bold text-gray-500">x${count}</span>
-                            </div>
-                        `;
-                    }
-                });
-            } else {
-                giftsGrid.innerHTML = `<p class="col-span-5 text-center text-gray-300 text-xs">لم يستلم هدايا بعد</p>`;
-            }
-
-            modal.classList.add('open');
         };
 
-        window.closeUserProfile = () => {
-            document.getElementById('userProfileModal').classList.remove('open');
-        };
-
-        // Standard Navigation
         window.goBack = () => window.location.href = 'afnan.html';
+        
         lucide.createIcons();
     </script>
 </body>
 </html>
+
