@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Afnan AI - الرئيسية</title>
+    <title>Afnan AI - تسجيل الدخول</title>
     
     <!-- Fonts: Noto Sans Arabic -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;600;800&display=swap" rel="stylesheet">
@@ -13,14 +13,44 @@
     
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    
-    <!-- Main Styles -->
-    <link rel="stylesheet" href="index.css">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            font-family: 'Noto Sans Arabic', sans-serif;
+            touch-action: manipulation;
+        }
+
+        body {
+            background: radial-gradient(circle at 0% 0%, #eef2ff 0%, #fdf2f8 50%, #f0f9ff 100%);
+            color: #1f2937;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 
+                0 4px 6px -1px rgba(0, 0, 0, 0.04),
+                0 2px 4px -1px rgba(0, 0, 0, 0.02),
+                inset 0 1px 0 0 rgba(255, 255, 255, 0.4);
+        }
+
+        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
 </head>
 <body class="antialiased selection:bg-blue-100 selection:text-blue-900">
 
     <!-- ================= AUTH SCREEN ================= -->
-    <div id="loginPage" class="fixed inset-0 z-50 flex flex-col items-center justify-center p-6 fade-in">
+    <div class="fixed inset-0 z-50 flex flex-col items-center justify-center p-6 fade-in">
         <div class="glass p-8 rounded-[40px] w-full max-w-sm text-center shadow-2xl relative overflow-hidden">
             <div class="absolute -top-10 -right-10 w-32 h-32 bg-blue-400/20 rounded-full blur-2xl"></div>
             <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-purple-400/20 rounded-full blur-2xl"></div>
@@ -35,7 +65,7 @@
                 <div class="space-y-3">
                     <button onclick="loginWithTwitter()" class="w-full py-4 rounded-2xl bg-black text-white font-bold text-lg shadow-lg hover:bg-gray-900 transition transform hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-3">
                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417a9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.213c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+                            <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.213c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
                         </svg>
                         دخول عبر تويتر
                     </button>
@@ -53,176 +83,46 @@
         </div>
     </div>
 
-    <!-- ================= MAIN APP ================= -->
-    <div id="main-app" class="hidden min-h-screen pb-24">
-        
-        <!-- HEADER -->
-        <header class="fixed top-0 left-0 right-0 h-20 z-30 px-6 flex items-center justify-between glass">
-            <h2 id="pageTitle" class="page-title">الرئيسية</h2>
-            <button onclick="toggleSidebar(true)" class="w-10 h-10 rounded-full flex items-center justify-center active:scale-90 transition">
-                <i data-lucide="menu" class="text-black w-6 h-6"></i>
-            </button>
-        </header>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, TwitterAuthProvider, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        <!-- VIEW CONTAINER -->
-        <main class="pt-24 px-5">
+        const firebaseConfig = {
+            apiKey: "AIzaSyBnmqWRY6lV54meFvO89QeXwtd28w81FcY",
+            authDomain: "rtx3090-28439.firebaseapp.com",
+            projectId: "rtx3090-28439",
+            storageBucket: "rtx3090-28439.firebasestorage.app",
+            messagingSenderId: "178612030690",
+            appId: "1:178612030690:web:883189ced2ed3a78e3e2bb",
+            databaseURL: "https://rtx3090-28439-default-rtdb.firebaseio.com/"
+        };
 
-            <!-- VIEW: HOME -->
-            <div id="view-home" class="view-section active fade-in">
-                <!-- Profile Card -->
-                <div class="glass p-6 rounded-3xl mb-6 text-center">
-                    <div class="avatar-wrapper mb-4">
-                        <img id="sideAvatar" src="https://via.placeholder.com/150" class="avatar-img" alt="صورة المستخدم">
-                        <img id="sideFrame" src="" class="user-frame hidden" alt="إطار">
-                    </div>
-                    <h3 id="sideName" class="text-xl font-bold mb-1">مستخدم</h3>
-                    <p id="sideID" class="text-sm text-gray-500 mb-4">000000</p>
-                    
-                    <!-- Levels Display -->
-                    <div class="grid grid-cols-2 gap-4 mb-4">
-                        <div class="level-badge">
-                            <div class="level-icon" id="magicLevelImg">✨</div>
-                            <div class="level-text">
-                                <span class="level-label">السحر</span>
-                                <span class="level-number" id="magicLevelDisplay">1</span>
-                            </div>
-                        </div>
-                        <div class="level-badge">
-                            <div class="level-icon" id="wealthLevelImg">💰</div>
-                            <div class="level-text">
-                                <span class="level-label">الثروة</span>
-                                <span class="level-number" id="wealthLevelDisplay">1</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Badges Display -->
-                    <div class="badges-container" id="badgesContainer"></div>
-                </div>
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const twitterProvider = new TwitterAuthProvider();
+        const googleProvider = new GoogleAuthProvider();
 
-                <!-- Wallet Card -->
-                <div class="glass p-6 rounded-3xl mb-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <h4 class="font-bold text-lg">المحفظة</h4>
-                        <span class="text-2xl">💰</span>
-                    </div>
-                    <div class="text-3xl font-black text-center mb-4">
-                        <span id="walletAmount">1000</span>
-                        <span class="text-lg text-gray-500"> جوهرة</span>
-                    </div>
-                    <button onclick="navigateTo('store')" class="w-full py-3 bg-black text-white font-bold rounded-2xl hover:bg-gray-900 transition">
-                        اشترِ المزيد 🛍️
-                    </button>
-                </div>
+        window.loginWithTwitter = async () => {
+            try {
+                await signInWithPopup(auth, twitterProvider);
+                window.location.href = 'afnan.html';
+            } catch (error) {
+                console.error('خطأ في تسجيل الدخول:', error);
+                alert('حدث خطأ أثناء تسجيل الدخول. حاول مرة أخرى.');
+            }
+        };
 
-                <!-- Quick Actions -->
-                <div class="grid grid-cols-2 gap-4 mb-6">
-                    <button onclick="openGiftsPage()" class="glass-card p-6 rounded-3xl text-center hover:bg-white transition">
-                        <div class="text-4xl mb-2">🎁</div>
-                        <p class="font-bold text-sm">الهدايا</p>
-                    </button>
-                    <button onclick="navigateTo('friends')" class="glass-card p-6 rounded-3xl text-center hover:bg-white transition">
-                        <div class="text-4xl mb-2">👥</div>
-                        <p class="font-bold text-sm">الأصدقاء</p>
-                    </button>
-                </div>
-            </div>
+        window.loginWithGoogle = async () => {
+            try {
+                await signInWithPopup(auth, googleProvider);
+                window.location.href = 'afnan.html';
+            } catch (error) {
+                console.error('خطأ في تسجيل الدخول:', error);
+                alert('حدث خطأ أثناء تسجيل الدخول. حاول مرة أخرى.');
+            }
+        };
 
-            <!-- VIEW: STORE -->
-            <div id="view-store" class="view-section fade-in">
-                <div class="glass p-6 rounded-3xl mb-6">
-                    <div class="flex gap-3 overflow-x-auto no-scrollbar mb-6">
-                        <button id="store-tab-frames" onclick="loadStoreItems('frames')" class="flex-none px-6 py-2.5 bg-gray-900 text-white rounded-full font-bold text-sm shadow-lg transition">
-                            الإطارات
-                        </button>
-                        <button id="store-tab-badges" onclick="loadStoreItems('badges')" class="flex-none px-6 py-2.5 glass-card text-gray-600 rounded-full font-bold text-sm hover:bg-white transition">
-                            الشارات
-                        </button>
-                    </div>
-                    
-                    <div id="storeGrid" class="grid grid-cols-2 gap-4"></div>
-                </div>
-            </div>
-
-            <!-- VIEW: BAG -->
-            <div id="view-bag" class="view-section fade-in">
-                <div class="glass p-6 rounded-3xl mb-6">
-                    <h4 class="font-bold text-lg mb-4">الإطارات</h4>
-                    <div id="bagGrid" class="grid grid-cols-4 gap-3 mb-6"></div>
-                    
-                    <h4 class="font-bold text-lg mb-4">الشارات</h4>
-                    <div id="badgesBagGrid" class="grid grid-cols-5 gap-3"></div>
-                </div>
-            </div>
-
-            <!-- VIEW: FRIENDS -->
-            <div id="view-friends" class="view-section fade-in">
-                <!-- Search Section -->
-                <div class="glass p-6 rounded-3xl mb-6">
-                    <h4 class="font-bold text-lg mb-4">البحث عن مستخدم</h4>
-                    <div class="flex gap-2 mb-4">
-                        <input id="searchUserInput" type="text" placeholder="أدخل رقم المستخدم" class="flex-1 px-4 py-3 rounded-2xl border border-gray-200 focus:outline-none focus:border-black">
-                        <button onclick="searchUser()" class="px-4 py-3 bg-black text-white font-bold rounded-2xl hover:bg-gray-900">
-                            🔍
-                        </button>
-                    </div>
-                    
-                    <div id="searchResults" class="hidden">
-                        <div id="userResult" class="glass-card p-4 rounded-2xl"></div>
-                    </div>
-                </div>
-
-                <!-- Friends List -->
-                <div class="glass p-6 rounded-3xl">
-                    <h4 class="font-bold text-lg mb-4">الأصدقاء</h4>
-                    <div id="friendsList" class="space-y-3"></div>
-                </div>
-            </div>
-        </main>
-
-        <!-- SIDEBAR -->
-        <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleSidebar(false)"></div>
-        <div id="sidebarContainer" class="sidebar-container glass-deep rounded-l-3xl overflow-y-auto no-scrollbar p-6">
-            <div class="flex items-center justify-between mb-8">
-                <h3 class="font-bold text-lg">القائمة</h3>
-                <button onclick="toggleSidebar(false)" class="w-8 h-8 flex items-center justify-center active:scale-90">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
-            </div>
-
-            <nav class="space-y-3 mb-8">
-                <button onclick="navigateTo('home')" class="w-full text-right px-4 py-3 rounded-2xl hover:bg-white transition flex items-center gap-3">
-                    <i data-lucide="home" class="w-5 h-5"></i>
-                    <span class="font-bold">الرئيسية</span>
-                </button>
-                <button onclick="navigateTo('store')" class="w-full text-right px-4 py-3 rounded-2xl hover:bg-white transition flex items-center gap-3">
-                    <i data-lucide="shopping-bag" class="w-5 h-5"></i>
-                    <span class="font-bold">المتجر</span>
-                </button>
-                <button onclick="navigateTo('bag')" class="w-full text-right px-4 py-3 rounded-2xl hover:bg-white transition flex items-center gap-3">
-                    <i data-lucide="backpack" class="w-5 h-5"></i>
-                    <span class="font-bold">الحقيبة</span>
-                </button>
-                <button onclick="navigateTo('friends')" class="w-full text-right px-4 py-3 rounded-2xl hover:bg-white transition flex items-center gap-3">
-                    <i data-lucide="users" class="w-5 h-5"></i>
-                    <span class="font-bold">الأصدقاء</span>
-                </button>
-            </nav>
-
-            <div class="border-t border-white/20 pt-4">
-                <button onclick="loadBagItems()" class="w-full text-right px-4 py-3 rounded-2xl hover:bg-white transition flex items-center gap-3 mb-2">
-                    <i data-lucide="refresh-cw" class="w-5 h-5"></i>
-                    <span class="font-bold text-sm">تحديث</span>
-                </button>
-                <button onclick="logout()" class="w-full text-right px-4 py-3 rounded-2xl hover:bg-red-100 transition flex items-center gap-3 text-red-600">
-                    <i data-lucide="log-out" class="w-5 h-5"></i>
-                    <span class="font-bold text-sm">تسجيل الخروج</span>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Initialize App -->
-    <script src="index.js"></script>
+        lucide.createIcons();
+    </script>
 </body>
 </html>
