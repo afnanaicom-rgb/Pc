@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المتجر</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Noto Sans Arabic', sans-serif; background: #fff; }
+        .top-bar { height: 60px; display: flex; align-items: center; padding: 0 20px; position: sticky; top: 0; background: white; border-bottom: 0.5px solid #f1f5f9; z-index: 50; }
+        .tab-btn { padding: 10px 20px; font-weight: 700; font-size: 14px; position: relative; color: #94a3b8; }
+        .tab-btn.active { color: #000; }
+        .tab-btn.active::after { content: ''; position: absolute; bottom: 0; left: 20%; right: 20%; height: 3px; background: #000; border-radius: 10px; }
+        .item-card { border-radius: 20px; background: #f8fafc; padding: 15px; display: flex; flex-direction: column; align-items: center; position: relative; }
+        .price-tag { background: rgba(255,255,255,0.9); padding: 4px 10px; border-radius: 10px; display: flex; items-center gap: 4px; margin-top: 10px; border: 0.5px solid #f1f5f9; }
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+        <button onclick="history.back()" class="p-2"><i data-lucide="chevron-right"></i></button>
+        <h1 class="flex-1 text-center font-black text-lg mr-[-40px]">المتجر</h1>
+    </div>
+
+    <div class="flex gap-4 border-b border-gray-50 px-6 overflow-x-auto whitespace-nowrap scrollbar-hide">
+        <button class="tab-btn active">الإطارات</button>
+        <button class="tab-btn">الشارات</button>
+        <button class="tab-btn">أدوات الغرف</button>
+    </div>
+
+    <div class="p-6 grid grid-cols-2 gap-4" id="store-items">
+        <!-- Items Loaded Here -->
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, doc, updateDoc, arrayUnion, increment, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const initAuth = async () => {
+          if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+            await signInWithCustomToken(auth, __initial_auth_token);
+          } else {
+            await signInAnonymously(auth);
+          }
+        };
+        initAuth();
+
+        onAuthStateChanged(auth, user => {
+            if (user) {
+                // Fetch Frames from Public Data
+                onSnapshot(collection(db, 'artifacts', 'rtx3090-28439', 'public', 'data', 'frames'), snap => {
+                    const container = document.getElementById('store-items');
+                    container.innerHTML = '';
+                    snap.forEach(itemDoc => {
+                        const item = itemDoc.data();
+                        container.innerHTML += `
+                            <div class="item-card" onclick="buyItem('${itemDoc.id}', ${item.price})">
+                                <img src="${item.image}" class="w-24 h-24 object-contain">
+                                <p class="font-bold text-xs mt-2">${item.name}</p>
+                                <div class="price-tag">
+                                    <i data-lucide="coins" class="w-3 h-3 text-yellow-500"></i>
+                                    <span class="text-[10px] font-black">${item.price}</span>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    lucide.createIcons();
+                }, err => console.error(err));
+            }
+        });
+
+        window.buyItem = async (id, price) => {
+            const userRef = doc(db, 'artifacts', 'rtx3090-28439', 'users', auth.currentUser.uid);
+            const userSnap = await getDoc(userRef);
+            const userData = userSnap.data();
+
+            if (userData.balance < price) {
+                alert("رصيدك غير كافٍ!");
+                return;
+            }
+
+            await updateDoc(userRef, {
+                balance: increment(-price),
+                purchasedFrames: arrayUnion({ id: id, purchaseDate: new Date() })
+            });
+            alert("تم الشراء بنجاح!");
+        };
+
+        lucide.createIcons();
+    </script>
+</body>
+</html>
+
