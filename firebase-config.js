@@ -1,28 +1,41 @@
-// Firebase Configuration
-import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
-import { getAnalytics } from "firebase/analytics";
-
+// firebase-config.js - ملف مشترك بين جميع الصفحات
 const firebaseConfig = {
-  apiKey: "AIzaSyBnmqWRY6lV54meFvO89QeXwtd28w81FcY",
-  authDomain: "rtx3090-28439.firebaseapp.com",
-  databaseURL: "https://rtx3090-28439-default-rtdb.firebaseio.com",
-  projectId: "rtx3090-28439",
-  storageBucket: "rtx3090-28439.firebasestorage.app",
-  messagingSenderId: "178612030690",
-  appId: "1:178612030690:web:883189ced2ed3a78e3e2bb",
-  measurementId: "G-PTKK9Y8HK5"
+    apiKey: "AIzaSyBnmqWRY6lV54meFvO89QeXwtd28w81FcY",
+    authDomain: "rtx3090-28439.firebaseapp.com",
+    projectId: "rtx3090-28439",
+    storageBucket: "rtx3090-28439.firebasestorage.app",
+    messagingSenderId: "178612030690",
+    appId: "1:178612030690:web:883189ced2ed3a78e3e2bb",
+    databaseURL: "https://rtx3090-28439-default-rtdb.firebaseio.com/"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+// تهيئة Firebase
+const app = firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+const storage = firebase.storage();
+const rtdb = firebase.database();
 
-// Initialize Firebase Authentication and get a reference to the service
-export const auth = getAuth(app);
+// دالة للحصول على معلومات المستخدم الحالي
+async function getCurrentUser() {
+    const user = auth.currentUser;
+    if (user) {
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        return userDoc.exists ? userDoc.data() : null;
+    }
+    return null;
+}
 
-// Initialize Cloud Firestore and get a reference to the service
-export const db = getFirestore(app);
+// دالة للتحقق من تسجيل الدخول
+function checkAuth() {
+    return new Promise((resolve) => {
+        auth.onAuthStateChanged((user) => {
+            resolve(!!user);
+        });
+    });
+}
 
-export default app;
+// تصدير المتغيرات والدوال
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { firebaseConfig, app, auth, db, storage, rtdb, getCurrentUser, checkAuth };
+}
