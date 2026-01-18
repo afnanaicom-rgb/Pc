@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Afnan AI - روم الصوت</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #8b5cf6;
+            --accent: #f59e0b;
+            --bg-black: #000000;
+            --glass: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --wealth: #facc15;
+            --magic: #d946ef;
+        }
+
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            outline: none; 
+            -webkit-tap-highlight-color: transparent; 
+        }
+        
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--bg-black);
+            color: #fff; 
+            height: 100vh; 
+            overflow: hidden;
+        }
+
+        .app-bg {
+            position: fixed; 
+            inset: 0;
+            background: radial-gradient(circle at 10% 10%, #1e1b4b 0%, #000000 50%);
+            z-index: -1;
+        }
+
+        .app-container { 
+            width: 100%; 
+            height: 100%; 
+            display: flex; 
+            flex-direction: column; 
+            position: relative; 
+        }
+
+        /* الهيدر */
+        .header { 
+            padding: 15px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            z-index: 100; 
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass-border);
+        }
+        
+        .room-info {
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            background: var(--glass);
+            padding: 5px 12px; 
+            border-radius: 30px; 
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(15px); 
+            cursor: pointer;
+        }
+        
+        .owner-img { 
+            width: 38px; 
+            height: 38px; 
+            border-radius: 50%; 
+            border: 2px solid var(--accent); 
+        }
+
+        /* شبكة الميكروفونات */
+        .mics-grid { 
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
+        
+        @media (min-width: 768px) {
+            .mics-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .mics-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        .user-card {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .user-card.speaking {
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+            border-color: #22c55e;
+        }
+
+        .user-card.muted {
+            opacity: 0.7;
+            filter: grayscale(50%);
+        }
+
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid var(--accent);
+            margin-bottom: 10px;
+            object-fit: cover;
+        }
+
+        .user-name {
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 5px;
+            text-align: center;
+        }
+
+        .user-levels {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+
+        .level-badge {
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+
+        .level-wealth {
+            background: var(--wealth);
+            color: #000;
+        }
+
+        .level-magic {
+            background: var(--magic);
+            color: #fff;
+        }
+
+        .mic-indicator {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .mic-on {
+            background: #22c55e;
+            color: white;
+        }
+
+        .mic-off {
+            background: #ef4444;
+            color: white;
+        }
+
+        /* عناصر التحكم */
+        .controls-bar {
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .control-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            color: white;
+        }
+
+        .control-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .control-btn:active {
+            transform: scale(0.95);
+        }
+
+        .control-btn.mic {
+            background: var(--primary);
+        }
+
+        .control-btn.leave {
+            background: #ef4444;
+        }
+
+        .control-btn.settings {
+            background: #6b7280;
+        }
+
+        /* شريط الأدوات */
+        .tools-bar {
+            padding: 10px 15px;
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            background: rgba(0, 0, 0, 0.5);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .tool-btn {
+            flex-shrink: 0;
+            padding: 8px 15px;
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            background: var(--glass);
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tool-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* الشات */
+        .chat-container {
+            position: fixed;
+            bottom: 140px;
+            left: 15px;
+            right: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .message {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 10px;
+            max-width: 80%;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.system {
+            align-self: center;
+            background: rgba(59, 130, 246, 0.3);
+            border-color: #3b82f6;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background: rgba(139, 92, 246, 0.3);
+            border-color: var(--primary);
+        }
+
+        .message.other {
+            align-self: flex-start;
+            background: rgba(75, 85, 99, 0.3);
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 5px;
+        }
+
+        .message-avatar {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+
+        .message-username {
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .message-content {
+            font-size: 14px;
+        }
+
+        .message-time {
+            font-size: 10px;
+            color: #9ca3af;
+            text-align: left;
+            margin-top: 5px;
+        }
+
+        /* إدخال النص */
+        .input-container {
+            position: fixed;
+            bottom: 80px;
+            left: 15px;
+            right: 15px;
+            z-index: 1000;
+        }
+
+        .chat-input {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 25px;
+            border: 1px solid var(--glass-border);
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            color: white;
+            font-size: 14px;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* الإشعارات */
+        .notification {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 2000;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        /* تحميل */
+        .loading {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid transparent;
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* تأثيرات الهدايا */
+        .gift-effect {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 100px;
+            z-index: 4000;
+            pointer-events: none;
+            animation: giftAnimation 2s ease-out forwards;
+        }
+
+        @keyframes giftAnimation {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0);
+            }
+            50% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1.5);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(1) translateY(-100px);
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-bg"></div>
+
+<div class="app-container">
+    <!-- شريط الأدوات -->
+    <div class="tools-bar" id="toolsBar">
+        <button class="tool-btn" onclick="toggleMuteAll()">
+            <i class="fas fa-volume-mute"></i> كتم الكل
+        </button>
+        <button class="tool-btn" onclick="inviteFriends()">
+            <i class="fas fa-user-plus"></i> دعوة أصدقاء
+        </button>
+        <button class="tool-btn" onclick="openGifts()">
+            <i class="fas fa-gift"></i> الهدايا
+        </button>
+        <button class="tool-btn" onclick="openSettings()">
+            <i class="fas fa-cog"></i> الإعدادات
+        </button>
+        <button class="tool-btn" onclick="showRoomInfo()">
+            <i class="fas fa-info-circle"></i> معلومات الروم
+        </button>
+    </div>
+
+    <!-- الهيدر -->
+    <header class="header">
+        <div class="room-info" id="roomInfo">
+            <div>
+                <span style="font-size:9px; color:var(--accent)" id="roomId">جاري التحميل...</span>
+                <div style="font-size:12px; font-weight:bold" id="roomName">روم الصوت</div>
+            </div>
+        </div>
+        <div style="display:flex; gap:8px">
+            <button class="control-btn" onclick="toggleFullscreen()">
+                <i class="fa-solid fa-expand"></i>
+            </button>
+            <button class="control-btn leave" onclick="leaveRoom()">
+                <i class="fa-solid fa-phone-slash"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- شبكة المستخدمين -->
+    <div class="mics-grid" id="micsGrid">
+        <!-- سيتم تعبئتها بالمستخدمين -->
+    </div>
+
+    <!-- الشات -->
+    <div class="chat-container" id="chatContainer"></div>
+
+    <!-- إدخال الشات -->
+    <div class="input-container">
+        <input type="text" 
+               class="chat-input" 
+               id="chatInput" 
+               placeholder="اكتب رسالة..." 
+               onkeypress="handleChatInput(event)">
+    </div>
+
+    <!-- شريط التحكم -->
+    <div class="controls-bar">
+        <button class="control-btn mic" id="micBtn" onclick="toggleMic()">
+            <i class="fas fa-microphone"></i>
+        </button>
+        <button class="control-btn" onclick="toggleCamera()">
+            <i class="fas fa-video"></i>
+        </button>
+        <button class="control-btn" onclick="toggleChat()">
+            <i class="fas fa-comment"></i>
+        </button>
+        <button class="control-btn settings" onclick="openAudioSettings()">
+            <i class="fas fa-sliders-h"></i>
+        </button>
+    </div>
+</div>
+
+<!-- نافذة التحميل -->
+<div class="loading" id="loadingScreen">
+    <div class="spinner"></div>
+    <p style="margin-top: 20px; color: #9ca3af;">جاري الاتصال بالروم...</p>
+</div>
+
+<!-- Scripts -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+<script>
+    // تهيئة Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyBnmqWRY6lV54meFvO89QeXwtd28w81FcY",
+        authDomain: "rtx3090-28439.firebaseapp.com",
+        projectId: "rtx3090-28439",
+        storageBucket: "rtx3090-28439.firebasestorage.app",
+        messagingSenderId: "178612030690",
+        appId: "1:178612030690:web:883189ced2ed3a78e3e2bb",
+        databaseURL: "https://rtx3090-28439-default-rtdb.firebaseio.com/"
+    };
+    
+    const app = firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const rtdb = firebase.database();
+
+    // متغيرات التطبيق
+    let currentUser = null;
+    let currentUserData = null;
+    let currentRoom = null;
+    let roomData = null;
+    let localStream = null;
+    let peerConnections = {};
+    let isMuted = false;
+    let isChatVisible = true;
+    let messagesListener = null;
+    let roomListener = null;
+    let signalsListener = null;
+
+    // تهيئة التطبيق
+    document.addEventListener('DOMContentLoaded', async () => {
+        // التحقق من تسجيل الدخول
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                currentUser = user;
+                await loadUserData();
+                await joinRoomFromURL();
+            } else {
+                window.location.href = 'afnan.html';
+            }
+        });
+    });
+
+    // تحميل بيانات المستخدم
+    async function loadUserData() {
+        try {
+            const userDoc = await db.collection('users').doc(currentUser.uid).get();
+            if (userDoc.exists) {
+                currentUserData = userDoc.data();
+            }
+        } catch (error) {
+            console.error('Error loading user data:', error);
+        }
+    }
+
+    // الانضمام للروم من الرابط
+    async function joinRoomFromURL() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const roomId = urlParams.get('id');
+        
+        if (!roomId) {
+            showNotification('لم يتم تحديد روم', 'error');
+            setTimeout(() => window.location.href = 'afnan.html', 2000);
+            return;
+        }
+
+        try {
+            // الحصول على بيانات الروم
+            const roomDoc = await db.collection('rooms').doc(roomId).get();
+            
+            if (!roomDoc.exists) {
+                showNotification('الروم غير موجود', 'error');
+                setTimeout(() => window.location.href = 'afnan.html', 2000);
+                return;
+            }
+
+            roomData = roomDoc.data();
+            currentRoom = roomId;
+            
+            // تحديث واجهة الروم
+            updateRoomUI();
+            
+            // الانضمام للروم
+            await joinRoom();
+            
+            // إخفاء شاشة التحميل
+            document.getElementById('loadingScreen').style.display = 'none';
+            
+        } catch (error) {
+            console.error('Error joining room:', error);
+            showNotification('حدث خطأ في الانضمام للروم', 'error');
+        }
+    }
+
+    // تحديث واجهة الروم
+    function updateRoomUI() {
+        if (!roomData) return;
+        
+        document.getElementById('roomName').textContent = roomData.name;
+        document.getElementById('roomId').textContent = `ID: ${currentRoom}`;
+        
+        // تحديث شبكة المستخدمين
+        updateUsersGrid();
+    }
+
+    // تحديث شبكة المستخدمين
+    function updateUsersGrid() {
+        if (!roomData || !roomData.users) return;
+        
+        const micsGrid = document.getElementById('micsGrid');
+        micsGrid.innerHTML = '';
+        
+        roomData.users.forEach(user => {
+            const isCurrentUser = user.uid === currentUser?.uid;
+            const userCard = document.createElement('div');
+            userCard.className = `user-card ${user.isMuted ? 'muted' : ''} ${isCurrentUser ? 'speaking' : ''}`;
+            
+            userCard.innerHTML = `
+                <img src="${user.avatar}" class="user-avatar" alt="${user.name}">
+                <div class="user-name">${user.name} ${user.isOwner ? '👑' : ''}</div>
+                <div class="user-levels">
+                    <span class="level-badge level-wealth">W.${user.wealthLevel || 1}</span>
+                    <span class="level-badge level-magic">M.${user.magicLevel || 1}</span>
+                </div>
+                <div class="mic-indicator ${user.isMuted ? 'mic-off' : 'mic-on'}">
+                    <i class="fas ${user.isMuted ? 'fa-microphone-slash' : 'fa-microphone'}"></i>
+                </div>
+            `;
+            
+            micsGrid.appendChild(userCard);
+        });
+    }
+
+    // الانضمام للروم
+    async function joinRoom() {
+        try {
+            // الحصول على صلاحيات الميكروفون
+            await getMediaPermissions();
+            
+            // تحديث بيانات الروم
+            await updateRoomUsers();
+            
+            // بدء استماع WebRTC
+            await startWebRTC();
+            
+            // الاستماع للرسائل
+            listenToMessages();
+            
+            // الاستماع لتحديثات الروم
+            listenToRoomUpdates();
+            
+            // إضافة رسالة ترحيب
+            addSystemMessage(`انضم ${currentUserData?.displayName || 'مستخدم'} إلى الروم`);
+            
+        } catch (error) {
+            console.error('Error in joinRoom:', error);
+            throw error;
+        }
+    }
+
+    // الحصول على صلاحيات الميكروفون
+    async function getMediaPermissions() {
+        try {
+            localStream = await navigator.mediaDevices.getUserMedia({
+                audio: {
+                    echoCancellation: true,
+                    noiseSuppression: true,
+                    autoGainControl: true,
+                    channelCount: 1
+                },
+                video: false
+            });
+            
+            // تحديث زر الميكروفون
+            updateMicButton();
+            
+        } catch (error) {
+            console.error('Error getting media permissions:', error);
+            showNotification('يجب السماح باستخدام الميكروفون', 'warning');
+            throw error;
+        }
+    }
+
+    // تحديث بيانات المستخدمين في الروم
+    async function updateRoomUsers() {
+        if (!currentRoom || !currentUserData) return;
+        
+        const userInRoom = {
+            uid: currentUser.uid,
+            name: currentUserData.displayName,
+            avatar: currentUserData.photoURL,
+            isMuted: false,
+            isSpeaker: true,
+            joinedAt: new Date(),
+            magicLevel: currentUserData.magicLevel || 1,
+            wealthLevel: currentUserData.wealthLevel || 1,
+            isOwner: roomData.ownerId === currentUser.uid
+        };
+        
+        // التحقق إذا كان المستخدم موجود بالفعل
+        const userExists = roomData.users?.some(u => u.uid === currentUser.uid);
+        
+        if (!userExists) {
+            await db.collection('rooms').doc(currentRoom).update({
+                users: firebase.firestore.FieldValue.arrayUnion(userInRoom),
+                currentSpeakers: firebase.firestore.FieldValue.increment(1)
+            });
+        }
+        
+        // تحديث بيانات المستخدم
+        await db.collection('users').doc(currentUser.uid).update({
+            currentRoom: currentRoom
+        });
+    }
+
+    // بدء WebRTC
+    async function startWebRTC() {
+        // تكوين ICE servers
+        const rtcConfig = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' },
+                { urls: 'stun:stun2.l.google.com:19302' },
+                { urls: 'stun:stun3.l.google.com:19302' },
+                { urls: 'stun:stun4.l.google.com:19302' }
+            ]
+        };
+        
+        // الاستماع للإشارات
+        listenForSignals();
+        
+        // إرسال إشارة دخول
+        sendSignal('join', null);
+    }
+
+    // الاستماع لإشارات WebRTC
+    function listenForSignals() {
+        const signalsRef = rtdb.ref(`rooms/${currentRoom}/signals`);
+        
+        signalsListener = signalsRef.on('child_added', async (snapshot) => {
+            const signal = snapshot.val();
+            
+            // تجاهل الإشارات الخاصة بالمستخدم الحالي
+            if (signal.userId === currentUser.uid) return;
+            
+            try {
+                if (signal.type === 'join') {
+                    await handleUserJoin(signal.userId);
+                } else if (signal.type === 'offer') {
+                    await handleOffer(signal.userId, signal.offer);
+                } else if (signal.type === 'answer') {
+                    await handleAnswer(signal.userId, signal.answer);
+                } else if (signal.type === 'ice-candidate') {
+                    await handleIceCandidate(signal.userId, signal.candidate);
+                } else if (signal.type === 'leave') {
+                    await handleUserLeave(signal.userId);
+                }
+            } catch (error) {
+                console.error('Error handling signal:', error);
+            }
+        });
+    }
+
+    // معالجة دخول مستخدم جديد
+    async function handleUserJoin(userId) {
+        // إنشاء اتصال جديد
+        const pc = new RTCPeerConnection({
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' }
+            ]
+        });
+        
+        peerConnections[userId] = pc;
+        
+        // إضافة المسار المحلي
+        localStream.getTracks().forEach(track => {
+            pc.addTrack(track, localStream);
+        });
+        
+        // معالجة مرشحات ICE
+        pc.onicecandidate = (event) => {
+            if (event.candidate) {
+                sendSignalToUser(userId, 'ice-candidate', event.candidate);
+            }
+        };
+        
+        // معالجة المسار الوارد
+        pc.ontrack = (event) => {
+            const audioElement = document.createElement('audio');
+            audioElement.id = `audio-${userId}`;
+            audioElement.autoplay = true;
+            audioElement.controls = false;
+            audioElement.style.display = 'none';
+            document.body.appendChild(audioElement);
+            audioElement.srcObject = event.streams[0];
+        };
+        
+        // إنشاء عرض اتصال
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+        
+        sendSignalToUser(userId, 'offer', offer);
+    }
+
+    // معالجة عرض الاتصال
+    async function handleOffer(userId, offer) {
+        const pc = new RTCPeerConnection({
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' }
+            ]
+        });
+        
+        peerConnections[userId] = pc;
+        
+        // إضافة المسار المحلي
+        localStream.getTracks().forEach(track => {
+            pc.addTrack(track, localStream);
+        });
+        
+        pc.onicecandidate = (event) => {
+            if (event.candidate) {
+                sendSignalToUser(userId, 'ice-candidate', event.candidate);
+            }
+        };
+        
+        pc.ontrack = (event) => {
+            const audioElement = document.createElement('audio');
+            audioElement.id = `audio-${userId}`;
+            audioElement.autoplay = true;
+            audioElement.controls = false;
+            audioElement.style.display = 'none';
+            document.body.appendChild(audioElement);
+            audioElement.srcObject = event.streams[0];
+        };
+        
+        await pc.setRemoteDescription(new RTCSessionDescription(offer));
+        
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+        
+        sendSignalToUser(userId, 'answer', answer);
+    }
+
+    // معالجة الإجابة
+    async function handleAnswer(userId, answer) {
+        const pc = peerConnections[userId];
+        if (pc) {
+            await pc.setRemoteDescription(new RTCSessionDescription(answer));
+        }
+    }
+
+    // معالجة مرشح ICE
+    async function handleIceCandidate(userId, candidate) {
+        const pc = peerConnections[userId];
+        if (pc) {
+            await pc.addIceCandidate(new RTCIceCandidate(candidate));
+        }
+    }
+
+    // معالجة خروج مستخدم
+    async function handleUserLeave(userId) {
+        // إغلاق الاتصال
+        if (peerConnections[userId]) {
+            peerConnections[userId].close();
+            delete peerConnections[userId];
+        }
+        
+        // إزالة عنصر الصوت
+        const audioElement = document.getElementById(`audio-${userId}`);
+        if (audioElement) {
+            audioElement.remove();
+        }
+        
+        // إضافة رسالة نظام
+        addSystemMessage(`غادر مستخدم من الروم`);
+    }
+
+    // إرسال إشارة
+    function sendSignal(type, data) {
+        if (!currentRoom || !currentUser) return;
+        
+        const signalRef = rtdb.ref(`rooms/${currentRoom}/signals`).push();
+        signalRef.set({
+            type: type,
+            userId: currentUser.uid,
+            data: data,
+            timestamp: Date.now()
+        });
+    }
+
+    // إرسال إشارة لمستخدم محدد
+    function sendSignalToUser(targetUserId, type, data) {
+        if (!currentRoom || !currentUser) return;
+        
+        const signalRef = rtdb.ref(`rooms/${currentRoom}/signals`).push();
+        signalRef.set({
+            type: type,
+            userId: currentUser.uid,
+            targetUserId: targetUserId,
+            data: data,
+            timestamp: Date.now()
+        });
+    }
+
+    // الاستماع لتحديثات الروم
+    function listenToRoomUpdates() {
+        roomListener = db.collection('rooms').doc(currentRoom)
+            .onSnapshot((doc) => {
+                if (doc.exists) {
+                    roomData = doc.data();
+                    updateUsersGrid();
+                }
+            });
+    }
+
+    // الاستماع للرسائل
+    function listenToMessages() {
+        messagesListener = db.collection('rooms').doc(currentRoom)
+            .collection('messages')
+            .orderBy('timestamp', 'asc')
+            .onSnapshot((snapshot) => {
+                snapshot.docChanges().forEach((change) => {
+                    if (change.type === 'added') {
+                        const message = change.doc.data();
+                        displayMessage(message);
+                    }
+                });
+            });
+    }
+
+    // عرض الرسالة
+    function displayMessage(message) {
+        const chatContainer = document.getElementById('chatContainer');
+        
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${message.type || 'other'}`;
+        
+        const time = new Date(message.timestamp?.toDate() || Date.now());
+        const timeString = time.toLocaleTimeString('ar-SA', { 
+            hour: '2-digit', 
+            minute: '2-digit' 
+        });
+        
+        messageDiv.innerHTML = `
+            <div class="message-header">
+                <img src="${message.avatar}" class="message-avatar" alt="${message.senderName}">
+                <span class="message-username">${message.senderName}</span>
+            </div>
+            <div class="message-content">${message.text}</div>
+            <div class="message-time">${timeString}</div>
+        `;
+        
+        chatContainer.appendChild(messageDiv);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    // إضافة رسالة نظام
+    function addSystemMessage(text) {
+        const message = {
+            type: 'system',
+            senderName: 'النظام',
+            text: text,
+            timestamp: new Date()
+        };
+        
+        displayMessage(message);
+        
+        // حفظ في قاعدة البيانات
+        db.collection('rooms').doc(currentRoom)
+            .collection('messages')
+            .add(message);
+    }
+
+    // معالجة إدخال الشات
+    function handleChatInput(event) {
+        if (event.key === 'Enter') {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            
+            if (text) {
+                sendMessage(text);
+                input.value = '';
+            }
+        }
+    }
+
+    // إرسال رسالة
+    function sendMessage(text) {
+        if (!currentUserData || !currentRoom) return;
+        
+        const message = {
+            type: 'user',
+            senderId: currentUser.uid,
+            senderName: currentUserData.displayName,
+            avatar: currentUserData.photoURL,
+            text: text,
+            timestamp: new Date()
+        };
+        
+        // حفظ في قاعدة البيانات
+        db.collection('rooms').doc(currentRoom)
+            .collection('messages')
+            .add(message);
+    }
+
+    // تبديل حالة الميكروفون
+    function toggleMic() {
+        if (!localStream) return;
+        
+        const audioTrack = localStream.getAudioTracks()[0];
+        if (audioTrack) {
+            isMuted = !audioTrack.enabled;
+            audioTrack.enabled = !isMuted;
+            
+            updateMicButton();
+            
+            // تحديث في قاعدة البيانات
+            if (currentRoom) {
+                db.collection('rooms').doc(currentRoom).get().then(doc => {
+                    if (doc.exists) {
+                        const roomData = doc.data();
+                        const updatedUsers = roomData.users.map(user => {
+                            if (user.uid === currentUser.uid) {
+                                return { ...user, isMuted: isMuted };
+                            }
+                            return user;
+                        });
+                        
+                        db.collection('rooms').doc(currentRoom).update({
+                            users: updatedUsers
+                        });
+                    }
+                });
+            }
+        }
+    }
+
+    // تحديث زر الميكروفون
+    function updateMicButton() {
+        const micBtn = document.getElementById('micBtn');
+        if (micBtn) {
+            if (isMuted) {
+                micBtn.innerHTML = '<i class="fas fa-microphone-slash"></i>';
+                micBtn.style.background = '#ef4444';
+            } else {
+                micBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+                micBtn.style.background = '#22c55e';
+            }
+        }
+    }
+
+    // كتم جميع المستخدمين
+    function toggleMuteAll() {
+        showNotification('تم كتم جميع المستخدمين', 'info');
+    }
+
+    // دعوة الأصدقاء
+    function inviteFriends() {
+        const inviteLink = `${window.location.origin}/afnan.html?join=${currentRoom}`;
+        navigator.clipboard.writeText(inviteLink).then(() => {
+            showNotification('تم نسخ رابط الدعوة', 'success');
+        });
+    }
+
+    // فتح الهدايا
+    function openGifts() {
+        showNotification('قريباً: متجر الهدايا', 'info');
+    }
+
+    // فتح الإعدادات
+    function openSettings() {
+        showNotification('قريباً: إعدادات الصوت', 'info');
+    }
+
+    // إظهار معلومات الروم
+    function showRoomInfo() {
+        if (!roomData) return;
+        
+        const info = `
+اسم الروم: ${roomData.name}
+المالك: ${roomData.ownerName}
+عدد الأعضاء: ${roomData.users?.length || 0}
+السعة: ${roomData.maxUsers}
+تاريخ الإنشاء: ${new Date(roomData.createdAt?.toDate()).toLocaleDateString('ar-SA')}
+        `;
+        
+        alert(info);
+    }
+
+    // تبديل الشات
+    function toggleChat() {
+        const chatContainer = document.getElementById('chatContainer');
+        const inputContainer = document.querySelector('.input-container');
+        
+        isChatVisible = !isChatVisible;
+        
+        if (isChatVisible) {
+            chatContainer.style.display = 'flex';
+            inputContainer.style.display = 'block';
+        } else {
+            chatContainer.style.display = 'none';
+            inputContainer.style.display = 'none';
+        }
+    }
+
+    // تبديل وضع ملء الشاشة
+    function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(console.error);
+        } else {
+            document.exitFullscreen();
+        }
+    }
+
+    // فتح إعدادات الصوت
+    function openAudioSettings() {
+        // في المتصفحات الحديثة يمكن فتح إعدادات الجهاز
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    // يمكن إضافة واجهة للتحكم في إعدادات الصوت
+                    showNotification('إعدادات الصوت متاحة', 'info');
+                })
+                .catch(console.error);
+        }
+    }
+
+    // تبديل الكاميرا (للمستقبل)
+    function toggleCamera() {
+        showNotification('ميزة الكاميرا قريباً', 'info');
+    }
+
+    // مغادرة الروم
+    async function leaveRoom() {
+        if (confirm('هل تريد مغادرة الروم؟')) {
+            try {
+                // إرسال إشارة مغادرة
+                sendSignal('leave', null);
+                
+                // تحديث الروم
+                if (currentRoom) {
+                    const roomDoc = await db.collection('rooms').doc(currentRoom).get();
+                    if (roomDoc.exists) {
+                        const roomData = roomDoc.data();
+                        const updatedUsers = roomData.users?.filter(u => u.uid !== currentUser.uid) || [];
+                        
+                        if (updatedUsers.length === 0) {
+                            // حذف الروم إذا أصبح فارغاً
+                            await db.collection('rooms').doc(currentRoom).delete();
+                            await rtdb.ref(`rooms/${currentRoom}`).remove();
+                        } else {
+                            await db.collection('rooms').doc(currentRoom).update({
+                                users: updatedUsers,
+                                currentSpeakers: Math.max(updatedUsers.filter(u => u.isSpeaker).length, 1)
+                            });
+                        }
+                    }
+                }
+                
+                // تحديث بيانات المستخدم
+                await db.collection('users').doc(currentUser.uid).update({
+                    currentRoom: null
+                });
+                
+                // إغلاق جميع الاتصالات
+                Object.values(peerConnections).forEach(pc => pc.close());
+                peerConnections = {};
+                
+                if (localStream) {
+                    localStream.getTracks().forEach(track => track.stop());
+                    localStream = null;
+                }
+                
+                // إزالة المستمعين
+                if (messagesListener) messagesListener();
+                if (roomListener) roomListener();
+                if (signalsListener) signalsListener();
+                
+                // إزالة عناصر الصوت
+                document.querySelectorAll('audio[id^="audio-"]').forEach(audio => audio.remove());
+                
+                // العودة للصفحة الرئيسية
+                window.location.href = 'afnan.html';
+                
+            } catch (error) {
+                console.error('Error leaving room:', error);
+                showNotification('حدث خطأ في مغادرة الروم', 'error');
+            }
+        }
+    }
+
+    // إظهار الإشعار
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = 'notification';
+        
+        let icon = 'info-circle';
+        if (type === 'success') icon = 'check-circle';
+        if (type === 'error') icon = 'exclamation-circle';
+        if (type === 'warning') icon = 'exclamation-triangle';
+        
+        notification.innerHTML = `
+            <i class="fas fa-${icon}"></i>
+            <span>${message}</span>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }
+
+    // التحكم في إغلاق الصفحة
+    window.addEventListener('beforeunload', async (e) => {
+        if (currentRoom) {
+            e.preventDefault();
+            e.returnValue = 'أنت في روم صوتي حالياً. هل تريد المغادرة؟';
+            
+            // محاولة مغادرة الروم قبل الإغلاق
+            await leaveRoom();
+        }
+    });
+
+    // التحكم في حالة الإنترنت
+    window.addEventListener('online', () => {
+        showNotification('تم استعادة الاتصال بالإنترنت', 'success');
+    });
+    
+    window.addEventListener('offline', () => {
+        showNotification('فقدان الاتصال بالإنترنت', 'error');
+    });
+</script>
+
+</body>
+</html>
