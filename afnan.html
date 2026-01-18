@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Afnan AI</title>
+    <title>Afnan AI - الرئيسية</title>
     
     <!-- Fonts: Noto Sans Arabic -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;600;800&display=swap" rel="stylesheet">
@@ -15,7 +15,6 @@
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
-        /* --- Base Settings --- */
         * {
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
@@ -36,16 +35,11 @@
             color: #f1f5f9;
         }
 
-        /* --- iOS Glassmorphism --- */
         .glass {
             background: rgba(255, 255, 255, 0.75);
             backdrop-filter: blur(20px) saturate(180%);
             -webkit-backdrop-filter: blur(20px) saturate(180%);
             border: 1px solid rgba(255, 255, 255, 0.6);
-            box-shadow: 
-                0 4px 6px -1px rgba(0, 0, 0, 0.04),
-                0 2px 4px -1px rgba(0, 0, 0, 0.02),
-                inset 0 1px 0 0 rgba(255, 255, 255, 0.4);
         }
 
         .dark-mode .glass {
@@ -59,9 +53,6 @@
             -webkit-backdrop-filter: blur(12px) saturate(180%);
             border: 1px solid rgba(255, 255, 255, 0.4);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 
-                0 2px 8px -2px rgba(0, 0, 0, 0.03),
-                inset 0 1px 0 0 rgba(255, 255, 255, 0.5);
         }
 
         .dark-mode .glass-card {
@@ -72,48 +63,8 @@
 
         .glass-card:active {
             transform: scale(0.97);
-            box-shadow: 
-                0 1px 3px -1px rgba(0, 0, 0, 0.02),
-                inset 0 2px 0 0 rgba(255, 255, 255, 0.3);
         }
 
-        /* --- Avatar & Frame Logic --- */
-        .avatar-wrapper {
-            position: relative;
-            width: 70px;
-            height: 70px;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .avatar-img {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid rgba(255, 255, 255, 0.8);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        }
-
-        .dark-mode .avatar-img {
-            border: 2px solid rgba(51, 65, 85, 0.8);
-        }
-
-        .user-frame {
-            position: absolute;
-            width: 145%; /* أكبر من الصورة */
-            height: 145%;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            pointer-events: none;
-            z-index: 10;
-            object-fit: contain;
-        }
-
-        /* --- Bottom Tab Bar --- */
         .bottom-tab-bar {
             position: fixed;
             bottom: 0;
@@ -125,17 +76,11 @@
             backdrop-filter: blur(20px) saturate(180%);
             -webkit-backdrop-filter: blur(20px) saturate(180%);
             border-top: 1px solid rgba(255, 255, 255, 0.6);
-            box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s ease;
         }
 
         .dark-mode .bottom-tab-bar {
             background: rgba(30, 41, 59, 0.85);
             border-top: 1px solid rgba(51, 65, 85, 0.6);
-        }
-
-        .bottom-tab-bar.hidden {
-            transform: translateY(100%);
         }
 
         .tab-button {
@@ -187,264 +132,33 @@
             font-weight: 600;
         }
 
-        /* --- Stats Grid --- */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-        }
-
-        .stat-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 15px 5px;
-            border-radius: 16px;
-        }
-
-        .stat-value {
-            font-size: 20px;
-            font-weight: 800;
-            margin-bottom: 2px;
-        }
-
-        .stat-label {
-            font-size: 11px;
-            color: #666;
-            font-weight: 600;
-        }
-
-        .dark-mode .stat-label {
-            color: #94a3b8;
-        }
-
-        /* --- Badges Grid --- */
-        .badges-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 0.5rem;
-        }
-
-        /* --- Gift Wall Grid --- */
-        .gifts-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-        }
-
-        /* --- Entrances Grid --- */
-        .entrances-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-        }
-
-        /* --- Chat Styles --- */
-        .message-sent {
-            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-            color: white;
-            border-radius: 20px 20px 4px 20px;
-            margin-left: 20%;
-        }
-
-        .message-received {
-            background: rgba(255, 255, 255, 0.9);
-            color: #1f2937;
-            border-radius: 20px 20px 20px 4px;
-            margin-right: 20%;
-        }
-
-        .dark-mode .message-received {
-            background: rgba(30, 41, 59, 0.9);
-            color: #f1f5f9;
-        }
-
-        /* --- Typing Indicator --- */
-        .typing-indicator {
-            display: inline-block;
-            padding: 8px 12px;
-            background: #f3f4f6;
-            border-radius: 15px;
-            font-size: 12px;
-            color: #6b7280;
-        }
-
-        .dark-mode .typing-indicator {
-            background: #334155;
-            color: #94a3b8;
-        }
-
-        /* --- General Animations --- */
         .fade-in { animation: fadeIn 0.5s ease-out forwards; }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(15px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* --- Entrance Animation --- */
-        .entrance-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: black;
-            z-index: 9999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .entrance-video {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-
-        /* --- Bottom Sheets --- */
-        .bottom-sheet {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: white;
-            border-top-left-radius: 30px;
-            border-top-right-radius: 30px;
-            box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.1);
-            z-index: 100;
-            transform: translateY(100%);
-            transition: transform 0.3s ease-out;
-            max-height: 50vh; /* ربع الشاشة */
-            overflow-y: auto;
-        }
-
-        .dark-mode .bottom-sheet {
-            background: #1e293b;
-        }
-
-        .bottom-sheet.open {
-            transform: translateY(0);
-        }
-
-        .sheet-header {
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            border-bottom: 1px solid #eee;
-        }
-
-        .dark-mode .sheet-header {
-            border-bottom: 1px solid #334155;
-        }
-
-        .sheet-handle {
-            width: 40px;
-            height: 4px;
-            background: #ddd;
-            border-radius: 2px;
-        }
-
-        .dark-mode .sheet-handle {
-            background: #475569;
-        }
-
-        /* --- Emoji Picker --- */
-        .emoji-picker {
-            max-height: 50vh;
-            overflow-y: auto;
-        }
-
-        .emoji-category {
-            margin-bottom: 15px;
-        }
-
-        .emoji-grid {
-            display: grid;
-            grid-template-columns: repeat(8, 1fr);
-            gap: 5px;
-            padding: 10px;
-        }
-
-        .emoji-item {
-            font-size: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 40px;
-            cursor: pointer;
-            transition: background 0.2s;
-            border-radius: 8px;
-        }
-
-        .emoji-item:hover {
-            background: #f3f4f6;
-        }
-
-        .dark-mode .emoji-item:hover {
-            background: #334155;
-        }
-
-        /* --- Dark Mode Toggle --- */
-        .dark-mode-toggle {
-            width: 50px;
-            height: 26px;
-            background: #ccc;
-            border-radius: 13px;
-            position: relative;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        .dark-mode-toggle.active {
-            background: #3b82f6;
-        }
-
-        .dark-mode-toggle::after {
-            content: '';
-            position: absolute;
-            width: 22px;
-            height: 22px;
-            background: white;
-            border-radius: 50%;
-            top: 2px;
-            left: 2px;
-            transition: transform 0.3s;
-        }
-
-        .dark-mode-toggle.active::after {
-            transform: translateX(24px);
-        }
-
-        /* --- Hide Scrollbar --- */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-        /* --- Hidden Sections --- */
-        .page-section {
-            display: none;
-        }
-
-        .page-section.active {
-            display: block;
-        }
     </style>
 </head>
 <body class="antialiased selection:bg-blue-100 selection:text-blue-900">
-    <!-- ================= MAIN APP ================= -->
+    <!-- MAIN APP -->
     <div id="main-app" class="min-h-screen pb-20">
         
         <!-- HEADER -->
         <header id="main-header" class="fixed top-0 left-0 right-0 h-20 z-30 px-6 flex items-center justify-between glass">
-            <!-- Content will be filled by JavaScript -->
+            <h2 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-400" id="header-title">الرئيسية</h2>
+            <div class="flex items-center gap-3" id="header-buttons">
+                <!-- Content will be filled by JavaScript -->
+            </div>
         </header>
 
-        <!-- PAGE SECTIONS -->
+        <!-- PAGE CONTENT -->
         <main class="pt-24 px-5 pb-24">
-            
-            <!-- ================= HOME PAGE ================= -->
-            <section id="page-home" class="page-section active">
-                <!-- HOME BANNER (مصغر) -->
+            <!-- HOME PAGE -->
+            <section id="page-home" class="active">
+                <!-- HOME BANNER -->
                 <div id="homeBanner" class="w-full h-32 rounded-[32px] glass-card mb-6 relative overflow-hidden flex items-center justify-center shadow-sm group"></div>
                 
                 <!-- SEARCH SECTION -->
@@ -458,396 +172,24 @@
                         </button>
                     </div>
                 </div>
-            </section>
 
-            <!-- ================= FRIENDS PAGE ================= -->
-            <section id="page-friends" class="page-section">
-                <div class="relative mb-6">
-                    <input type="text" id="searchUserInput" placeholder="ابحث عن مستخدم بواسطة الـ ID..." 
-                           class="w-full p-4 pr-12 rounded-2xl glass-card border-0 focus:ring-0 focus:outline-none text-sm dark:bg-gray-800 dark:text-white">
-                    <button onclick="searchUser()" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                        <i data-lucide="search" class="w-5 h-5"></i>
-                    </button>
-                </div>
-                <div id="searchResults" class="space-y-3 mb-8 hidden">
-                    <h3 class="font-bold text-lg text-gray-800 dark:text-gray-200">نتائج البحث</h3>
-                    <div id="userResult" class="glass-card p-4 rounded-3xl"></div>
-                </div>
-                <h3 class="font-bold text-lg mb-4 text-gray-800 dark:text-gray-200">طلبات المتابعة</h3>
-                <div id="friendRequestsList" class="space-y-3 mb-6"></div>
-                <h3 class="font-bold text-lg mb-4 text-gray-800 dark:text-gray-200">أصدقائي</h3>
-                <div id="friendsList" class="space-y-3"></div>
-            </section>
-
-            <!-- ================= CHAT PAGE ================= -->
-            <section id="page-chat" class="page-section">
-                <!-- Entrance Animation Container (Hidden by default) -->
-                <div id="entranceAnimation" class="entrance-container hidden"></div>
-
-                <!-- Typing Indicator -->
-                <div id="typingIndicator" class="hidden mb-4">
-                    <div class="typing-indicator inline-block">
-                        <span class="mr-2">يكتب الآن...</span>
-                        <span class="dot">.</span>
-                        <span class="dot">.</span>
-                        <span class="dot">.</span>
-                    </div>
-                </div>
-
-                <!-- CHAT MESSAGES -->
-                <div id="chatMessages" class="space-y-4 mb-6">
-                    <!-- Messages will be loaded here -->
-                </div>
-
-                <!-- MESSAGE INPUT -->
-                <div class="fixed bottom-20 left-4 right-4">
-                    <div class="flex items-center gap-2">
-                        <button onclick="openEmojiPicker()" class="w-12 h-12 rounded-full glass flex items-center justify-center">
-                            <i data-lucide="smile" class="w-5 h-5 text-gray-500"></i>
-                        </button>
-                        <div class="flex-1 relative">
-                            <input type="text" id="messageInput" placeholder="اكتب رسالة..." 
-                                   class="w-full p-4 pr-14 rounded-2xl glass border-0 focus:ring-0 focus:outline-none text-sm dark:bg-gray-800 dark:text-white"
-                                   oninput="handleTyping()">
-                            <button onclick="sendMessage()" class="absolute left-3 top-1/2 transform -translate-y-1/2">
-                                <i data-lucide="send" class="w-5 h-5 text-blue-500"></i>
-                            </button>
-                        </div>
-                        <button onclick="openGiftPicker()" class="w-12 h-12 rounded-full glass flex items-center justify-center">
-                            <i data-lucide="gift" class="w-5 h-5 text-gray-500"></i>
+                <!-- FRIENDS PAGE CONTENT -->
+                <div id="friends-section" class="hidden">
+                    <div class="relative mb-6">
+                        <input type="text" id="searchUserInput" placeholder="ابحث عن مستخدم بواسطة الـ ID..." 
+                               class="w-full p-4 pr-12 rounded-2xl glass-card border-0 focus:ring-0 focus:outline-none text-sm dark:bg-gray-800 dark:text-white">
+                        <button onclick="searchUser()" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                            <i data-lucide="search" class="w-5 h-5"></i>
                         </button>
                     </div>
-                </div>
-            </section>
-
-            <!-- ================= PROFILE PAGE ================= -->
-            <section id="page-profile" class="page-section">
-                <!-- PROFILE INFO -->
-                <div class="text-center mb-8">
-                    <div class="avatar-wrapper mb-4">
-                        <img id="userAvatar" src="https://via.placeholder.com/150" class="avatar-img">
-                        <img id="userFrame" src="" class="user-frame hidden">
+                    <div id="searchResults" class="space-y-3 mb-8 hidden">
+                        <h3 class="font-bold text-lg text-gray-800 dark:text-gray-200">نتائج البحث</h3>
+                        <div id="userResult" class="glass-card p-4 rounded-3xl"></div>
                     </div>
-                    <h3 id="userName" class="text-2xl font-black text-gray-900 dark:text-white mb-1">...</h3>
-                    <div class="inline-flex items-center gap-2 bg-gray-100/50 dark:bg-gray-800/50 px-3 py-1 rounded-lg border border-gray-200/50 dark:border-gray-700/50">
-                        <span class="text-xs font-bold text-gray-400">ID:</span>
-                        <span id="userId" class="text-sm font-mono font-medium text-gray-600 dark:text-gray-300">...</span>
-                        <button onclick="copyID()" class="text-gray-400 hover:text-black dark:hover:text-white"><i data-lucide="copy" class="w-3 h-3"></i></button>
-                    </div>
-                </div>
-
-                <!-- STATS -->
-                <div class="stats-grid mb-8">
-                    <div class="stat-item glass-card">
-                        <div class="stat-value" id="friendsCount">0</div>
-                        <div class="stat-label">أصدقاء</div>
-                    </div>
-                    <div class="stat-item glass-card">
-                        <div class="stat-value" id="followCount">0</div>
-                        <div class="stat-label">متابعون</div>
-                    </div>
-                    <div class="stat-item glass-card">
-                        <div class="stat-value" id="fansCount">0</div>
-                        <div class="stat-label">معجبون</div>
-                    </div>
-                </div>
-
-                <!-- LEVELS -->
-                <div class="mb-6">
-                    <h3 class="font-bold text-lg mb-4 text-gray-800 dark:text-gray-200">المستويات</h3>
-                    <div class="flex gap-3">
-                        <div class="flex-1 glass-card p-4 rounded-2xl flex flex-col items-center justify-center">
-                            <div class="w-20 h-20 flex items-center justify-center overflow-hidden mb-2">
-                                <img id="magicLevelImg" src="" class="w-full h-full object-contain">
-                            </div>
-                            <span class="text-sm font-bold">السحر</span>
-                            <span class="text-xs text-gray-500 dark:text-gray-400">المستوى <span id="magicLevelText">1</span></span>
-                        </div>
-                        <div class="flex-1 glass-card p-4 rounded-2xl flex flex-col items-center justify-center">
-                            <div class="w-20 h-20 flex items-center justify-center overflow-hidden mb-2">
-                                <img id="wealthLevelImg" src="" class="w-full h-full object-contain">
-                            </div>
-                            <span class="text-sm font-bold">الثروة</span>
-                            <span class="text-xs text-gray-500 dark:text-gray-400">المستوى <span id="wealthLevelText">1</span></span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ACTIVE BADGES -->
-                <div class="mb-6">
-                    <h3 class="font-bold text-lg mb-4 text-gray-800 dark:text-gray-200">الشارات النشطة</h3>
-                    <div id="activeBadgesGrid" class="badges-grid mb-4"></div>
-                </div>
-
-                <!-- PROFILE ACTIONS -->
-                <div class="space-y-3 mb-6">
-                    <div onclick="switchPage('wallet')" class="glass-card p-4 rounded-3xl flex items-center justify-between cursor-pointer hover:bg-white dark:hover:bg-gray-800 transition">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-2xl bg-yellow-50 dark:bg-yellow-900/30 flex items-center justify-center">
-                                <i data-lucide="wallet" class="w-5 h-5 text-yellow-500"></i>
-                            </div>
-                            <span class="font-bold text-gray-700 dark:text-gray-300">المحفظة</span>
-                        </div>
-                        <i data-lucide="chevron-left" class="w-5 h-5 text-gray-400"></i>
-                    </div>
-                    
-                    <div onclick="switchPage('store')" class="glass-card p-4 rounded-3xl flex items-center justify-between cursor-pointer hover:bg-white dark:hover:bg-gray-800 transition">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-2xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
-                                <i data-lucide="shopping-bag" class="w-5 h-5 text-blue-500"></i>
-                            </div>
-                            <span class="font-bold text-gray-700 dark:text-gray-300">المتجر</span>
-                        </div>
-                        <i data-lucide="chevron-left" class="w-5 h-5 text-gray-400"></i>
-                    </div>
-                    
-                    <div onclick="switchPage('bag')" class="glass-card p-4 rounded-3xl flex items-center justify-between cursor-pointer hover:bg-white dark:hover:bg-gray-800 transition">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-2xl bg-purple-50 dark:bg-purple-900/30 flex items-center justify-center">
-                                <i data-lucide="backpack" class="w-5 h-5 text-purple-500"></i>
-                            </div>
-                            <span class="font-bold text-gray-700 dark:text-gray-300">حقيبتي</span>
-                        </div>
-                        <i data-lucide="chevron-left" class="w-5 h-5 text-gray-400"></i>
-                    </div>
-                    
-                    <div onclick="switchPage('full-profile')" class="glass-card p-4 rounded-3xl flex items-center justify-between cursor-pointer hover:bg-white dark:hover:bg-gray-800 transition">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-2xl bg-red-50 dark:bg-red-900/30 flex items-center justify-center">
-                                <i data-lucide="gift" class="w-5 h-5 text-red-500"></i>
-                            </div>
-                            <span class="font-bold text-gray-700 dark:text-gray-300">جدار الهدايا</span>
-                        </div>
-                        <i data-lucide="chevron-left" class="w-5 h-5 text-gray-400"></i>
-                    </div>
-
-                    <div onclick="switchPage('blocked-users')" class="glass-card p-4 rounded-3xl flex items-center justify-between cursor-pointer hover:bg-white dark:hover:bg-gray-800 transition">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-2xl bg-gray-900 flex items-center justify-center">
-                                <i data-lucide="shield" class="w-5 h-5 text-white"></i>
-                            </div>
-                            <span class="font-bold text-gray-700 dark:text-gray-300">المستخدمون المحظورون</span>
-                        </div>
-                        <i data-lucide="chevron-left" class="w-5 h-5 text-gray-400"></i>
-                    </div>
-
-                    <div onclick="switchPage('settings')" class="glass-card p-4 rounded-3xl flex items-center justify-between cursor-pointer hover:bg-white dark:hover:bg-gray-800 transition">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-2xl bg-gray-900 flex items-center justify-center">
-                                <i data-lucide="settings" class="w-5 h-5 text-white"></i>
-                            </div>
-                            <span class="font-bold text-gray-700 dark:text-gray-300">الإعدادات</span>
-                        </div>
-                        <i data-lucide="chevron-left" class="w-5 h-5 text-gray-400"></i>
-                    </div>
-                </div>
-            </section>
-
-            <!-- ================= FULL PROFILE PAGE (Gift Wall) ================= -->
-            <section id="page-full-profile" class="page-section">
-                <div class="text-center mb-8">
-                    <div class="avatar-wrapper mb-4" style="width: 100px; height: 100px;">
-                        <img id="fullUserAvatar" src="https://via.placeholder.com/150" class="avatar-img">
-                        <img id="fullUserFrame" src="" class="user-frame hidden">
-                    </div>
-                    <h3 id="fullUserName" class="text-2xl font-black text-gray-900 dark:text-white mb-1">...</h3>
-                    <div class="inline-flex items-center gap-2 bg-gray-100/50 dark:bg-gray-800/50 px-3 py-1 rounded-lg border border-gray-200/50 dark:border-gray-700/50 mb-4">
-                        <span class="text-xs font-bold text-gray-400">ID:</span>
-                        <span id="fullUserId" class="text-sm font-mono font-medium text-gray-600 dark:text-gray-300">...</span>
-                    </div>
-
-                    <!-- LEVELS -->
-                    <div class="mb-8">
-                        <h3 class="font-bold text-lg mb-4 text-gray-800 dark:text-gray-200">المستويات</h3>
-                        <div class="flex gap-3">
-                            <div class="flex-1 glass-card p-4 rounded-2xl flex flex-col items-center justify-center">
-                                <div class="w-20 h-20 flex items-center justify-center overflow-hidden mb-2">
-                                    <img id="fullMagicLevelImg" src="" class="w-full h-full object-contain">
-                                </div>
-                                <span class="text-sm font-bold">السحر</span>
-                                <span class="text-xs text-gray-500 dark:text-gray-400">المستوى <span id="fullMagicLevelText">1</span></span>
-                            </div>
-                            <div class="flex-1 glass-card p-4 rounded-2xl flex flex-col items-center justify-center">
-                                <div class="w-20 h-20 flex items-center justify-center overflow-hidden mb-2">
-                                    <img id="fullWealthLevelImg" src="" class="w-full h-full object-contain">
-                                </div>
-                                <span class="text-sm font-bold">الثروة</span>
-                                <span class="text-xs text-gray-500 dark:text-gray-400">المستوى <span id="fullWealthLevelText">1</span></span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- GIFTS WALL -->
-                    <h3 class="font-bold text-lg mb-4 text-gray-800 dark:text-gray-200 text-right">🎁 جدار الهدايا</h3>
-                    <div id="giftsWall" class="gifts-grid mb-8">
-                        <!-- Gifts will be loaded here -->
-                    </div>
-                    
-                    <button onclick="switchPage('profile')" class="w-full py-3 rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold hover:bg-gray-200 dark:hover:bg-gray-700 transition">
-                        العودة للملف الشخصي
-                    </button>
-                </div>
-            </section>
-
-            <!-- ================= WALLET PAGE ================= -->
-            <section id="page-wallet" class="page-section">
-                <!-- WORK BALANCE -->
-                <div class="glass-card rounded-[40px] p-8 text-center mb-8 relative overflow-hidden">
-                    <div class="absolute -top-20 -left-20 w-48 h-48 bg-yellow-200/30 dark:bg-yellow-900/20 rounded-full blur-3xl"></div>
-                    <div class="relative z-10">
-                        <p class="text-gray-500 dark:text-gray-400 text-sm font-semibold mb-2">الرصيد الكلي</p>
-                        <h2 class="text-6xl font-black text-gray-900 dark:text-white tracking-tight mb-2" id="walletAmount">0</h2>
-                        <span class="inline-flex items-center gap-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 px-3 py-1 rounded-full text-xs font-bold">
-                            <i data-lucide="coins" class="w-3 h-3"></i> عملة ذهبية
-                        </span>
-                    </div>
-                </div>
-                
-                <!-- DIAMONDS -->
-                <div class="glass-card rounded-[40px] p-8 text-center mb-8 relative overflow-hidden">
-                    <div class="absolute -top-20 -left-20 w-48 h-48 bg-purple-200/30 dark:bg-purple-900/20 rounded-full blur-3xl"></div>
-                    <div class="relative z-10">
-                        <p class="text-gray-500 dark:text-gray-400 text-sm font-semibold mb-2">الألماس</p>
-                        <h2 class="text-6xl font-black text-gray-900 dark:text-white tracking-tight mb-2" id="diamondAmount">0</h2>
-                        <span class="inline-flex items-center gap-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-3 py-1 rounded-full text-xs font-bold">
-                            <i data-lucide="gem" class="w-3 h-3"></i> ألماس
-                        </span>
-                    </div>
-                </div>
-
-                <h3 class="font-bold text-xl mb-4 mr-2 dark:text-gray-200">شحن الرصيد</h3>
-                <div class="grid grid-cols-2 gap-4 mb-6">
-                    <div onclick="recharge(85000)" class="glass-card p-6 rounded-3xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-white dark:hover:bg-gray-800 transition">
-                        <span class="text-2xl font-black text-gray-900 dark:text-white">85,000</span>
-                        <span class="text-gray-400 dark:text-gray-500 text-xs">$1</span>
-                    </div>
-                    <div onclick="recharge(170000)" class="glass-card p-6 rounded-3xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-white dark:hover:bg-gray-800 transition">
-                        <span class="text-2xl font-black text-gray-900 dark:text-white">170,000</span>
-                        <span class="text-gray-400 dark:text-gray-500 text-xs">$2</span>
-                    </div>
-                    <div onclick="recharge(340000)" class="glass-card p-6 rounded-3xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-white dark:hover:bg-gray-800 transition">
-                        <span class="text-2xl font-black text-gray-900 dark:text-white">340,000</span>
-                        <span class="text-gray-400 dark:text-gray-500 text-xs">$4</span>
-                    </div>
-                    <div onclick="recharge(680000)" class="glass-card p-6 rounded-3xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-white dark:hover:bg-gray-800 transition">
-                        <span class="text-2xl font-black text-gray-900 dark:text-white">680,000</span>
-                        <span class="text-gray-400 dark:text-gray-500 text-xs">$8</span>
-                    </div>
-                </div>
-
-                <h3 class="font-bold text-xl mb-4 mr-2 dark:text-gray-200">تاريخ الشحن</h3>
-                <div id="rechargeHistory" class="space-y-3 mb-8">
-                    <!-- Recharge history will be loaded here -->
-                    <div class="glass-card p-4 rounded-3xl flex items-center justify-between">
-                        <div>
-                            <p class="font-bold text-sm dark:text-gray-300">شحن رصيد</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">اليوم 10:30 صباحاً</p>
-                        </div>
-                        <span class="text-green-600 font-bold">+85,000</span>
-                    </div>
-                </div>
-            </section>
-
-            <!-- ================= STORE PAGE ================= -->
-            <section id="page-store" class="page-section">
-                <!-- STORE TABS -->
-                <div class="flex gap-3 mb-6 overflow-x-auto no-scrollbar pb-2">
-                    <button onclick="loadStoreItems('frames')" id="store-tab-frames" class="flex-none px-6 py-2.5 bg-gray-900 text-white rounded-full font-bold text-sm shadow-lg hover:bg-gray-800 transition">إطارات</button>
-                    <button onclick="loadStoreItems('badges')" id="store-tab-badges" class="flex-none px-6 py-2.5 glass-card text-gray-600 dark:text-gray-300 rounded-full font-bold text-sm hover:bg-white dark:hover:bg-gray-800 transition">شارات</button>
-                    <button onclick="loadStoreItems('entrances')" id="store-tab-entrances" class="flex-none px-6 py-2.5 glass-card text-gray-600 dark:text-gray-300 rounded-full font-bold text-sm hover:bg-white dark:hover:bg-gray-800 transition">الدخلات</button>
-                </div>
-
-                <!-- STORE ITEMS GRID -->
-                <div id="storeGrid" class="grid grid-cols-2 gap-4 pb-20"></div>
-            </section>
-
-            <!-- ================= BAG PAGE ================= -->
-            <section id="page-bag" class="page-section">
-                <h3 class="font-bold text-lg mb-4 text-gray-800 dark:text-gray-200">إطاراتي</h3>
-                <div id="bagGrid" class="grid grid-cols-3 gap-3 mb-8"></div>
-                
-                <h3 class="font-bold text-lg mb-4 text-gray-800 dark:text-gray-200">شاراتي</h3>
-                <div id="badgesBagGrid" class="badges-grid mb-8"></div>
-                
-                <h3 class="font-bold text-lg mb-4 text-gray-800 dark:text-gray-200">الدخلات النشطة</h3>
-                <div id="activeEntrancesGrid" class="entrances-grid mb-8">
-                    <!-- Active entrances will be loaded here -->
-                </div>
-            </section>
-
-            <!-- ================= BLOCKED USERS PAGE ================= -->
-            <section id="page-blocked-users" class="page-section">
-                <h3 class="font-bold text-xl mb-6 text-gray-800 dark:text-gray-200">المستخدمون المحظورون</h3>
-                <div id="blockedUsersList" class="space-y-3">
-                    <!-- Blocked users will be loaded here -->
-                </div>
-            </section>
-
-            <!-- ================= SETTINGS PAGE ================= -->
-            <section id="page-settings" class="page-section">
-                <h3 class="font-bold text-xl mb-6 text-gray-800 dark:text-gray-200">الإعدادات</h3>
-                
-                <div class="space-y-4 mb-8">
-                    <!-- الوضع الليلي -->
-                    <div class="glass-card p-4 rounded-3xl flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-2xl bg-gray-900 flex items-center justify-center">
-                                <i data-lucide="moon" class="w-5 h-5 text-white"></i>
-                            </div>
-                            <div>
-                                <span class="font-bold text-gray-700 dark:text-gray-300 block">الوضع الليلي</span>
-                                <span class="text-xs text-gray-500 dark:text-gray-400">تبديل الوضع الداكن</span>
-                            </div>
-                        </div>
-                        <div id="darkModeToggle" class="dark-mode-toggle" onclick="toggleDarkMode()"></div>
-                    </div>
-                    
-                    <!-- القائمة السوداء -->
-                    <div onclick="switchPage('blocked-users')" class="glass-card p-4 rounded-3xl flex items-center justify-between cursor-pointer hover:bg-white dark:hover:bg-gray-800 transition">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-2xl bg-red-50 dark:bg-red-900/30 flex items-center justify-center">
-                                <i data-lucide="user-x" class="w-5 h-5 text-red-500"></i>
-                            </div>
-                            <div>
-                                <span class="font-bold text-gray-700 dark:text-gray-300 block">القائمة السوداء</span>
-                                <span class="text-xs text-gray-500 dark:text-gray-400">إدارة المستخدمين المحظورين</span>
-                            </div>
-                        </div>
-                        <i data-lucide="chevron-left" class="w-5 h-5 text-gray-400"></i>
-                    </div>
-                    
-                    <!-- سياسة الخصوصية -->
-                    <div onclick="openPrivacyPolicy()" class="glass-card p-4 rounded-3xl flex items-center justify-between cursor-pointer hover:bg-white dark:hover:bg-gray-800 transition">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-2xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
-                                <i data-lucide="shield" class="w-5 h-5 text-blue-500"></i>
-                            </div>
-                            <div>
-                                <span class="font-bold text-gray-700 dark:text-gray-300 block">سياسة الخصوصية</span>
-                                <span class="text-xs text-gray-500 dark:text-gray-400">قراءة سياسة الخصوصية</span>
-                            </div>
-                        </div>
-                        <i data-lucide="chevron-left" class="w-5 h-5 text-gray-400"></i>
-                    </div>
-                    
-                    <!-- اتفاقية المستخدم -->
-                    <div onclick="openTermsOfService()" class="glass-card p-4 rounded-3xl flex items-center justify-between cursor-pointer hover:bg-white dark:hover:bg-gray-800 transition">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-2xl bg-green-50 dark:bg-green-900/30 flex items-center justify-center">
-                                <i data-lucide="file-text" class="w-5 h-5 text-green-500"></i>
-                            </div>
-                            <div>
-                                <span class="font-bold text-gray-700 dark:text-gray-300 block">اتفاقية المستخدم</span>
-                                <span class="text-xs text-gray-500 dark:text-gray-400">قراءة شروط الاستخدام</span>
-                            </div>
-                        </div>
-                        <i data-lucide="chevron-left" class="w-5 h-5 text-gray-400"></i>
-                    </div>
-                    
-                    <!-- تسجيل الخروج -->
-                    <button onclick="confirmLogout()" class="w-full mt-8 py-3 rounded-2xl bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 font-bold hover:bg-red-100 dark:hover:bg-red-900/50 transition">
-                        تسجيل الخروج
-                    </button>
+                    <h3 class="font-bold text-lg mb-4 text-gray-800 dark:text-gray-200">طلبات المتابعة</h3>
+                    <div id="friendRequestsList" class="space-y-3 mb-6"></div>
+                    <h3 class="font-bold text-lg mb-4 text-gray-800 dark:text-gray-200">أصدقائي</h3>
+                    <div id="friendsList" class="space-y-3"></div>
                 </div>
             </section>
         </main>
@@ -862,112 +204,21 @@
                 <i data-lucide="users" class="tab-icon"></i>
                 <span class="tab-label">الأصدقاء</span>
             </button>
-            <button onclick="switchPage('profile')" class="tab-button">
+            <button onclick="goToProfile()" class="tab-button">
                 <i data-lucide="user" class="tab-icon"></i>
                 <span class="tab-label">الملف</span>
             </button>
         </nav>
     </div>
 
-    <!-- ================= MODALS ================= -->
-    
-    <!-- EDIT MODAL -->
-    <div id="editModal" class="fixed inset-0 z-[60] hidden flex items-center justify-center px-4">
-        <div class="absolute inset-0 bg-black/20 backdrop-blur-sm" onclick="closeEditModal()"></div>
-        <div class="relative w-full max-w-sm glass-deep rounded-[40px] p-6 shadow-2xl fade-in dark:bg-gray-800">
-            <h3 class="text-center font-bold text-xl mb-6 dark:text-white">تعديل الملف</h3>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-gray-400 mb-2 mr-2">الاسم الظاهر</label>
-                    <input id="editNameInp" type="text" class="w-full p-4 rounded-2xl bg-gray-50/50 dark:bg-gray-700 dark:text-white border border-gray-100 dark:border-gray-600 focus:bg-white dark:focus:bg-gray-600 focus:outline-none transition font-bold text-center">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-400 mb-2 mr-2">رابط الصورة</label>
-                    <input id="editPhotoInp" type="text" class="w-full p-4 rounded-2xl bg-gray-50/50 dark:bg-gray-700 dark:text-white border border-gray-100 dark:border-gray-600 focus:bg-white dark:focus:bg-gray-600 focus:outline-none transition text-xs text-center text-gray-500 dark:text-gray-400">
-                </div>
-            </div>
-            <div class="flex gap-3 mt-8">
-                <button onclick="closeEditModal()" class="flex-1 py-3 rounded-2xl bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-300 font-bold hover:bg-gray-200 dark:hover:bg-gray-600">إلغاء</button>
-                <button onclick="saveProfileChanges()" class="flex-1 py-3 rounded-2xl bg-black dark:bg-gray-900 text-white font-bold hover:shadow-lg hover:-translate-y-1 transition">حفظ</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- GIFT PICKER MODAL (Bottom Sheet) -->
-    <div id="giftPickerModal" class="bottom-sheet">
-        <div class="sheet-header">
-            <div class="sheet-handle"></div>
-        </div>
-        <div class="p-6">
-            <h3 class="font-bold text-xl mb-6 text-center dark:text-white">اختر هدية</h3>
-            <div id="giftGrid" class="grid grid-cols-3 gap-3 mb-6">
-                <!-- Gifts will be loaded here -->
-            </div>
-            <div class="flex gap-3">
-                <button onclick="closeGiftPicker()" class="flex-1 py-3 rounded-2xl bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-300 font-bold hover:bg-gray-200 dark:hover:bg-gray-600">إلغاء</button>
-                <button onclick="sendGift()" class="flex-1 py-3 rounded-2xl bg-black dark:bg-gray-900 text-white font-bold hover:shadow-lg hover:-translate-y-1 transition">إرسال</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- EMOJI PICKER MODAL (Bottom Sheet) -->
-    <div id="emojiPickerModal" class="bottom-sheet">
-        <div class="sheet-header">
-            <div class="sheet-handle"></div>
-        </div>
-        <div class="p-4 emoji-picker">
-            <h3 class="font-bold text-lg mb-4 text-center dark:text-white">الإيموجيات</h3>
-            <div id="emojiGrid" class="emoji-grid">
-                <!-- Emojis will be loaded here -->
-            </div>
-        </div>
-    </div>
-
-    <!-- GIFT BOX BOTTOM SHEET -->
-    <div id="giftBoxSheet" class="bottom-sheet">
-        <div class="sheet-header">
-            <div class="sheet-handle"></div>
-        </div>
-        <div class="p-6">
-            <h3 class="font-bold text-xl mb-6 text-center dark:text-white">صندوق الهدايا</h3>
-            <div id="giftBoxContent" class="grid grid-cols-3 gap-4 mb-6">
-                <!-- Gifts will be loaded here -->
-                <div class="glass-card p-4 rounded-2xl flex flex-col items-center justify-center">
-                    <div class="w-16 h-16 bg-yellow-100 dark:bg-yellow-900/30 rounded-xl flex items-center justify-center mb-2">
-                        <i data-lucide="coin" class="w-8 h-8 text-yellow-600 dark:text-yellow-400"></i>
-                    </div>
-                    <span class="text-xs font-bold text-center dark:text-white">5,000</span>
-                    <span class="text-[10px] text-gray-500 dark:text-gray-400">عملة ذهبية</span>
-                </div>
-                <div class="glass-card p-4 rounded-2xl flex flex-col items-center justify-center">
-                    <div class="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center mb-2">
-                        <i data-lucide="diamond" class="w-8 h-8 text-purple-600 dark:text-purple-400"></i>
-                    </div>
-                    <span class="text-xs font-bold text-center dark:text-white">10</span>
-                    <span class="text-[10px] text-gray-500 dark:text-gray-400">ألماس</span>
-                </div>
-                <div class="glass-card p-4 rounded-2xl flex flex-col items-center justify-center">
-                    <div class="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center mb-2">
-                        <i data-lucide="gift" class="w-8 h-8 text-green-600 dark:text-green-400"></i>
-                    </div>
-                    <span class="text-xs font-bold text-center dark:text-white">هدية</span>
-                    <span class="text-[10px] text-gray-500 dark:text-gray-400">عشوائية</span>
-                </div>
-            </div>
-            <button onclick="claimGiftBox()" class="w-full py-4 bg-black dark:bg-gray-900 text-white rounded-2xl font-bold hover:bg-gray-800 dark:hover:bg-gray-700 transition">
-                فتح الصندوق
-            </button>
-        </div>
-    </div>
-
+    <!-- FIREBASE AND APP SCRIPT -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { 
             getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, 
             collection, getDocs, increment, query, where, arrayUnion, 
-            arrayRemove, orderBy, addDoc, serverTimestamp, deleteDoc,
-            writeBatch
+            arrayRemove, orderBy
         } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -987,19 +238,10 @@
         let userData = {};
         let storeData = { frames: [], badges: [], entrances: [], gifts: [], magicLevels: {}, wealthLevels: {} };
         let currentPage = 'home';
-        let selectedGift = null;
-        let currentChatId = null;
-        let chatPartner = null;
-        let chatUnsubscribe = null;
-        let typingTimeout = null;
-        let isTyping = false;
 
-        // Check dark mode from localStorage
+        // Check dark mode
         const isDarkMode = localStorage.getItem('darkMode') === 'true';
-        if (isDarkMode) {
-            document.body.classList.add('dark-mode');
-            document.getElementById('darkModeToggle')?.classList.add('active');
-        }
+        if (isDarkMode) document.body.classList.add('dark-mode');
 
         // Initialize app
         onAuthStateChanged(auth, async (user) => {
@@ -1007,11 +249,8 @@
                 onSnapshot(doc(db, "users", user.uid), async (docSnap) => {
                     if (docSnap.exists()) {
                         userData = docSnap.data();
-                        await updateUI();
                         await loadFriendRequests();
                         await loadFriends();
-                        await loadGiftsWall();
-                        await loadBlockedUsers();
                     } else {
                         await createUserDoc(user);
                     }
@@ -1020,181 +259,44 @@
                 await loadBanner();
                 updateHeader();
             } else {
-                window.location.href = 'index.html';
+                window.location.href = 'login.html';
             }
         });
 
-        // Page Navigation
+        // Navigation
         window.switchPage = (page) => {
-            // Hide all pages
-            document.querySelectorAll('.page-section').forEach(section => {
-                section.classList.remove('active');
-            });
-            
-            // Show selected page
-            document.getElementById(`page-${page}`).classList.add('active');
             currentPage = page;
+            const friendsSection = document.getElementById('friends-section');
+            const headerTitle = document.getElementById('header-title');
+            const headerButtons = document.getElementById('header-buttons');
             
-            // Update header
-            updateHeader();
-            
-            // Show/hide bottom tab bar
-            const bottomTabBar = document.getElementById('bottomTabBar');
-            if (page === 'chat') {
-                bottomTabBar.classList.add('hidden');
-            } else {
-                bottomTabBar.classList.remove('hidden');
-            }
-            
-            // Update active tab buttons
+            // Update active tab
             document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
             if (page === 'home') {
-                document.querySelectorAll('.tab-button')[0]?.classList.add('active');
+                document.querySelector('.tab-button:nth-child(1)').classList.add('active');
+                friendsSection.classList.add('hidden');
+                headerTitle.textContent = 'الرئيسية';
+                headerButtons.innerHTML = `
+                    <button onclick="openNotifications()" class="w-10 h-10 rounded-full flex items-center justify-center active:scale-90 transition">
+                        <i data-lucide="bell" class="text-black dark:text-white w-5 h-5"></i>
+                    </button>
+                `;
             } else if (page === 'friends') {
-                document.querySelectorAll('.tab-button')[1]?.classList.add('active');
-            } else if (page === 'profile') {
-                document.querySelectorAll('.tab-button')[2]?.classList.add('active');
+                document.querySelector('.tab-button:nth-child(2)').classList.add('active');
+                friendsSection.classList.remove('hidden');
+                headerTitle.textContent = 'الأصدقاء';
+                headerButtons.innerHTML = '';
             }
             
-            // Load page-specific content
-            if (page === 'store') {
-                loadStoreItems('frames');
-            } else if (page === 'wallet') {
-                document.getElementById('walletAmount').innerText = (userData.balance || 0).toLocaleString();
-                document.getElementById('diamondAmount').innerText = (userData.diamonds || 0).toLocaleString();
-            } else if (page === 'friends') {
-                loadFriendRequests();
-                loadFriends();
-            } else if (page === 'full-profile') {
-                loadFullProfileData();
-            } else if (page === 'bag') {
-                loadBagItems();
-            } else if (page === 'blocked-users') {
-                loadBlockedUsers();
-            } else if (page === 'chat') {
-                // Stop previous chat listener
-                if (chatUnsubscribe) {
-                    chatUnsubscribe();
-                    chatUnsubscribe = null;
-                }
-            } else if (page === 'settings') {
-                updateDarkModeToggle();
-            }
+            lucide.createIcons();
+        };
+
+        window.goToProfile = () => {
+            window.location.href = 'me.html';
         };
 
         function updateHeader() {
-            const header = document.getElementById('main-header');
-            let headerHTML = '';
-            
-            switch(currentPage) {
-                case 'home':
-                    headerHTML = `
-                        <h2 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-400">الرئيسية</h2>
-                        <div class="flex items-center gap-3">
-                            <button onclick="openNotifications()" class="w-10 h-10 rounded-full flex items-center justify-center active:scale-90 transition">
-                                <i data-lucide="bell" class="text-black dark:text-white w-5 h-5"></i>
-                            </button>
-                        </div>
-                    `;
-                    break;
-                    
-                case 'friends':
-                    headerHTML = `
-                        <h2 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-400">الأصدقاء</h2>
-                        <div class="w-10 h-10"></div>
-                    `;
-                    break;
-                    
-                case 'chat':
-                    headerHTML = `
-                        <button onclick="closeChat()" class="w-10 h-10 rounded-full flex items-center justify-center active:scale-90 transition">
-                            <i data-lucide="arrow-right" class="text-black dark:text-white w-5 h-5"></i>
-                        </button>
-                        <h2 id="chatTitle" class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-400">الدردشة</h2>
-                        <div class="flex items-center gap-3">
-                            <button onclick="openChatInfo()" class="w-10 h-10 rounded-full flex items-center justify-center active:scale-90 transition">
-                                <i data-lucide="info" class="text-black dark:text-white w-5 h-5"></i>
-                            </button>
-                        </div>
-                    `;
-                    break;
-                    
-                case 'profile':
-                    headerHTML = `
-                        <h2 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-400">ملفي الشخصي</h2>
-                        <div class="flex items-center gap-3">
-                            <button onclick="openEditProfile()" class="w-10 h-10 rounded-full flex items-center justify-center active:scale-90 transition">
-                                <i data-lucide="edit-3" class="text-black dark:text-white w-5 h-5"></i>
-                            </button>
-                            <button onclick="switchPage('settings')" class="w-10 h-10 rounded-full flex items-center justify-center active:scale-90 transition">
-                                <i data-lucide="settings" class="text-black dark:text-white w-5 h-5"></i>
-                            </button>
-                        </div>
-                    `;
-                    break;
-                    
-                case 'full-profile':
-                    headerHTML = `
-                        <button onclick="switchPage('profile')" class="w-10 h-10 rounded-full flex items-center justify-center active:scale-90 transition">
-                            <i data-lucide="arrow-right" class="text-black dark:text-white w-5 h-5"></i>
-                        </button>
-                        <h2 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-400">جدار الهدايا</h2>
-                        <div class="w-10 h-10"></div>
-                    `;
-                    break;
-                    
-                case 'wallet':
-                    headerHTML = `
-                        <button onclick="switchPage('profile')" class="w-10 h-10 rounded-full flex items-center justify-center active:scale-90 transition">
-                            <i data-lucide="arrow-right" class="text-black dark:text-white w-5 h-5"></i>
-                        </button>
-                        <h2 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-400">المحفظة</h2>
-                        <div class="w-10 h-10"></div>
-                    `;
-                    break;
-                    
-                case 'store':
-                    headerHTML = `
-                        <button onclick="switchPage('profile')" class="w-10 h-10 rounded-full flex items-center justify-center active:scale-90 transition">
-                            <i data-lucide="arrow-right" class="text-black dark:text-white w-5 h-5"></i>
-                        </button>
-                        <h2 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-400">المتجر</h2>
-                        <div class="w-10 h-10"></div>
-                    `;
-                    break;
-                    
-                case 'bag':
-                    headerHTML = `
-                        <button onclick="switchPage('profile')" class="w-10 h-10 rounded-full flex items-center justify-center active:scale-90 transition">
-                            <i data-lucide="arrow-right" class="text-black dark:text-white w-5 h-5"></i>
-                        </button>
-                        <h2 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-400">حقيبتي</h2>
-                        <div class="w-10 h-10"></div>
-                    `;
-                    break;
-                    
-                case 'blocked-users':
-                    headerHTML = `
-                        <button onclick="switchPage('profile')" class="w-10 h-10 rounded-full flex items-center justify-center active:scale-90 transition">
-                            <i data-lucide="arrow-right" class="text-black dark:text-white w-5 h-5"></i>
-                        </button>
-                        <h2 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-400">المستخدمون المحظورين</h2>
-                        <div class="w-10 h-10"></div>
-                    `;
-                    break;
-                    
-                case 'settings':
-                    headerHTML = `
-                        <button onclick="switchPage('profile')" class="w-10 h-10 rounded-full flex items-center justify-center active:scale-90 transition">
-                            <i data-lucide="arrow-right" class="text-black dark:text-white w-5 h-5"></i>
-                        </button>
-                        <h2 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-400">الإعدادات</h2>
-                        <div class="w-10 h-10"></div>
-                    `;
-                    break;
-            }
-            
-            header.innerHTML = headerHTML;
+            // Already updated in switchPage
             lucide.createIcons();
         }
 
@@ -1251,268 +353,6 @@
                 console.error("Error loading global data:", error);
             }
         }
-
-        async function updateUI() {
-            if (!auth.currentUser) return;
-            
-            // Profile page
-            document.getElementById('userName').innerText = userData.displayName || "مستخدم";
-            document.getElementById('userId').innerText = userData.customId || "000000";
-            document.getElementById('userAvatar').src = userData.photoURL || 'https://via.placeholder.com/150';
-            
-            // Stats
-            document.getElementById('friendsCount').innerText = userData.friends?.length || 0;
-            document.getElementById('followCount').innerText = userData.followers?.length || 0;
-            document.getElementById('fansCount').innerText = userData.fans?.length || 0;
-            
-            // Levels - Update from Firebase
-            const ml = userData.magicLevel || 1;
-            const wl = userData.wealthLevel || 1;
-            
-            const magicImg = document.getElementById('magicLevelImg');
-            const wealthImg = document.getElementById('wealthLevelImg');
-            document.getElementById('magicLevelText').innerText = ml;
-            document.getElementById('wealthLevelText').innerText = wl;
-            
-            if (storeData.magicLevels[ml]) {
-                magicImg.src = storeData.magicLevels[ml].image;
-            } else if (storeData.magicLevels["1"]) {
-                magicImg.src = storeData.magicLevels["1"].image;
-            }
-            
-            if (storeData.wealthLevels[wl]) {
-                wealthImg.src = storeData.wealthLevels[wl].image;
-            } else if (storeData.wealthLevels["1"]) {
-                wealthImg.src = storeData.wealthLevels["1"].image;
-            }
-
-            // Active frame
-            const frameEl = document.getElementById('userFrame');
-            if (userData.activeFrame) {
-                const frameDoc = storeData.frames.find(f => f.id === userData.activeFrame);
-                if(frameDoc) {
-                    frameEl.src = frameDoc.image;
-                    frameEl.classList.remove('hidden');
-                } else {
-                    frameEl.classList.add('hidden');
-                    await updateDoc(doc(db, "users", auth.currentUser.uid), { activeFrame: null });
-                }
-            } else {
-                frameEl.classList.add('hidden');
-            }
-
-            // Active badges
-            const activeBadgesGrid = document.getElementById('activeBadgesGrid');
-            activeBadgesGrid.innerHTML = '';
-            if (userData.activeBadges && userData.activeBadges.length > 0) {
-                userData.activeBadges.forEach(badgeId => {
-                    const badge = storeData.badges.find(b => b.id === badgeId);
-                    if (badge) {
-                        activeBadgesGrid.innerHTML += `
-                            <div class="flex items-center justify-center">
-                                <img src="${badge.image}" class="w-8 h-8 object-contain" title="${badge.name}">
-                            </div>
-                        `;
-                    }
-                });
-            } else {
-                activeBadgesGrid.innerHTML = '<p class="text-center text-gray-400 dark:text-gray-500 text-sm col-span-5 py-4">لا توجد شارات نشطة</p>';
-            }
-            
-            // Wallet amount
-            document.getElementById('walletAmount').innerText = (userData.balance || 0).toLocaleString();
-            document.getElementById('diamondAmount').innerText = (userData.diamonds || 0).toLocaleString();
-            
-            // Update full profile data
-            await loadFullProfileData();
-        }
-
-        async function loadFullProfileData() {
-            document.getElementById('fullUserName').innerText = userData.displayName || "مستخدم";
-            document.getElementById('fullUserId').innerText = userData.customId || "000000";
-            document.getElementById('fullUserAvatar').src = userData.photoURL || 'https://via.placeholder.com/150';
-            
-            const magicImg = document.getElementById('fullMagicLevelImg');
-            const wealthImg = document.getElementById('fullWealthLevelImg');
-            
-            const ml = userData.magicLevel || 1;
-            const wl = userData.wealthLevel || 1;
-            
-            document.getElementById('fullMagicLevelText').innerText = ml;
-            document.getElementById('fullWealthLevelText').innerText = wl;
-            
-            if (storeData.magicLevels[ml]) {
-                magicImg.src = storeData.magicLevels[ml].image;
-            } else if (storeData.magicLevels["1"]) {
-                magicImg.src = storeData.magicLevels["1"].image;
-            }
-            
-            if (storeData.wealthLevels[wl]) {
-                wealthImg.src = storeData.wealthLevels[wl].image;
-            } else if (storeData.wealthLevels["1"]) {
-                wealthImg.src = storeData.wealthLevels["1"].image;
-            }
-
-            const frameEl = document.getElementById('fullUserFrame');
-            if (userData.activeFrame) {
-                const frameDoc = storeData.frames.find(f => f.id === userData.activeFrame);
-                if(frameDoc) {
-                    frameEl.src = frameDoc.image;
-                    frameEl.classList.remove('hidden');
-                } else {
-                    frameEl.classList.add('hidden');
-                }
-            } else {
-                frameEl.classList.add('hidden');
-            }
-            
-            // Load gifts
-            await loadGiftsWall();
-        }
-
-        async function loadGiftsWall() {
-            const grid = document.getElementById('giftsWall');
-            if (!grid) return;
-            grid.innerHTML = '';
-            
-            if (userData.receivedGifts && userData.receivedGifts.length > 0) {
-                userData.receivedGifts.forEach(gift => {
-                    grid.innerHTML += `
-                        <div class="glass-card p-3 rounded-2xl flex flex-col items-center justify-center">
-                            <img src="${gift.image}" class="w-12 h-12 object-contain mb-2">
-                            <span class="text-xs font-bold text-center dark:text-white">${gift.name}</span>
-                            <span class="text-[10px] text-gray-500 dark:text-gray-400">${new Date(gift.receivedAt).toLocaleDateString('ar-SA')}</span>
-                        </div>
-                    `;
-                });
-            } else {
-                grid.innerHTML = '<p class="text-center text-gray-400 dark:text-gray-500 text-sm col-span-4 py-10">لا توجد هدايا مستلمة بعد</p>';
-            }
-        }
-
-        // Store Functions
-        window.loadStoreItems = (type) => {
-            const grid = document.getElementById('storeGrid');
-            grid.innerHTML = '';
-            const items = type === 'frames' ? storeData.frames : 
-                         type === 'badges' ? storeData.badges : 
-                         storeData.entrances;
-            
-            // Update active tab
-            document.getElementById('store-tab-frames').className = type === 'frames' ? 'flex-none px-6 py-2.5 bg-gray-900 text-white rounded-full font-bold text-sm shadow-lg transition' : 'flex-none px-6 py-2.5 glass-card text-gray-600 dark:text-gray-300 rounded-full font-bold text-sm hover:bg-white dark:hover:bg-gray-800 transition';
-            document.getElementById('store-tab-badges').className = type === 'badges' ? 'flex-none px-6 py-2.5 bg-gray-900 text-white rounded-full font-bold text-sm shadow-lg transition' : 'flex-none px-6 py-2.5 glass-card text-gray-600 dark:text-gray-300 rounded-full font-bold text-sm hover:bg-white dark:hover:bg-gray-800 transition';
-            document.getElementById('store-tab-entrances').className = type === 'entrances' ? 'flex-none px-6 py-2.5 bg-gray-900 text-white rounded-full font-bold text-sm shadow-lg transition' : 'flex-none px-6 py-2.5 glass-card text-gray-600 dark:text-gray-300 rounded-full font-bold text-sm hover:bg-white dark:hover:bg-gray-800 transition';
-
-            items.forEach(item => {
-                const field = type === 'frames' ? 'purchasedFrames' : 
-                            type === 'badges' ? 'purchasedBadges' : 
-                            'purchasedEntrances';
-                const owned = userData[field]?.some(i => i.id === item.id);
-                grid.innerHTML += `
-                    <div class="glass-card p-4 rounded-3xl flex flex-col items-center justify-between min-h-[160px] relative">
-                        <img src="${item.image}" class="w-16 h-16 object-contain mb-2">
-                        <h4 class="font-bold text-sm text-center mb-2 dark:text-white">${item.name}</h4>
-                        <button onclick="${owned ? '' : `buyItem('${type}', '${item.id}', ${item.price})`}" 
-                                class="w-full py-2 ${owned ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500' : 'bg-black dark:bg-gray-900 text-white'} text-xs font-bold rounded-xl">
-                            ${owned ? 'مملوك' : `${item.price} 💰 شراء`}
-                        </button>
-                    </div>`;
-            });
-        };
-
-        window.buyItem = async (type, id, price) => {
-            if (userData.balance < price) return alert('رصيدك غير كافٍ!');
-            const field = type === 'frames' ? 'purchasedFrames' : 
-                         type === 'badges' ? 'purchasedBadges' : 
-                         'purchasedEntrances';
-            await updateDoc(doc(db, "users", auth.currentUser.uid), {
-                balance: increment(-price),
-                [field]: arrayUnion({ id: id, purchasedAt: new Date() })
-            });
-            loadStoreItems(type);
-        };
-
-        // Bag Functions
-        window.loadBagItems = async () => {
-            // Frames
-            const fGrid = document.getElementById('bagGrid');
-            fGrid.innerHTML = '';
-            
-            const frames = userData.purchasedFrames || [];
-            for (const f of frames) {
-                const exists = storeData.frames.find(sf => sf.id === f.id);
-                if (exists) {
-                    const isEquipped = userData.activeFrame === f.id;
-                    fGrid.innerHTML += `
-                        <div onclick="equipFrame('${f.id}')" class="p-3 rounded-2xl glass-card flex flex-col items-center justify-center cursor-pointer ${isEquipped ? 'border-2 border-black dark:border-white bg-white dark:bg-gray-800' : ''}">
-                            <img src="${exists.image}" class="w-12 h-12 object-contain">
-                            ${isEquipped ? '<p class="text-xs mt-1 text-green-600 font-bold">✓</p>' : ''}
-                        </div>`;
-                } else {
-                    await updateDoc(doc(db, "users", auth.currentUser.uid), { purchasedFrames: arrayRemove(f) });
-                }
-            }
-
-            // Badges
-            const bGrid = document.getElementById('badgesBagGrid');
-            bGrid.innerHTML = '';
-            
-            const badges = userData.purchasedBadges || [];
-            for (const b of badges) {
-                const exists = storeData.badges.find(sb => sb.id === b.id);
-                if (exists) {
-                    const isActive = userData.activeBadges?.includes(b.id);
-                    bGrid.innerHTML += `
-                        <div onclick="toggleBadge('${b.id}')" class="p-2 rounded-xl glass-card flex items-center justify-center cursor-pointer ${isActive ? 'border-2 border-black dark:border-white bg-white dark:bg-gray-800' : ''}">
-                            <img src="${exists.image}" class="w-8 h-8 object-contain">
-                        </div>`;
-                } else {
-                    await updateDoc(doc(db, "users", auth.currentUser.uid), { purchasedBadges: arrayRemove(b) });
-                }
-            }
-
-            // Entrances
-            const eGrid = document.getElementById('activeEntrancesGrid');
-            eGrid.innerHTML = '';
-            
-            const entrances = userData.purchasedEntrances || [];
-            for (const e of entrances) {
-                const exists = storeData.entrances.find(se => se.id === e.id);
-                if (exists) {
-                    const isActive = userData.activeEntrance === e.id;
-                    eGrid.innerHTML += `
-                        <div onclick="equipEntrance('${e.id}')" class="p-4 rounded-2xl glass-card flex flex-col items-center justify-center cursor-pointer ${isActive ? 'border-2 border-black dark:border-white bg-white dark:bg-gray-800' : ''}">
-                            <img src="${exists.image}" class="w-16 h-16 object-contain mb-2">
-                            <span class="text-xs font-bold text-center dark:text-white">${exists.name}</span>
-                            ${isActive ? '<p class="text-xs mt-1 text-green-600 font-bold">✓</p>' : ''}
-                        </div>`;
-                } else {
-                    await updateDoc(doc(db, "users", auth.currentUser.uid), { purchasedEntrances: arrayRemove(e) });
-                }
-            }
-        };
-
-        window.equipFrame = async (id) => {
-            const newFrame = userData.activeFrame === id ? null : id;
-            await updateDoc(doc(db, "users", auth.currentUser.uid), { activeFrame: newFrame });
-            loadBagItems();
-            await updateUI();
-        };
-
-        window.toggleBadge = async (id) => {
-            const isActive = userData.activeBadges?.includes(id);
-            await updateDoc(doc(db, "users", auth.currentUser.uid), {
-                activeBadges: isActive ? arrayRemove(id) : arrayUnion(id)
-            });
-            loadBagItems();
-            await updateUI();
-        };
-
-        window.equipEntrance = async (id) => {
-            const newEntrance = userData.activeEntrance === id ? null : id;
-            await updateDoc(doc(db, "users", auth.currentUser.uid), { activeEntrance: newEntrance });
-            loadBagItems();
-        };
 
         // Friends System
         window.searchUser = async () => {
@@ -1575,12 +415,13 @@
                         </div>
                     </div>`;
             }
+            lucide.createIcons();
         };
 
         window.quickSearch = async () => {
             const term = document.getElementById('quickSearchInput').value.trim();
             if (!term) return;
-            window.switchPage('friends');
+            switchPage('friends');
             document.getElementById('searchUserInput').value = term;
             await searchUser();
         };
@@ -1625,7 +466,6 @@
             searchUser();
             loadFriendRequests();
             loadFriends();
-            await updateUI();
         };
 
         window.unfollowUser = async (uid) => {
@@ -1640,13 +480,11 @@
                 
                 searchUser();
                 loadFriends();
-                await updateUI();
             }
         };
 
         window.blockUser = async (uid) => {
             if (confirm('هل تريد حظر هذا المستخدم؟')) {
-                // Remove from friends if exists
                 await updateDoc(doc(db, "users", auth.currentUser.uid), {
                     friends: arrayRemove(uid),
                     sentRequests: arrayRemove(uid),
@@ -1654,7 +492,6 @@
                     blockedUsers: arrayUnion(uid)
                 });
                 
-                // Remove from other user's lists
                 await updateDoc(doc(db, "users", uid), {
                     friends: arrayRemove(auth.currentUser.uid),
                     sentRequests: arrayRemove(auth.currentUser.uid),
@@ -1665,7 +502,6 @@
                 searchUser();
                 loadFriendRequests();
                 loadFriends();
-                await updateUI();
             }
         };
 
@@ -1676,40 +512,7 @@
             
             alert('تم إلغاء حظر المستخدم');
             searchUser();
-            loadBlockedUsers();
         };
-
-        async function loadBlockedUsers() {
-            const list = document.getElementById('blockedUsersList');
-            if (!list) return;
-            list.innerHTML = '';
-            
-            const blockedUsers = userData.blockedUsers || [];
-            for (const uid of blockedUsers) {
-                const snap = await getDoc(doc(db, "users", uid));
-                if (snap.exists()) {
-                    const user = snap.data();
-                    list.innerHTML += `
-                        <div class="glass-card p-4 rounded-3xl flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <img src="${user.photoURL}" class="w-12 h-12 rounded-full object-cover">
-                                <div>
-                                    <h4 class="font-bold text-sm dark:text-white">${user.displayName}</h4>
-                                    <p class="text-xs text-gray-400">ID: ${user.customId}</p>
-                                </div>
-                            </div>
-                            <button onclick="unblockUser('${user.uid}')" class="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-lg text-xs font-bold">
-                                إلغاء الحظر
-                            </button>
-                        </div>
-                    `;
-                }
-            }
-            
-            if (blockedUsers.length === 0) {
-                list.innerHTML = '<p class="text-center text-gray-400 dark:text-gray-500 text-sm py-4">لا يوجد مستخدمين محظورين</p>';
-            }
-        }
 
         async function loadFriendRequests() {
             const list = document.getElementById('friendRequestsList');
@@ -1743,7 +546,8 @@
                         </div>`;
                 }
             }
-        }
+            lucide.createIcons();
+        };
 
         window.rejectFriendRequest = async (uid) => {
             if (confirm('هل تريد رفض طلب الصداقة؟')) {
@@ -1772,7 +576,7 @@
                 if (snap.exists()) {
                     const friend = snap.data();
                     list.innerHTML += `
-                        <div onclick="startChatWithFriend('${friend.uid}')" class="glass-card p-4 rounded-3xl flex items-center justify-between cursor-pointer hover:bg-white dark:hover:bg-gray-800 transition">
+                        <div onclick="startChat('${friend.uid}')" class="glass-card p-4 rounded-3xl flex items-center justify-between cursor-pointer hover:bg-white dark:hover:bg-gray-800 transition">
                             <div class="flex items-center gap-3">
                                 <img src="${friend.photoURL}" class="w-12 h-12 rounded-full object-cover">
                                 <div>
@@ -1787,495 +591,11 @@
             lucide.createIcons();
         }
 
-        // Chat Functions
-        window.startChatWithFriend = async (friendId) => {
-            const friendSnap = await getDoc(doc(db, "users", friendId));
-            if (friendSnap.exists()) {
-                chatPartner = friendSnap.data();
-                
-                // Show entrance animation if active
-                if (chatPartner.activeEntrance) {
-                    const entrance = storeData.entrances.find(e => e.id === chatPartner.activeEntrance);
-                    if (entrance) {
-                        showEntranceAnimation(entrance);
-                    }
-                }
-                
-                switchPage('chat');
-                document.getElementById('chatTitle').innerText = chatPartner.displayName;
-                
-                // Generate chat ID
-                const chatId = [auth.currentUser.uid, friendId].sort().join('_');
-                currentChatId = chatId;
-                
-                // Load messages
-                loadChatMessages(chatId);
-                // Listen for typing
-                listenForTyping(chatId);
-            }
+        window.startChat = (friendId) => {
+            window.location.href = `chat.html?friend=${friendId}`;
         };
 
-        function showEntranceAnimation(entrance) {
-            const container = document.getElementById('entranceAnimation');
-            container.classList.remove('hidden');
-            container.innerHTML = `
-                <img src="${entrance.image}" class="entrance-video" />
-            `;
-            
-            // Remove after 3 seconds
-            setTimeout(() => {
-                container.classList.add('hidden');
-                container.innerHTML = '';
-            }, 3000);
-        }
-
-        async function loadChatMessages(chatId) {
-            const messagesContainer = document.getElementById('chatMessages');
-            messagesContainer.innerHTML = '';
-            
-            // Subscribe to chat messages
-            const messagesRef = collection(db, "chats", chatId, "messages");
-            const q = query(messagesRef, orderBy("timestamp", "asc"));
-            
-            chatUnsubscribe = onSnapshot(q, (snapshot) => {
-                messagesContainer.innerHTML = '';
-                snapshot.forEach((doc) => {
-                    const message = doc.data();
-                    displayMessage(message);
-                });
-                
-                // Scroll to bottom
-                setTimeout(() => {
-                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
-                }, 100);
-            });
-        }
-
-        function displayMessage(message) {
-            const messagesContainer = document.getElementById('chatMessages');
-            const isMe = message.senderId === auth.currentUser.uid;
-            
-            let messageHTML = '';
-            if (message.type === 'gift') {
-                messageHTML = `
-                    <div class="${isMe ? 'flex justify-end' : 'flex justify-start'} mb-4">
-                        <div class="glass-card p-4 rounded-3xl max-w-[70%]">
-                            <div class="flex items-center gap-3">
-                                <img src="${message.giftImage}" class="w-12 h-12 object-contain">
-                                <div>
-                                    <p class="font-bold text-sm dark:text-white">🎁 ${isMe ? 'أنت أرسلت هدية' : 'تلقيت هدية'}</p>
-                                    <p class="text-xs text-gray-600 dark:text-gray-400">${message.giftName}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            } else {
-                messageHTML = `
-                    <div class="${isMe ? 'message-sent' : 'message-received'} p-4 max-w-[80%]">
-                        <p class="text-sm ${isMe ? 'text-white' : 'dark:text-white'}">${message.text}</p>
-                        <span class="text-xs opacity-70 mt-1 block ${isMe ? 'text-blue-100' : 'text-gray-500 dark:text-gray-400'}">
-                            ${message.timestamp ? new Date(message.timestamp.toDate()).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' }) : 'الآن'}
-                        </span>
-                    </div>
-                `;
-            }
-            
-            messagesContainer.innerHTML += messageHTML;
-        }
-
-        window.handleTyping = () => {
-            if (!currentChatId || !chatPartner) return;
-            
-            // Clear previous timeout
-            if (typingTimeout) clearTimeout(typingTimeout);
-            
-            // Send typing status
-            sendTypingStatus(true);
-            
-            // Set timeout to stop typing indicator
-            typingTimeout = setTimeout(() => {
-                sendTypingStatus(false);
-            }, 1500);
-        };
-
-        async function sendTypingStatus(isTyping) {
-            if (!currentChatId || !chatPartner) return;
-            
-            const typingRef = doc(db, "chats", currentChatId, "typing", auth.currentUser.uid);
-            if (isTyping) {
-                await setDoc(typingRef, {
-                    isTyping: true,
-                    timestamp: serverTimestamp()
-                });
-            } else {
-                await deleteDoc(typingRef);
-            }
-        }
-
-        function listenForTyping(chatId) {
-            const typingRef = collection(db, "chats", chatId, "typing");
-            onSnapshot(typingRef, (snapshot) => {
-                const typingIndicator = document.getElementById('typingIndicator');
-                let someoneTyping = false;
-                
-                snapshot.forEach((docSnap) => {
-                    const data = docSnap.data();
-                    // Check if it's the other person typing
-                    if (docSnap.id !== auth.currentUser.uid && data.isTyping) {
-                        someoneTyping = true;
-                    }
-                });
-                
-                if (someoneTyping) {
-                    typingIndicator.classList.remove('hidden');
-                } else {
-                    typingIndicator.classList.add('hidden');
-                }
-            });
-        }
-
-        window.sendMessage = async () => {
-            const input = document.getElementById('messageInput');
-            const text = input.value.trim();
-            
-            if (!text || !currentChatId || !chatPartner) {
-                alert('يرجى اختيار صديق للدردشة أولاً');
-                return;
-            }
-            
-            // Stop typing indicator
-            await sendTypingStatus(false);
-            
-            // Add message to Firestore
-            const messagesRef = collection(db, "chats", currentChatId, "messages");
-            await addDoc(messagesRef, {
-                text: text,
-                senderId: auth.currentUser.uid,
-                senderName: userData.displayName,
-                timestamp: serverTimestamp()
-            });
-            
-            input.value = '';
-        };
-
-        window.closeChat = () => {
-            switchPage('friends');
-            if (chatUnsubscribe) {
-                chatUnsubscribe();
-                chatUnsubscribe = null;
-            }
-            currentChatId = null;
-            chatPartner = null;
-        };
-
-        // Gift Functions
-        window.openGiftPicker = async () => {
-            if (!currentChatId || !chatPartner) {
-                alert('يرجى اختيار صديق لإرسال الهدية أولاً');
-                return;
-            }
-            
-            const modal = document.getElementById('giftPickerModal');
-            modal.classList.add('open');
-            
-            const grid = document.getElementById('giftGrid');
-            grid.innerHTML = '';
-            
-            storeData.gifts.forEach(gift => {
-                grid.innerHTML += `
-                    <div onclick="selectGift('${gift.id}')" class="glass-card p-3 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:bg-white dark:hover:bg-gray-800 transition">
-                        <img src="${gift.image}" class="w-12 h-12 object-contain mb-2">
-                        <span class="text-xs font-bold text-center dark:text-white">${gift.name}</span>
-                        <span class="text-[10px] text-gray-500 dark:text-gray-400">${gift.price} 💰</span>
-                    </div>
-                `;
-            });
-        };
-
-        window.selectGift = (giftId) => {
-            selectedGift = storeData.gifts.find(g => g.id === giftId);
-            document.querySelectorAll('#giftGrid > div').forEach(div => {
-                div.classList.remove('border-2', 'border-black', 'dark:border-white');
-            });
-            event.currentTarget.classList.add('border-2', 'border-black', 'dark:border-white');
-        };
-
-        window.sendGift = async () => {
-            if (!selectedGift) return alert('يرجى اختيار هدية');
-            if (!chatPartner) return alert('يرجى اختيار صديق لإرسال الهدية');
-            
-            if (userData.balance < selectedGift.price) {
-                alert('رصيدك غير كافٍ');
-                return;
-            }
-            
-            try {
-                // 1. خصم السعر من رصيد المرسل
-                await updateDoc(doc(db, "users", auth.currentUser.uid), {
-                    balance: increment(-selectedGift.price)
-                });
-                
-                // 2. إضافة الهدية للمستقبل
-                const giftData = {
-                    id: selectedGift.id,
-                    name: selectedGift.name,
-                    image: selectedGift.image,
-                    value: selectedGift.value,
-                    type: selectedGift.type,
-                    senderId: auth.currentUser.uid,
-                    senderName: userData.displayName,
-                    receivedAt: new Date()
-                };
-                
-                await updateDoc(doc(db, "users", chatPartner.uid), {
-                    receivedGifts: arrayUnion(giftData)
-                });
-                
-                // 3. إضافة خبرة السحر للمرسل
-                await updateDoc(doc(db, "users", auth.currentUser.uid), {
-                    magicExp: increment(selectedGift.value * 0.1)
-                });
-                
-                // 4. إضافة خبرة الثروة للمستقبل
-                await updateDoc(doc(db, "users", chatPartner.uid), {
-                    wealthExp: increment(selectedGift.value * 0.05)
-                });
-                
-                // 5. تحقق من ترقية المستويات
-                await checkLevelUp(auth.currentUser.uid, 'magic');
-                await checkLevelUp(chatPartner.uid, 'wealth');
-                
-                // 6. إرسال رسالة الهدية في الدردشة
-                const messagesRef = collection(db, "chats", currentChatId, "messages");
-                await addDoc(messagesRef, {
-                    type: 'gift',
-                    giftId: selectedGift.id,
-                    giftName: selectedGift.name,
-                    giftImage: selectedGift.image,
-                    giftValue: selectedGift.value,
-                    senderId: auth.currentUser.uid,
-                    senderName: userData.displayName,
-                    timestamp: serverTimestamp()
-                });
-                
-                alert(`✅ تم إرسال الهدية بنجاح إلى ${chatPartner.displayName}`);
-                closeGiftPicker();
-                
-            } catch (error) {
-                console.error('Error sending gift:', error);
-                alert('حدث خطأ أثناء إرسال الهدية');
-            }
-        };
-
-        async function checkLevelUp(uid, type) {
-            const userSnap = await getDoc(doc(db, "users", uid));
-            if (userSnap.exists()) {
-                const user = userSnap.data();
-                const levelField = type === 'magic' ? 'magicLevel' : 'wealthLevel';
-                const expField = type === 'magic' ? 'magicExp' : 'wealthExp';
-                const currentLevel = user[levelField] || 1;
-                const currentExp = user[expField] || 0;
-                
-                // قاعدة بسيطة: كل 1000 خبرة ترفع مستوى
-                const requiredExp = currentLevel * 1000;
-                
-                if (currentExp >= requiredExp) {
-                    await updateDoc(doc(db, "users", uid), {
-                        [levelField]: increment(1),
-                        [expField]: currentExp - requiredExp
-                    });
-                    
-                    // يمكن إضافة إشعار هنا للمستخدم
-                }
-            }
-        }
-
-        window.closeGiftPicker = () => {
-            const modal = document.getElementById('giftPickerModal');
-            modal.classList.remove('open');
-            selectedGift = null;
-        };
-
-        // Emoji Picker Functions
-        window.openEmojiPicker = () => {
-            const modal = document.getElementById('emojiPickerModal');
-            modal.classList.add('open');
-            
-            const emojiGrid = document.getElementById('emojiGrid');
-            emojiGrid.innerHTML = '';
-            
-            // Basic emojis
-            const emojis = [
-                '😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣',
-                '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰',
-                '😘', '😗', '😙', '😚', '😋', '😛', '😝', '😜',
-                '🤪', '🤨', '🧐', '🤓', '😎', '🥸', '🤩', '🥳',
-                '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '😣',
-                '😖', '😫', '😩', '🥺', '😢', '😭', '😤', '😠',
-                '😡', '🤬', '🤯', '😳', '🥵', '🥶', '😱', '😨',
-                '😰', '😥', '😓', '🤗', '🤔', '🤭', '🤫', '🤥',
-                '😶', '😐', '😑', '😬', '🙄', '😯', '😦', '😧',
-                '😮', '😲', '🥱', '😴', '🤤', '😪', '😵', '🤐',
-                '🥴', '🤢', '🤮', '🤧', '😷', '🤒', '🤕', '🤑',
-                '🤠', '😈', '👿', '👹', '👺', '🤡', '💩', '👻',
-                '💀', '☠️', '👽', '👾', '🤖', '🎃', '😺', '😸',
-                '😹', '😻', '😼', '😽', '🙀', '😿', '😾', '👋',
-                '🤚', '🖐️', '✋', '🖖', '👌', '🤌', '🤏', '✌️',
-                '🤞', '🤟', '🤘', '🤙', '👈', '👉', '👆', '👇',
-                '🖕', '👍', '👎', '✊', '👊', '🤛', '🤜', '👏',
-                '🙌', '👐', '🤲', '🤝', '🙏', '✍️', '💅', '🤳',
-                '💪', '🦾', '🦵', '🦿', '🦶', '👂', '🦻', '👃',
-                '🧠', '🦷', '🦴', '👀', '👁️', '👅', '👄', '💋',
-                '🩸', '❤️', '🧡', '💛', '💚', '💙', '💜', '🖤',
-                '🤍', '🤎', '💔', '❣️', '💕', '💞', '💓', '💗',
-                '💖', '💘', '💝', '💟', '☮️', '✝️', '☪️', '🕉️',
-                '☸️', '✡️', '🔯', '🕎', '☯️', '☦️', '🛐', '⛎',
-                '♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏',
-                '♐', '♑', '♒', '♓', '🆔', '⚛️', '🉑', '☢️',
-                '☣️', '📴', '📳', '🈶', '🈚', '🈸', '🈺', '🈷️',
-                '✴️', '🆚', '💮', '🉐', '㊙️', '㊗️', '🈴', '🈵',
-                '🈹', '🈲', '🅰️', '🅱️', '🆎', '🆑', '🅾️', '🆘',
-                '❌', '⭕', '🛑', '⛔', '📛', '🚫', '💯', '💢',
-                '♨️', '🚷', '🚯', '🚳', '🚱', '🔞', '📵', '🚭'
-            ];
-            
-            emojis.forEach(emoji => {
-                const emojiElement = document.createElement('div');
-                emojiElement.className = 'emoji-item';
-                emojiElement.textContent = emoji;
-                emojiElement.onclick = () => {
-                    const input = document.getElementById('messageInput');
-                    input.value += emoji;
-                    modal.classList.remove('open');
-                };
-                emojiGrid.appendChild(emojiElement);
-            });
-        };
-
-        window.closeEmojiPicker = () => {
-            const modal = document.getElementById('emojiPickerModal');
-            modal.classList.remove('open');
-        };
-
-        // Gift Box Functions
-        window.openGiftBox = () => {
-            const sheet = document.getElementById('giftBoxSheet');
-            sheet.classList.add('open');
-        };
-
-        window.closeGiftBox = () => {
-            const sheet = document.getElementById('giftBoxSheet');
-            sheet.classList.remove('open');
-        };
-
-        window.claimGiftBox = async () => {
-            if (userData.dailyGiftClaimed) {
-                alert('لقد حصلت على هديتك اليومية بالفعل!');
-                return;
-            }
-            
-            // Add rewards
-            const rewards = {
-                coins: 5000,
-                diamonds: 0.01, // Small amount of diamonds
-                randomGift: true
-            };
-            
-            await updateDoc(doc(db, "users", auth.currentUser.uid), {
-                balance: increment(rewards.coins),
-                diamonds: increment(rewards.diamonds),
-                dailyGiftClaimed: true
-            });
-            
-            alert(`🎉 مبروك! حصلت على:\n${rewards.coins} عملة ذهبية\n${rewards.diamonds} ألماس\nهدية عشوائية`);
-            closeGiftBox();
-        };
-
-        // Settings Functions
-        window.toggleDarkMode = () => {
-            const body = document.body;
-            const toggle = document.getElementById('darkModeToggle');
-            
-            if (body.classList.contains('dark-mode')) {
-                body.classList.remove('dark-mode');
-                toggle.classList.remove('active');
-                localStorage.setItem('darkMode', 'false');
-            } else {
-                body.classList.add('dark-mode');
-                toggle.classList.add('active');
-                localStorage.setItem('darkMode', 'true');
-            }
-        };
-
-        function updateDarkModeToggle() {
-            const toggle = document.getElementById('darkModeToggle');
-            if (document.body.classList.contains('dark-mode')) {
-                toggle.classList.add('active');
-            } else {
-                toggle.classList.remove('active');
-            }
-        }
-
-        window.openPrivacyPolicy = () => {
-            alert('سياسة الخصوصية:\n\nنحن نحترم خصوصيتك ونلتزم بحماية بياناتك الشخصية. نحن لا نشارك بياناتك مع أي طرف ثالث دون موافقتك.');
-        };
-
-        window.openTermsOfService = () => {
-            alert('اتفاقية المستخدم:\n\n1. يجب أن يكون عمرك 13 سنة أو أكثر.\n2. أنت مسؤول عن المحتوى الذي تنشره.\n3. يحق لنا إزالة أي محتوى غير مناسب.\n4. يجب احترام جميع المستخدمين.');
-        };
-
-        // Modal Functions
-        window.openEditProfile = () => {
-            document.getElementById('editNameInp').value = userData.displayName;
-            document.getElementById('editPhotoInp').value = userData.photoURL;
-            document.getElementById('editModal').classList.remove('hidden');
-        };
-
-        window.closeEditModal = () => document.getElementById('editModal').classList.add('hidden');
-
-        window.saveProfileChanges = async () => {
-            const n = document.getElementById('editNameInp').value;
-            const p = document.getElementById('editPhotoInp').value;
-            await updateDoc(doc(db, "users", auth.currentUser.uid), { displayName: n, photoURL: p });
-            closeEditModal();
-        };
-
-        window.recharge = (amount) => {
-            updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(amount) })
-                .then(() => {
-                    alert('تم الشحن بنجاح!');
-                })
-                .catch(error => {
-                    console.error('Error recharging:', error);
-                    alert('حدث خطأ أثناء الشحن');
-                });
-        };
-
-        // Utility Functions
-        window.copyID = () => navigator.clipboard.writeText(userData.customId).then(() => alert('تم نسخ الـ ID'));
-
-        window.openNotifications = () => {
-            alert('قريباً: شاشة الإشعارات');
-        };
-
-        window.openChatInfo = () => {
-            if (chatPartner) {
-                alert(`معلومات الدردشة مع: ${chatPartner.displayName}\nID: ${chatPartner.customId}\nالمستوى السحري: ${chatPartner.magicLevel || 1}\nالمستوى الثروة: ${chatPartner.wealthLevel || 1}`);
-            } else {
-                alert('معلومات الدردشة');
-            }
-        };
-
-        window.confirmLogout = () => {
-            if (confirm('هل تريد تسجيل الخروج؟')) {
-                signOut(auth).then(() => {
-                    window.location.href = 'index.html';
-                });
-            }
-        };
-
-        // Home Page Functions
+        // Banner
         async function loadBanner() {
             try {
                 const bDoc = await getDoc(doc(db, "appData", "banner"));
@@ -2291,14 +611,9 @@
             }
         }
 
-        // Close bottom sheets when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.bottom-sheet') && !e.target.closest('[onclick*="open"]')) {
-                document.querySelectorAll('.bottom-sheet').forEach(sheet => {
-                    sheet.classList.remove('open');
-                });
-            }
-        });
+        window.openNotifications = () => {
+            alert('قريباً: شاشة الإشعارات');
+        };
 
         // Initialize icons
         lucide.createIcons();
