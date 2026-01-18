@@ -3,457 +3,679 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Afnan Private - Premium</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <title>Afnan AI - الدردشة</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;600;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Noto Sans Arabic', sans-serif; }
-        body { background: #ffffff; color: #000000; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            font-family: 'Noto Sans Arabic', sans-serif;
+            touch-action: manipulation;
+        }
 
-        /* Global Banner Animation: Top-Right -> Top-Left (3s) */
-        #globalBanner {
+        body {
+            background: radial-gradient(circle at 0% 0%, #eef2ff 0%, #fdf2f8 50%, #f0f9ff 100%);
+            color: #1f2937;
+            overflow-x: hidden;
+            min-height: 100vh;
+            transition: background 0.3s ease;
+        }
+
+        body.dark-mode {
+            background: radial-gradient(circle at 0% 0%, #0f172a 0%, #1e293b 50%, #334155 100%);
+            color: #f1f5f9;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+
+        .dark-mode .glass {
+            background: rgba(30, 41, 59, 0.75);
+            border: 1px solid rgba(51, 65, 85, 0.6);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(12px) saturate(180%);
+            -webkit-backdrop-filter: blur(12px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .dark-mode .glass-card {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(51, 65, 85, 0.4);
+            color: #f1f5f9;
+        }
+
+        .message-sent {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            border-radius: 20px 20px 4px 20px;
+            margin-left: 20%;
+        }
+
+        .message-received {
+            background: rgba(255, 255, 255, 0.9);
+            color: #1f2937;
+            border-radius: 20px 20px 20px 4px;
+            margin-right: 20%;
+        }
+
+        .dark-mode .message-received {
+            background: rgba(30, 41, 59, 0.9);
+            color: #f1f5f9;
+        }
+
+        .typing-indicator {
+            display: inline-block;
+            padding: 8px 12px;
+            background: #f3f4f6;
+            border-radius: 15px;
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .dark-mode .typing-indicator {
+            background: #334155;
+            color: #94a3b8;
+        }
+
+        .entrance-container {
             position: fixed;
-            top: 15px;
-            right: -100%;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: black;
             z-index: 9999;
-            pointer-events: none;
             display: flex;
             align-items: center;
-        }
-        #globalBanner.active {
-            animation: slideAcross 3s cubic-bezier(0.19, 1, 0.22, 1) forwards;
-        }
-        @keyframes slideAcross {
-            0% { right: -100%; opacity: 0; }
-            10% { right: 20px; opacity: 1; }
-            90% { right: 20px; opacity: 1; transform: translateX(0); }
-            100% { right: 100%; opacity: 0; transform: translateX(-500px); }
+            justify-content: center;
         }
 
-        /* Messaging Layout */
-        .msg-me { align-self: flex-end; background: #000000; color: #ffffff; border-radius: 15px 15px 2px 15px; }
-        .msg-them { align-self: flex-start; background: #f3f4f6; color: #000000; border-radius: 15px 15px 15px 2px; }
-        
-        /* Gift Alignment */
-        .gift-me { align-self: flex-end; }
-        .gift-them { align-self: flex-start; }
-
-        .modal-view {
-            position: fixed; inset: 0; background: #ffffff; z-index: 500;
-            transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        .entrance-video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
         }
-        .modal-view.active { transform: translateY(0); }
+
+        .bottom-sheet {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top-left-radius: 30px;
+            border-top-right-radius: 30px;
+            box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            transform: translateY(100%);
+            transition: transform 0.3s ease-out;
+            max-height: 50vh;
+            overflow-y: auto;
+        }
+
+        .dark-mode .bottom-sheet {
+            background: #1e293b;
+        }
+
+        .bottom-sheet.open {
+            transform: translateY(0);
+        }
+
+        .emoji-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 5px;
+            padding: 10px;
+        }
+
+        .emoji-item {
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 40px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-radius: 8px;
+        }
+
+        .emoji-item:hover {
+            background: #f3f4f6;
+        }
+
+        .dark-mode .emoji-item:hover {
+            background: #334155;
+        }
 
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        .btn-black { background: #000000; color: #ffffff; transition: all 0.2s; }
-        .btn-black:active { transform: scale(0.95); opacity: 0.8; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body>
-
-    <!-- Global Banner -->
-    <div id="globalBanner">
-        <div class="relative w-[320px] h-[80px] bg-black rounded-2xl border border-gray-800 shadow-2xl flex items-center px-4 overflow-hidden">
-            <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
-            <img id="bSender" class="w-10 h-10 rounded-full border border-white/50 relative z-10">
-            <div class="flex-1 flex justify-center relative z-10">
-                <img id="bGift" class="w-14 h-14 object-contain animate-bounce">
-            </div>
-            <img id="bReceiver" class="w-10 h-10 rounded-full border border-white/50 relative z-10">
-        </div>
-    </div>
-
-    <!-- Header & Search -->
-    <header class="p-4 border-b bg-white flex flex-col gap-4">
-        <div class="flex items-center justify-between">
-            <h1 class="text-2xl font-black tracking-tighter">AFNAN</h1>
-            <div class="flex gap-2">
-                <button class="p-2 bg-gray-100 rounded-full"><i data-lucide="bell" class="w-5 h-5"></i></button>
-                <button class="p-2 bg-black text-white rounded-full" onclick="toggleSearch(true)"><i data-lucide="search" class="w-5 h-5"></i></button>
-            </div>
-        </div>
-    </header>
-
-    <!-- Search Modal -->
-    <div id="searchBar" class="hidden p-4 bg-gray-50 border-b animate-in fade-in slide-in-from-top-2">
-        <div class="flex gap-2">
-            <input type="text" id="userSearchInput" placeholder="ادخل ID المستخدم (مثال: 123456)..." class="flex-1 px-4 py-2 rounded-xl border focus:ring-2 focus:ring-black outline-none text-sm">
-            <button onclick="findUser()" class="btn-black px-6 py-2 rounded-xl text-sm font-bold">بحث</button>
-        </div>
-    </div>
-
-    <!-- Friends/Chats List -->
-    <main id="friendsList" class="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar">
-        <!-- Load from users -> friends -->
-    </main>
-
-    <!-- Chat Modal -->
-    <div id="chatModal" class="modal-view flex flex-col">
-        <header class="h-16 border-b flex items-center justify-between px-4">
+<body class="antialiased selection:bg-blue-100 selection:text-blue-900">
+    <div id="main-app" class="min-h-screen pb-32">
+        
+        <!-- HEADER -->
+        <header class="fixed top-0 left-0 right-0 h-20 z-30 px-6 flex items-center justify-between glass">
+            <button onclick="goBack()" class="w-10 h-10 rounded-full flex items-center justify-center active:scale-90 transition">
+                <i data-lucide="arrow-right" class="text-black dark:text-white w-5 h-5"></i>
+            </button>
+            <h2 id="chatTitle" class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-400">الدردشة</h2>
             <div class="flex items-center gap-3">
-                <button onclick="closeChat()"><i data-lucide="arrow-right"></i></button>
-                <div class="flex items-center gap-2 cursor-pointer" onclick="openProfile(currentFriend.uid)">
-                    <img id="cAvatar" src="" class="w-10 h-10 rounded-full bg-gray-100 border">
-                    <div>
-                        <div id="cName" class="font-bold text-sm">...</div>
-                        <div class="flex items-center gap-1 text-[8px] text-gray-400 font-bold uppercase tracking-widest">
-                            <i data-lucide="lock" class="w-3 h-3 text-green-500"></i> E2EE ENCRYPTED
-                        </div>
-                    </div>
-                </div>
+                <button onclick="openChatInfo()" class="w-10 h-10 rounded-full flex items-center justify-center active:scale-90 transition">
+                    <i data-lucide="info" class="text-black dark:text-white w-5 h-5"></i>
+                </button>
             </div>
-            <button onclick="openProfile(currentFriend.uid)"><i data-lucide="menu"></i></button>
         </header>
 
-        <div id="chatBox" class="flex-1 overflow-y-auto p-4 flex flex-col gap-4 bg-white no-scrollbar"></div>
+        <!-- Entrance Animation Container -->
+        <div id="entranceAnimation" class="entrance-container hidden"></div>
 
-        <div class="p-4 border-t flex items-center gap-3 bg-white">
-            <button onclick="openGiftPicker()" class="p-2 bg-gray-100 rounded-full"><i data-lucide="gift" class="w-6 h-6"></i></button>
-            <input type="text" id="mInput" placeholder="اكتب رسالة مشفرة..." class="flex-1 bg-gray-50 rounded-2xl px-4 py-3 text-sm focus:outline-none border-none">
-            <button onclick="sendEncryptedMsg()" class="bg-black text-white p-3 rounded-2xl"><i data-lucide="send" class="w-5 h-5"></i></button>
-        </div>
-    </div>
-
-    <!-- Profile View (As requested: Fixed issues) -->
-    <div id="profileModal" class="modal-view overflow-y-auto no-scrollbar">
-        <div class="p-4 flex items-center justify-between border-b">
-            <button onclick="closeProfile()"><i data-lucide="chevron-down"></i></button>
-            <span class="font-black text-sm">الملف الشخصي</span>
-            <button id="blockBtn" class="text-red-500"><i data-lucide="slash"></i></button>
-        </div>
-
-        <div class="p-8 text-center">
-            <div class="relative inline-block group">
-                <img id="pAvatar" src="" class="w-32 h-32 rounded-full border-4 border-black shadow-2xl mx-auto object-cover transition-transform group-active:scale-95 cursor-pointer">
-                <div id="pMagicBadge" class="absolute -bottom-2 -right-2 bg-purple-600 text-white text-[10px] px-2 py-1 rounded-full border-2 border-white font-black shadow-lg">Magic LV 0</div>
-            </div>
-            
-            <h2 id="pName" class="text-2xl font-black mt-4">...</h2>
-            <p id="pId" class="text-xs text-gray-400 font-bold mt-1 tracking-widest uppercase">ID: 000000</p>
-
-            <div class="flex justify-center gap-4 mt-6">
-                <div class="bg-gray-50 p-3 rounded-2xl w-24 border">
-                    <p class="text-[10px] text-gray-400 font-bold uppercase">الثروة</p>
-                    <p id="pWealthLv" class="text-lg font-black">1</p>
-                </div>
-                <div class="bg-gray-50 p-3 rounded-2xl w-24 border">
-                    <p class="text-[10px] text-gray-400 font-bold uppercase">السحر</p>
-                    <p id="pMagicLv" class="text-lg font-black">1</p>
+        <!-- CHAT MESSAGES -->
+        <main class="pt-24 px-5 pb-24">
+            <div id="typingIndicator" class="hidden mb-4">
+                <div class="typing-indicator inline-block">
+                    <span class="mr-2">يكتب الآن...</span>
+                    <span class="dot">.</span>
+                    <span class="dot">.</span>
+                    <span class="dot">.</span>
                 </div>
             </div>
 
-            <div class="mt-8 flex gap-2">
-                <button id="friendActionBtn" class="flex-1 btn-black py-4 rounded-2xl font-black text-sm shadow-xl">تحميل...</button>
-                <button onclick="openGiftPicker()" class="p-4 bg-gray-100 rounded-2xl"><i data-lucide="gift"></i></button>
+            <div id="chatMessages" class="space-y-4 mb-6">
+                <!-- Messages will be loaded here -->
             </div>
+        </main>
 
-            <!-- Received Gifts Area -->
-            <div class="mt-10 text-right">
-                <h3 class="font-black text-lg mb-4 border-r-4 border-black pr-3">خزانة الهدايا</h3>
-                <div id="pGiftsGrid" class="grid grid-cols-4 gap-3 bg-gray-50 p-4 rounded-3xl min-h-[120px] border border-dashed border-gray-300">
-                    <!-- Real Sync from Firestore -->
+        <!-- MESSAGE INPUT -->
+        <div class="fixed bottom-20 left-4 right-4">
+            <div class="flex items-center gap-2">
+                <button onclick="openEmojiPicker()" class="w-12 h-12 rounded-full glass flex items-center justify-center">
+                    <i data-lucide="smile" class="w-5 h-5 text-gray-500"></i>
+                </button>
+                <div class="flex-1 relative">
+                    <input type="text" id="messageInput" placeholder="اكتب رسالة..." 
+                           class="w-full p-4 pr-14 rounded-2xl glass border-0 focus:ring-0 focus:outline-none text-sm dark:bg-gray-800 dark:text-white"
+                           oninput="handleTyping()">
+                    <button onclick="sendMessage()" class="absolute left-3 top-1/2 transform -translate-y-1/2">
+                        <i data-lucide="send" class="w-5 h-5 text-blue-500"></i>
+                    </button>
                 </div>
+                <button onclick="openGiftPicker()" class="w-12 h-12 rounded-full glass flex items-center justify-center">
+                    <i data-lucide="gift" class="w-5 h-5 text-gray-500"></i>
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- Gift Store (B&W Design) -->
-    <div id="giftPicker" class="fixed inset-0 z-[600] bg-black/80 backdrop-blur-sm hidden flex flex-col justify-end" onclick="closeGiftPicker()">
-        <div class="bg-white rounded-t-[40px] p-6 max-h-[70vh] flex flex-col" onclick="event.stopPropagation()">
-            <div class="flex justify-between items-center mb-6">
-                <div>
-                    <h3 class="font-black text-xl">المتجر الملكي</h3>
-                    <p class="text-xs text-gray-400">رصيدك: <span id="uBalance" class="text-black font-bold">0</span> 💰</p>
-                </div>
-                <button onclick="closeGiftPicker()" class="p-2 bg-gray-100 rounded-full"><i data-lucide="x"></i></button>
+    <!-- GIFT PICKER MODAL -->
+    <div id="giftPickerModal" class="bottom-sheet">
+        <div class="sheet-header p-4">
+            <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto"></div>
+        </div>
+        <div class="p-6">
+            <h3 class="font-bold text-xl mb-6 text-center dark:text-white">اختر هدية</h3>
+            <div id="giftGrid" class="grid grid-cols-3 gap-3 mb-6">
+                <!-- Gifts will be loaded here -->
             </div>
-            
-            <div class="flex gap-2 mb-4">
-                <button class="flex-1 py-2 bg-black text-white rounded-full text-[10px] font-bold uppercase tracking-wider">هدايا الثروة</button>
-                <button class="flex-1 py-2 bg-gray-100 rounded-full text-[10px] font-bold uppercase tracking-wider">هدايا السحر</button>
+            <div class="flex gap-3">
+                <button onclick="closeGiftPicker()" class="flex-1 py-3 rounded-2xl bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-300 font-bold hover:bg-gray-200 dark:hover:bg-gray-600">إلغاء</button>
+                <button onclick="sendGift()" class="flex-1 py-3 rounded-2xl bg-black dark:bg-gray-900 text-white font-bold hover:shadow-lg hover:-translate-y-1 transition">إرسال</button>
             </div>
+        </div>
+    </div>
 
-            <div id="giftGrid" class="grid grid-cols-4 gap-3 overflow-y-auto no-scrollbar pb-10">
-                <!-- Gifts from Firestore -->
+    <!-- EMOJI PICKER MODAL -->
+    <div id="emojiPickerModal" class="bottom-sheet">
+        <div class="sheet-header p-4">
+            <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto"></div>
+        </div>
+        <div class="p-4" style="max-height: 50vh; overflow-y: auto;">
+            <h3 class="font-bold text-lg mb-4 text-center dark:text-white">الإيموجيات</h3>
+            <div id="emojiGrid" class="emoji-grid">
+                <!-- Emojis will be loaded here -->
             </div>
-
-            <button id="sendGiftBtn" onclick="executeGiftSend()" class="w-full py-4 bg-gray-200 text-gray-400 rounded-2xl font-black disabled:opacity-50">اختر قطعة فنية</button>
         </div>
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, onSnapshot, query, where, getDocs, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-        import { getDatabase, ref, push, onValue, set, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-database.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { 
+            getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, 
+            collection, getDocs, increment, query, where, arrayUnion, 
+            arrayRemove, orderBy, addDoc, serverTimestamp, deleteDoc
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBnmqWRY6lV54meFvO89QeXwtd28w81FcY",
             authDomain: "rtx3090-28439.firebaseapp.com",
             projectId: "rtx3090-28439",
+            storageBucket: "rtx3090-28439.firebasestorage.app",
+            messagingSenderId: "178612030690",
+            appId: "1:178612030690:web:883189ced2ed3a78e3e2bb",
             databaseURL: "https://rtx3090-28439-default-rtdb.firebaseio.com/"
         };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const rtdb = getDatabase(app);
 
-        let userMe = null;
-        let currentFriend = null;
+        let userData = {};
+        let storeData = { gifts: [], entrances: [] };
         let selectedGift = null;
-        let chatUnsub = null;
+        let chatPartner = null;
+        let currentChatId = null;
+        let chatUnsubscribe = null;
+        let typingTimeout = null;
 
-        const CIPHER_KEY = "AFNAN_SECURE_777";
+        // Check dark mode
+        const isDarkMode = localStorage.getItem('darkMode') === 'true';
+        if (isDarkMode) document.body.classList.add('dark-mode');
 
-        // Simple E2EE Helper
-        const encrypt = (t) => t.split('').map(c => String.fromCharCode(c.charCodeAt(0) ^ CIPHER_KEY.charCodeAt(0))).join('');
-        const decrypt = (t) => encrypt(t);
+        // Get friend ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const friendId = urlParams.get('friend');
 
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
-                // Real-time user data sync
-                onSnapshot(doc(db, "users", user.uid), (snap) => {
-                    userMe = { uid: user.uid, ...snap.data() };
-                    document.getElementById('uBalance').innerText = userMe.balance.toLocaleString();
-                    renderFriends();
+                onSnapshot(doc(db, "users", user.uid), async (docSnap) => {
+                    if (docSnap.exists()) {
+                        userData = docSnap.data();
+                        await loadGlobalData();
+                        if (friendId) {
+                            await startChatWithFriend(friendId);
+                        } else {
+                            window.location.href = 'index.html';
+                        }
+                    }
                 });
+            } else {
+                window.location.href = 'index.html';
+            }
+        });
 
-                // Global Banner Listener (RTDB for speed)
-                onValue(ref(rtdb, 'live_banners'), (snap) => {
-                    const data = snap.val();
-                    if(!data) return;
-                    const last = Object.values(data).pop();
-                    if(Date.now() - last.ts < 5000) triggerBanner(last);
+        async function loadGlobalData() {
+            try {
+                const gSnap = await getDocs(collection(db, "gifts"));
+                storeData.gifts = gSnap.docs.map(d => ({id: d.id, ...d.data()}));
+                
+                const eSnap = await getDocs(collection(db, "entrances"));
+                storeData.entrances = eSnap.docs.map(d => ({id: d.id, ...d.data()}));
+            } catch (error) {
+                console.error("Error loading global data:", error);
+            }
+        }
+
+        async function startChatWithFriend(friendId) {
+            const friendSnap = await getDoc(doc(db, "users", friendId));
+            if (friendSnap.exists()) {
+                chatPartner = friendSnap.data();
+                document.getElementById('chatTitle').textContent = chatPartner.displayName;
+                
+                // Show entrance animation if active
+                if (chatPartner.activeEntrance) {
+                    const entrance = storeData.entrances.find(e => e.id === chatPartner.activeEntrance);
+                    if (entrance) {
+                        showEntranceAnimation(entrance);
+                    }
+                }
+                
+                // Generate chat ID
+                currentChatId = [auth.currentUser.uid, friendId].sort().join('_');
+                
+                // Load messages
+                loadChatMessages(currentChatId);
+                // Listen for typing
+                listenForTyping(currentChatId);
+            }
+        }
+
+        function showEntranceAnimation(entrance) {
+            const container = document.getElementById('entranceAnimation');
+            container.classList.remove('hidden');
+            container.innerHTML = `
+                <img src="${entrance.image}" class="entrance-video" />
+            `;
+            
+            setTimeout(() => {
+                container.classList.add('hidden');
+                container.innerHTML = '';
+            }, 3000);
+        }
+
+        async function loadChatMessages(chatId) {
+            const messagesContainer = document.getElementById('chatMessages');
+            messagesContainer.innerHTML = '';
+            
+            const messagesRef = collection(db, "chats", chatId, "messages");
+            const q = query(messagesRef, orderBy("timestamp", "asc"));
+            
+            chatUnsubscribe = onSnapshot(q, (snapshot) => {
+                messagesContainer.innerHTML = '';
+                snapshot.forEach((doc) => {
+                    const message = doc.data();
+                    displayMessage(message);
+                });
+                
+                setTimeout(() => {
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                }, 100);
+            });
+        }
+
+        function displayMessage(message) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const isMe = message.senderId === auth.currentUser.uid;
+            
+            let messageHTML = '';
+            if (message.type === 'gift') {
+                messageHTML = `
+                    <div class="${isMe ? 'flex justify-end' : 'flex justify-start'} mb-4">
+                        <div class="glass-card p-4 rounded-3xl max-w-[70%]">
+                            <div class="flex items-center gap-3">
+                                <img src="${message.giftImage}" class="w-12 h-12 object-contain">
+                                <div>
+                                    <p class="font-bold text-sm dark:text-white">🎁 ${isMe ? 'أنت أرسلت هدية' : 'تلقيت هدية'}</p>
+                                    <p class="text-xs text-gray-600 dark:text-gray-400">${message.giftName}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                messageHTML = `
+                    <div class="${isMe ? 'message-sent' : 'message-received'} p-4 max-w-[80%]">
+                        <p class="text-sm ${isMe ? 'text-white' : 'dark:text-white'}">${message.text}</p>
+                        <span class="text-xs opacity-70 mt-1 block ${isMe ? 'text-blue-100' : 'text-gray-500 dark:text-gray-400'}">
+                            ${message.timestamp ? new Date(message.timestamp.toDate()).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' }) : 'الآن'}
+                        </span>
+                    </div>
+                `;
+            }
+            
+            messagesContainer.innerHTML += messageHTML;
+        }
+
+        window.handleTyping = () => {
+            if (!currentChatId || !chatPartner) return;
+            
+            if (typingTimeout) clearTimeout(typingTimeout);
+            
+            sendTypingStatus(true);
+            
+            typingTimeout = setTimeout(() => {
+                sendTypingStatus(false);
+            }, 1500);
+        };
+
+        async function sendTypingStatus(isTyping) {
+            if (!currentChatId || !chatPartner) return;
+            
+            const typingRef = doc(db, "chats", currentChatId, "typing", auth.currentUser.uid);
+            if (isTyping) {
+                await setDoc(typingRef, {
+                    isTyping: true,
+                    timestamp: serverTimestamp()
+                });
+            } else {
+                await deleteDoc(typingRef);
+            }
+        }
+
+        function listenForTyping(chatId) {
+            const typingRef = collection(db, "chats", chatId, "typing");
+            onSnapshot(typingRef, (snapshot) => {
+                const typingIndicator = document.getElementById('typingIndicator');
+                let someoneTyping = false;
+                
+                snapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    if (docSnap.id !== auth.currentUser.uid && data.isTyping) {
+                        someoneTyping = true;
+                    }
+                });
+                
+                if (someoneTyping) {
+                    typingIndicator.classList.remove('hidden');
+                } else {
+                    typingIndicator.classList.add('hidden');
+                }
+            });
+        }
+
+        window.sendMessage = async () => {
+            const input = document.getElementById('messageInput');
+            const text = input.value.trim();
+            
+            if (!text || !currentChatId || !chatPartner) return;
+            
+            await sendTypingStatus(false);
+            
+            const messagesRef = collection(db, "chats", currentChatId, "messages");
+            await addDoc(messagesRef, {
+                text: text,
+                senderId: auth.currentUser.uid,
+                senderName: userData.displayName,
+                timestamp: serverTimestamp()
+            });
+            
+            input.value = '';
+        };
+
+        window.goBack = () => {
+            if (chatUnsubscribe) chatUnsubscribe();
+            window.history.back();
+        };
+
+        window.openChatInfo = () => {
+            if (chatPartner) {
+                alert(`معلومات الدردشة مع: ${chatPartner.displayName}\nID: ${chatPartner.customId}\nالمستوى السحري: ${chatPartner.magicLevel || 1}\nالمستوى الثروة: ${chatPartner.wealthLevel || 1}`);
+            }
+        };
+
+        // Gift Functions
+        window.openGiftPicker = async () => {
+            if (!currentChatId || !chatPartner) {
+                alert('يرجى اختيار صديق لإرسال الهدية أولاً');
+                return;
+            }
+            
+            const modal = document.getElementById('giftPickerModal');
+            modal.classList.add('open');
+            
+            const grid = document.getElementById('giftGrid');
+            grid.innerHTML = '';
+            
+            storeData.gifts.forEach(gift => {
+                grid.innerHTML += `
+                    <div onclick="selectGift('${gift.id}')" class="glass-card p-3 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:bg-white dark:hover:bg-gray-800 transition">
+                        <img src="${gift.image}" class="w-12 h-12 object-contain mb-2">
+                        <span class="text-xs font-bold text-center dark:text-white">${gift.name}</span>
+                        <span class="text-[10px] text-gray-500 dark:text-gray-400">${gift.price} 💰</span>
+                    </div>
+                `;
+            });
+            lucide.createIcons();
+        };
+
+        window.selectGift = (giftId) => {
+            selectedGift = storeData.gifts.find(g => g.id === giftId);
+            document.querySelectorAll('#giftGrid > div').forEach(div => {
+                div.classList.remove('border-2', 'border-black', 'dark:border-white');
+            });
+            event.currentTarget.classList.add('border-2', 'border-black', 'dark:border-white');
+        };
+
+        window.sendGift = async () => {
+            if (!selectedGift) return alert('يرجى اختيار هدية');
+            if (!chatPartner) return alert('يرجى اختيار صديق لإرسال الهدية');
+            
+            if (userData.balance < selectedGift.price) {
+                alert('رصيدك غير كافٍ');
+                return;
+            }
+            
+            try {
+                await updateDoc(doc(db, "users", auth.currentUser.uid), {
+                    balance: increment(-selectedGift.price)
+                });
+                
+                const giftData = {
+                    id: selectedGift.id,
+                    name: selectedGift.name,
+                    image: selectedGift.image,
+                    value: selectedGift.value,
+                    type: selectedGift.type,
+                    senderId: auth.currentUser.uid,
+                    senderName: userData.displayName,
+                    receivedAt: new Date()
+                };
+                
+                await updateDoc(doc(db, "users", chatPartner.uid), {
+                    receivedGifts: arrayUnion(giftData)
+                });
+                
+                await updateDoc(doc(db, "users", auth.currentUser.uid), {
+                    magicExp: increment(selectedGift.value * 0.1)
+                });
+                
+                await updateDoc(doc(db, "users", chatPartner.uid), {
+                    wealthExp: increment(selectedGift.value * 0.05)
+                });
+                
+                await checkLevelUp(auth.currentUser.uid, 'magic');
+                await checkLevelUp(chatPartner.uid, 'wealth');
+                
+                const messagesRef = collection(db, "chats", currentChatId, "messages");
+                await addDoc(messagesRef, {
+                    type: 'gift',
+                    giftId: selectedGift.id,
+                    giftName: selectedGift.name,
+                    giftImage: selectedGift.image,
+                    giftValue: selectedGift.value,
+                    senderId: auth.currentUser.uid,
+                    senderName: userData.displayName,
+                    timestamp: serverTimestamp()
+                });
+                
+                alert(`✅ تم إرسال الهدية بنجاح إلى ${chatPartner.displayName}`);
+                closeGiftPicker();
+                
+            } catch (error) {
+                console.error('Error sending gift:', error);
+                alert('حدث خطأ أثناء إرسال الهدية');
+            }
+        };
+
+        async function checkLevelUp(uid, type) {
+            const userSnap = await getDoc(doc(db, "users", uid));
+            if (userSnap.exists()) {
+                const user = userSnap.data();
+                const levelField = type === 'magic' ? 'magicLevel' : 'wealthLevel';
+                const expField = type === 'magic' ? 'magicExp' : 'wealthExp';
+                const currentLevel = user[levelField] || 1;
+                const currentExp = user[expField] || 0;
+                
+                const requiredExp = currentLevel * 1000;
+                
+                if (currentExp >= requiredExp) {
+                    await updateDoc(doc(db, "users", uid), {
+                        [levelField]: increment(1),
+                        [expField]: currentExp - requiredExp
+                    });
+                }
+            }
+        }
+
+        window.closeGiftPicker = () => {
+            const modal = document.getElementById('giftPickerModal');
+            modal.classList.remove('open');
+            selectedGift = null;
+        };
+
+        // Emoji Picker Functions
+        window.openEmojiPicker = () => {
+            const modal = document.getElementById('emojiPickerModal');
+            modal.classList.add('open');
+            
+            const emojiGrid = document.getElementById('emojiGrid');
+            emojiGrid.innerHTML = '';
+            
+            const emojis = [
+                '😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣',
+                '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰',
+                '😘', '😗', '😙', '😚', '😋', '😛', '😝', '😜',
+                '🤪', '🤨', '🧐', '🤓', '😎', '🥸', '🤩', '🥳',
+                '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '😣',
+                '😖', '😫', '😩', '🥺', '😢', '😭', '😤', '😠',
+                '😡', '🤬', '🤯', '😳', '🥵', '🥶', '😱', '😨',
+                '😰', '😥', '😓', '🤗', '🤔', '🤭', '🤫', '🤥',
+                '😶', '😐', '😑', '😬', '🙄', '😯', '😦', '😧',
+                '😮', '😲', '🥱', '😴', '🤤', '😪', '😵', '🤐',
+                '🥴', '🤢', '🤮', '🤧', '😷', '🤒', '🤕', '🤑',
+                '🤠', '😈', '👿', '👹', '👺', '🤡', '💩', '👻',
+                '💀', '☠️', '👽', '👾', '🤖', '🎃', '😺', '😸',
+                '😹', '😻', '😼', '😽', '🙀', '😿', '😾', '👋',
+                '🤚', '🖐️', '✋', '🖖', '👌', '🤌', '🤏', '✌️',
+                '🤞', '🤟', '🤘', '🤙', '👈', '👉', '👆', '👇',
+                '🖕', '👍', '👎', '✊', '👊', '🤛', '🤜', '👏',
+                '🙌', '👐', '🤲', '🤝', '🙏', '✍️', '💅', '🤳',
+                '💪', '🦾', '🦵', '🦿', '🦶', '👂', '🦻', '👃',
+                '🧠', '🦷', '🦴', '👀', '👁️', '👅', '👄', '💋',
+                '🩸', '❤️', '🧡', '💛', '💚', '💙', '💜', '🖤',
+                '🤍', '🤎', '💔', '❣️', '💕', '💞', '💓', '💗',
+                '💖', '💘', '💝', '💟', '☮️', '✝️', '☪️', '🕉️',
+                '☸️', '✡️', '🔯', '🕎', '☯️', '☦️', '🛐', '⛎',
+                '♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏',
+                '♐', '♑', '♒', '♓', '🆔', '⚛️', '🉑', '☢️',
+                '☣️', '📴', '📳', '🈶', '🈚', '🈸', '🈺', '🈷️',
+                '✴️', '🆚', '💮', '🉐', '㊙️', '㊗️', '🈴', '🈵',
+                '🈹', '🈲', '🅰️', '🅱️', '🆎', '🆑', '🅾️', '🆘',
+                '❌', '⭕', '🛑', '⛔', '📛', '🚫', '💯', '💢',
+                '♨️', '🚷', '🚯', '🚳', '🚱', '🔞', '📵', '🚭'
+            ];
+            
+            emojis.forEach(emoji => {
+                const emojiElement = document.createElement('div');
+                emojiElement.className = 'emoji-item';
+                emojiElement.textContent = emoji;
+                emojiElement.onclick = () => {
+                    const input = document.getElementById('messageInput');
+                    input.value += emoji;
+                    modal.classList.remove('open');
+                };
+                emojiGrid.appendChild(emojiElement);
+            });
+        };
+
+        window.closeEmojiPicker = () => {
+            const modal = document.getElementById('emojiPickerModal');
+            modal.classList.remove('open');
+        };
+
+        // Close bottom sheets when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.bottom-sheet') && !e.target.closest('[onclick*="open"]')) {
+                document.querySelectorAll('.bottom-sheet').forEach(sheet => {
+                    sheet.classList.remove('open');
                 });
             }
         });
 
-        async function findUser() {
-            const input = document.getElementById('userSearchInput').value.trim();
-            if(!input) return;
-            const q = query(collection(db, "users"), where("customId", "==", input));
-            const snap = await getDocs(q);
-            if(snap.empty) return alert("المستخدم غير موجود");
-            openProfile(snap.docs[0].id);
-        }
-
-        async function renderFriends() {
-            const container = document.getElementById('friendsList');
-            container.innerHTML = '';
-            const friendsIds = userMe.friends || [];
-            
-            for(const fid of friendsIds) {
-                const fSnap = await getDoc(doc(db, "users", fid));
-                if(fSnap.exists()) {
-                    const f = fSnap.data();
-                    const d = document.createElement('div');
-                    d.className = "flex items-center justify-between p-4 bg-white border rounded-3xl shadow-sm cursor-pointer active:scale-95 transition-all";
-                    d.innerHTML = `
-                        <div class="flex items-center gap-4" onclick="openChat('${fid}')">
-                            <img src="${f.photoURL}" class="w-14 h-14 rounded-full border bg-gray-50">
-                            <div>
-                                <h4 class="font-black text-sm">${f.displayName}</h4>
-                                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">ID: ${f.customId}</p>
-                            </div>
-                        </div>
-                        <button onclick="openProfile('${fid}')" class="p-2 text-gray-300"><i data-lucide="chevron-left"></i></button>
-                    `;
-                    container.appendChild(d);
-                }
-            }
-            lucide.createIcons();
-        }
-
-        window.openChat = async (uid) => {
-            const snap = await getDoc(doc(db, "users", uid));
-            currentFriend = { uid, ...snap.data() };
-            document.getElementById('cName').innerText = currentFriend.displayName;
-            document.getElementById('cAvatar').src = currentFriend.photoURL;
-            document.getElementById('chatModal').classList.add('active');
-
-            const cid = [auth.currentUser.uid, uid].sort().join('_');
-            if(chatUnsub) chatUnsub();
-            chatUnsub = onValue(ref(rtdb, `chats/${cid}/messages`), (snap) => {
-                const box = document.getElementById('chatBox');
-                box.innerHTML = '';
-                const msgs = snap.val();
-                if(!msgs) return;
-                Object.values(msgs).forEach(m => {
-                    const isMe = m.senderId === auth.currentUser.uid;
-                    const d = document.createElement('div');
-                    if(m.type === 'gift') {
-                        d.className = isMe ? 'gift-me' : 'gift-them';
-                        d.innerHTML = `<div class="p-2 bg-gray-50 rounded-2xl border flex flex-col items-center">
-                                          <img src="${m.img}" class="w-20 h-20 object-contain">
-                                          <p class="text-[9px] font-black uppercase mt-1">${m.name}</p>
-                                       </div>`;
-                    } else {
-                        d.className = isMe ? 'msg-me' : 'msg-them';
-                        d.className += " p-3 max-w-[80%] text-sm font-medium";
-                        d.innerText = decrypt(m.text);
-                    }
-                    box.appendChild(d);
-                });
-                box.scrollTop = box.scrollHeight;
-            });
-        };
-
-        window.sendEncryptedMsg = async () => {
-            const val = document.getElementById('mInput').value.trim();
-            if(!val) return;
-            const cid = [auth.currentUser.uid, currentFriend.uid].sort().join('_');
-            await push(ref(rtdb, `chats/${cid}/messages`), {
-                senderId: auth.currentUser.uid,
-                text: encrypt(val),
-                type: 'text',
-                ts: serverTimestamp()
-            });
-            document.getElementById('mInput').value = '';
-        };
-
-        window.openProfile = async (uid) => {
-            const snap = await getDoc(doc(db, "users", uid));
-            const p = { uid, ...snap.data() };
-            document.getElementById('pName').innerText = p.displayName;
-            document.getElementById('pAvatar').src = p.photoURL;
-            document.getElementById('pId').innerText = `ID: ${p.customId}`;
-            document.getElementById('pWealthLv').innerText = p.wealthLevel || 1;
-            document.getElementById('pMagicLv').innerText = p.magicLevel || 1;
-            document.getElementById('pMagicBadge').innerText = `Magic LV ${p.magicLevel || 1}`;
-
-            // Sync Received Gifts
-            const grid = document.getElementById('pGiftsGrid');
-            grid.innerHTML = '';
-            if(p.receivedGifts) {
-                Object.entries(p.receivedGifts).forEach(([gid, data]) => {
-                    grid.innerHTML += `<div class="flex flex-col items-center bg-white p-2 rounded-2xl shadow-sm border">
-                                          <img src="${data.image}" class="w-8 h-8 object-contain">
-                                          <span class="text-[9px] font-black mt-1">x${data.count}</span>
-                                       </div>`;
-                });
-            } else {
-                grid.innerHTML = '<div class="col-span-4 text-center text-[10px] text-gray-300 py-10">الخزانة فارغة</div>';
-            }
-
-            // Relationship Status / Action
-            const btn = document.getElementById('friendActionBtn');
-            if(userMe.friends?.includes(uid)) {
-                btn.innerText = "صديق (إزالة)";
-                btn.onclick = () => removeFriend(uid);
-            } else if(userMe.sentRequests?.includes(uid)) {
-                btn.innerText = "تم إرسال الطلب";
-                btn.disabled = true;
-            } else {
-                btn.innerText = "إرسال طلب صداقة";
-                btn.disabled = false;
-                btn.onclick = () => sendFriendRequest(uid);
-            }
-
-            currentFriend = p;
-            document.getElementById('profileModal').classList.add('active');
-            lucide.createIcons();
-        };
-
-        async function sendFriendRequest(uid) {
-            await updateDoc(doc(db, "users", auth.currentUser.uid), { sentRequests: arrayUnion(uid) });
-            await updateDoc(doc(db, "users", uid), { friendRequests: arrayUnion(auth.currentUser.uid) });
-            openProfile(uid);
-        }
-
-        async function removeFriend(uid) {
-            await updateDoc(doc(db, "users", auth.currentUser.uid), { friends: arrayRemove(uid) });
-            await updateDoc(doc(db, "users", uid), { friends: arrayRemove(auth.currentUser.uid) });
-            openProfile(uid);
-        }
-
-        window.openGiftPicker = async () => {
-            document.getElementById('giftPicker').classList.remove('hidden');
-            const grid = document.getElementById('giftGrid');
-            grid.innerHTML = '<div class="col-span-4 py-10 text-center animate-pulse">...</div>';
-            
-            const q = query(collection(db, "gifts"));
-            const snap = await getDocs(q);
-            grid.innerHTML = '';
-            snap.forEach(doc => {
-                const g = { id: doc.id, ...doc.data() };
-                const d = document.createElement('div');
-                d.className = "flex flex-col items-center p-3 bg-gray-50 rounded-2xl border-2 border-transparent cursor-pointer transition-all active:scale-90";
-                d.innerHTML = `<img src="${g.image}" class="w-10 h-10 object-contain">
-                               <p class="text-[9px] font-black mt-2 uppercase text-center">${g.name}</p>
-                               <p class="text-[8px] text-gray-400 font-bold">${g.price.toLocaleString()}</p>`;
-                d.onclick = () => {
-                    selectedGift = g;
-                    document.querySelectorAll('#giftGrid > div').forEach(x => x.classList.remove('border-black', 'bg-white'));
-                    d.classList.add('border-black', 'bg-white');
-                    const btn = document.getElementById('sendGiftBtn');
-                    btn.disabled = userMe.balance < g.price;
-                    btn.innerText = userMe.balance < g.price ? "الرصيد غير كافٍ" : `إرسال (${g.price.toLocaleString()})`;
-                    btn.className = "w-full py-4 bg-black text-white rounded-2xl font-black";
-                };
-                grid.appendChild(d);
-            });
-        };
-
-        window.executeGiftSend = async () => {
-            if(!selectedGift || userMe.balance < selectedGift.price) return;
-            const targetId = currentFriend.uid;
-            
-            try {
-                // 1. Transaction
-                await updateDoc(doc(db, "users", auth.currentUser.uid), { balance: increment(-selectedGift.price) });
-                
-                // 2. Persistent Save to Target's receivedGifts
-                const giftRef = `receivedGifts.${selectedGift.id}`;
-                await updateDoc(doc(db, "users", targetId), {
-                    [giftRef + ".count"]: increment(1),
-                    [giftRef + ".image"]: selectedGift.image,
-                    [giftRef + ".name"]: selectedGift.name,
-                    wealthGiftsReceived: increment(1)
-                });
-
-                // 3. Send Signal to Chat (Real-time)
-                const cid = [auth.currentUser.uid, targetId].sort().join('_');
-                await push(ref(rtdb, `chats/${cid}/messages`), {
-                    senderId: auth.currentUser.uid,
-                    type: 'gift',
-                    name: selectedGift.name,
-                    img: selectedGift.image,
-                    ts: serverTimestamp()
-                });
-
-                // 4. Global Banner
-                await push(ref(rtdb, 'live_banners'), {
-                    sImg: userMe.photoURL,
-                    rImg: currentFriend.photoURL,
-                    gImg: selectedGift.image,
-                    ts: Date.now()
-                });
-
-                closeGiftPicker();
-            } catch(e) { console.error(e); }
-        };
-
-        function triggerBanner(data) {
-            const b = document.getElementById('globalBanner');
-            document.getElementById('bSender').src = data.sImg;
-            document.getElementById('bReceiver').src = data.rImg;
-            document.getElementById('bGift').src = data.gImg;
-
-            b.classList.remove('active');
-            void b.offsetWidth; // force reflow
-            b.classList.add('active');
-        }
-
-        window.toggleSearch = (show) => document.getElementById('searchBar').classList.toggle('hidden', !show);
-        window.closeChat = () => document.getElementById('chatModal').classList.remove('active');
-        window.closeProfile = () => document.getElementById('profileModal').classList.remove('active');
-        window.closeGiftPicker = () => document.getElementById('giftPicker').classList.add('hidden');
-
+        // Initialize icons
         lucide.createIcons();
+        setInterval(() => lucide.createIcons(), 1000);
     </script>
 </body>
 </html>
-
