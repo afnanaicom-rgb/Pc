@@ -69,12 +69,28 @@
         .btn-hover:active {
             transform: scale(0.96);
         }
+        
+        /* الصورة الخلفية */
+        .background-image {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('https://i.postimg.cc/15w0JQjz/9479a3.jpg');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.1;
+            z-index: 0;
+        }
     </style>
 </head>
 <body class="antialiased flex items-center justify-center min-h-screen relative">
 
     <!-- Background Elements -->
-    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+    <div class="background-image"></div>
+    
+    <div class="fixed inset-0 overflow-hidden pointer-events-none z-1">
         <div class="absolute -top-[10%] -right-[10%] w-[50%] h-[50%] bg-blue-400/10 rounded-full blur-3xl animate-pulse"></div>
         <div class="absolute top-[40%] -left-[10%] w-[40%] h-[40%] bg-purple-400/10 rounded-full blur-3xl"></div>
         <div class="absolute -bottom-[10%] right-[20%] w-[40%] h-[40%] bg-indigo-400/10 rounded-full blur-3xl"></div>
@@ -135,16 +151,20 @@
     </div>
 
     <script type="module">
-        // استيراد الدوال اللازمة لدعم Redirect بدلاً من Popup
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { 
             getAuth, 
             TwitterAuthProvider, 
             GoogleAuthProvider, 
-            signInWithRedirect, 
-            getRedirectResult,
+            signInWithPopup,
             onAuthStateChanged
         } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { 
+            getFirestore,
+            doc,
+            getDoc,
+            setDoc
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBnmqWRY6lV54meFvO89QeXwtd28w81FcY",
@@ -158,6 +178,7 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const db = getFirestore(app);
         
         // إعداد اللغة للعربية في واجهة فايربيس
         auth.languageCode = 'ar';
@@ -181,43 +202,73 @@
             const provider = providerName === 'twitter' ? twitterProvider : googleProvider;
             
             try {
-                // استخدام signInWithRedirect وهو الأنسب للموبايل والـ WebViews
-                // هذا سيقوم بفتح الصفحة في المتصفح الافتراضي إذا كان التطبيق معداً لذلك
-                // أو سيقوم بإعادة توجيه الـ WebView نفسه
-                await signInWithRedirect(auth, provider);
-            } catch (error) {
-                console.error('خطأ في بدء عملية الدخول:', error);
-                hideLoading();
-                alert('عذراً، حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى.');
-            }
-        };
-
-        // التحقق من نتيجة تسجيل الدخول عند العودة للصفحة
-        // هذه الخطوة ضرورية جداً مع signInWithRedirect
-        const checkRedirect = async () => {
-            try {
-                const result = await getRedirectResult(auth);
-                if (result) {
-                    // المستخدم عاد بنجاح من صفحة الدخول
-                    const user = result.user;
-                    console.log("تم تسجيل الدخول بنجاح:", user.displayName);
-                    window.location.href = 'afnan.html';
+                // استخدام signInWithPopup بدلاً من Redirect
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+                
+                // التحقق مما إذا كان المستخدم موجوداً في قاعدة البيانات
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                
+                if (!userDoc.exists()) {
+                    // إنشاء مستخدم جديد
+                    await setDoc(doc(db, "users", user.uid), {
+                        displayName: user.displayName || "مستخدم جديد",
+                        photoURL: user.photoURL || "https://via.placeholder.com/150",
+                        email: user.email || "",
+                        uid: user.uid,
+                        balance: 1000,
+                        diamonds: 0,
+                        magicLevel: 1,
+                        wealthLevel: 1,
+                        magicExp: 0,
+                        wealthExp: 0,
+                        customId: Math.floor(100000 + Math.random() * 900000).toString(),
+                        purchasedFrames: [],
+                        purchasedBadges: [],
+                        purchasedEntrances: [],
+                        activeFrame: null,
+                        activeBadges: [],
+                        activeEntrance: null,
+                        friends: [],
+                        friendRequests: [],
+                        sentRequests: [],
+                        blockedUsers: [],
+                        receivedGifts: [],
+                        dailyGiftClaimed: false,
+                        followers: [],
+                        fans: [],
+                        createdAt: new Date()
+                    });
                 }
+                
+                // الانتقال إلى الصفحة الرئيسية بعد تسجيل الدخول
+                window.location.href = 'afnan.html';
+                
             } catch (error) {
-                console.error('فشل استرجاع بيانات الدخول:', error);
-                // التعامل مع حالات محددة مثل إغلاق المستخدم للنافذة قبل الاكمال
+                console.error('خطأ في عملية الدخول:', error);
+                hideLoading();
+                
+                // رسائل خطأ مخصصة
+                if (error.code === 'auth/popup-closed-by-user') {
+                    alert('تم إغلاق نافذة الدخول. يرجى المحاولة مرة أخرى.');
+                } else if (error.code === 'auth/cancelled-popup-request') {
+                    alert('تم إلغاء عملية الدخول. يرجى المحاولة مرة أخرى.');
+                } else if (error.code === 'auth/popup-blocked') {
+                    alert('تم حظر النافذة المنبثقة. يرجى السماح بالنوافذ المنبثقة لهذا الموقع.');
+                } else if (error.code === 'auth/account-exists-with-different-credential') {
+                    alert('هذا البريد الإلكتروني مرتبط بحساب آخر. يرجى استخدام طريقة تسجيل دخول أخرى.');
+                } else {
+                    alert(`عذراً، حدث خطأ: ${error.message}`);
+                }
             }
         };
 
-        // مراقب حالة المستخدم
-        // مفيد إذا كان المستخدم مسجل دخول بالفعل (مثلاً تم حفظ الجلسة)
+        // التحقق من حالة المستخدم
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                console.log("المستخدم مسجل دخول بالفعل");
+                // إذا كان المستخدم مسجل دخول بالفعل، انتقل مباشرة إلى afnan.html
+                console.log("المستخدم مسجل دخول بالفعل، جاري التوجيه...");
                 window.location.href = 'afnan.html';
-            } else {
-                // المستخدم غير مسجل، نتحقق مما إذا كان عائداً من Redirect
-                checkRedirect();
             }
         });
 
@@ -226,4 +277,3 @@
     </script>
 </body>
 </html>
-
