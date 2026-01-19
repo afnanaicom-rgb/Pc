@@ -90,6 +90,7 @@
             justify-content: center;
             backdrop-filter: blur(5px); 
             transition: 0.3s;
+            position: relative;
         }
 
         .mic-img { 
@@ -97,6 +98,7 @@
             height: 90%; 
             border-radius: 50%; 
             object-fit: cover; 
+            cursor: pointer;
         }
 
         .msg-bubble {
@@ -172,6 +174,35 @@
 
         .modal-overlay.active .modal-content {
             transform: translateY(0);
+        }
+
+        /* صندوق الهدايا من الأسفل */
+        .bottom-sheet {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(30, 41, 59, 0.95);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px 24px 0 0;
+            padding: 24px;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            z-index: 2001;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .bottom-sheet.active {
+            transform: translateY(0);
+        }
+
+        .sheet-handle {
+            width: 40px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+            margin: 0 auto 16px;
         }
 
         /* البنر */
@@ -250,6 +281,36 @@
             -ms-overflow-style: none; 
             scrollbar-width: none; 
         }
+
+        /* تأثير الهدايا */
+        .gift-effect {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            z-index: 3000;
+        }
+
+        /* ميكات الروم - 10 ميكات */
+        .mics-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .mics-container.bottom {
+            margin-top: 20px;
+        }
+
+        .mics-divider {
+            width: 100%;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 10px 0;
+        }
     </style>
 </head>
 <body class="antialiased">
@@ -291,7 +352,7 @@
             
             <div id="publicRoomsList" class="grid grid-cols-2 gap-3 mb-8">
                 <!-- سيتم تعبئتها بالرومات -->
-                <div class="text-center py-8 text-gray-500">
+                <div class="text-center py-8 text-gray-500 col-span-2">
                     <i class="fas fa-comments text-3xl mb-3"></i>
                     <p>لا توجد رومات عامة حالياً</p>
                 </div>
@@ -327,7 +388,7 @@
         </div>
 
         <!-- البار السفلي -->
-        <nav class="glass fixed bottom-0 left-0 right-0 h-16 flex items-center justify-around border-t border-white/10">
+        <nav class="glass fixed bottom-0 left-0 right-0 h-16 flex items-center justify-around border-t border-white/10 z-50">
             <button onclick="goToHome()" class="flex flex-col items-center text-blue-400">
                 <i class="fas fa-home text-lg mb-1"></i>
                 <span class="text-xs">الرئيسية</span>
@@ -352,27 +413,31 @@
         <div class="app-container w-full h-full flex flex-col">
             <!-- هيدر الروم -->
             <header class="header p-4 flex justify-between items-center border-b border-white/10">
-                <div class="room-info glass rounded-3xl p-2 flex items-center gap-2 cursor-pointer">
+                <button class="btn-control w-10 h-10 rounded-full glass flex items-center justify-center" onclick="minimizeRoom()">
+                    <i class="fa-solid fa-chevron-down"></i>
+                </button>
+                <div class="room-info glass rounded-3xl p-2 flex items-center gap-2 cursor-pointer" onclick="showRoomInfo()">
                     <img id="roomOwnerAvatar" src="" class="owner-img w-10 h-10 rounded-full border-2 border-accent">
                     <div>
-                        <span class="text-xs text-accent" id="roomOwnerId">ID: ---</span>
                         <div class="text-sm font-bold" id="roomTitle">---</div>
+                        <span class="text-xs text-accent" id="roomOnlineCount">0/10</span>
                     </div>
                 </div>
-                <div class="flex gap-2">
-                    <button class="btn-control w-10 h-10 rounded-full glass flex items-center justify-center" onclick="toggleFullscreen()">
-                        <i class="fa-solid fa-expand"></i>
-                    </button>
-                    <button class="btn-control w-10 h-10 rounded-full bg-red-500 flex items-center justify-center" onclick="leaveRoom()">
-                        <i class="fa-solid fa-phone-slash"></i>
-                    </button>
-                </div>
+                <button class="btn-control w-10 h-10 rounded-full bg-red-500 flex items-center justify-center" onclick="leaveRoom()">
+                    <i class="fa-solid fa-phone-slash"></i>
+                </button>
             </header>
 
-            <!-- شبكة الميكات -->
+            <!-- شبكة الميكات (10 ميكات) -->
             <div class="mics-grid flex-1 p-4 overflow-y-auto">
-                <div id="micsGrid" class="flex flex-wrap justify-center gap-4">
-                    <!-- سيتم تعبئتها بالمستخدمين -->
+                <div class="mics-container" id="topMicsGrid">
+                    <!-- 5 ميكات علوية -->
+                </div>
+                
+                <div class="mics-divider"></div>
+                
+                <div class="mics-container bottom" id="bottomMicsGrid">
+                    <!-- 5 ميكات سفلية -->
                 </div>
             </div>
 
@@ -384,17 +449,20 @@
             <!-- الفوتر -->
             <footer class="footer p-4 border-t border-white/10">
                 <div class="flex items-center gap-2">
+                    <button id="muteBtn" class="btn-action w-12 h-12 rounded-full glass flex items-center justify-center" onclick="toggleMute()">
+                        <i class="fa-solid fa-microphone" id="muteIcon"></i>
+                    </button>
+                    
                     <div class="input-box flex-1 glass rounded-3xl p-2 flex items-center">
                         <input type="text" 
                                id="chatInput" 
                                class="main-input flex-1 bg-transparent border-0 focus:outline-none text-white" 
-                               placeholder="اكتب رسالة...">
+                               placeholder="اكتب رسالة..."
+                               onkeypress="if(event.key === 'Enter') sendMessage()">
                     </div>
+                    
                     <button id="giftBtn" class="btn-action w-12 h-12 rounded-full glass flex items-center justify-center" onclick="openGiftSheet()">
                         <i class="fa-solid fa-gift text-accent"></i>
-                    </button>
-                    <button id="sendBtn" class="btn-action w-12 h-12 rounded-full bg-primary flex items-center justify-center" onclick="sendMessage()">
-                        <i class="fa-solid fa-paper-plane"></i>
                     </button>
                 </div>
             </footer>
@@ -440,8 +508,8 @@
                 <div>
                     <label class="block text-sm mb-2">عدد الأعضاء</label>
                     <select id="maxUsersInput" class="w-full p-3 rounded-2xl glass border border-white/10 focus:border-accent focus:outline-none">
-                        <option value="5">5 أشخاص</option>
                         <option value="10" selected>10 أشخاص</option>
+                        <option value="5">5 أشخاص</option>
                         <option value="20">20 شخصاً</option>
                     </select>
                 </div>
@@ -460,52 +528,101 @@
         </div>
     </div>
 
-    <!-- مودال إرسال هدية -->
-    <div id="giftSheet" class="modal-overlay">
+    <!-- صندوق الهدايا من الأسفل -->
+    <div id="giftSheet" class="bottom-sheet">
+        <div class="sheet-handle"></div>
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-lg">إرسال هدية</h3>
+            <button onclick="closeGiftSheet()" class="w-8 h-8 rounded-full flex items-center justify-center bg-white/10 hover:bg-white/20">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <!-- اختيار المستلم -->
+        <div class="mb-6">
+            <h4 class="text-sm font-bold mb-3">اختر المستلم:</h4>
+            <div id="userSelector" class="flex gap-3 overflow-x-auto pb-3">
+                <!-- سيتم تعبئتها بالمستخدمين -->
+            </div>
+        </div>
+        
+        <!-- اختيار الهدية -->
+        <div class="mb-6">
+            <h4 class="text-sm font-bold mb-3">اختر الهدية:</h4>
+            <div id="giftsGrid" class="grid grid-cols-4 gap-3">
+                <!-- سيتم تعبئتها من Firebase -->
+            </div>
+        </div>
+        
+        <!-- معلومات الإرسال -->
+        <div class="glass-card rounded-xl p-4 mb-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <div class="text-sm text-gray-400">إلى:</div>
+                    <div id="selectedRecipientName" class="font-bold">لم يتم الاختيار</div>
+                </div>
+                <div>
+                    <div class="text-sm text-gray-400">الهدية:</div>
+                    <div id="selectedGiftName" class="font-bold">لم يتم الاختيار</div>
+                </div>
+                <div>
+                    <div class="text-sm text-gray-400">السعر:</div>
+                    <div id="selectedGiftPrice" class="font-bold text-accent">0 💰</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- زر الإرسال -->
+        <button onclick="sendGift()" class="w-full py-3 rounded-xl bg-gradient-to-r from-yellow-500 to-orange-500 hover:opacity-90 transition font-bold">
+            إرسال الهدية
+        </button>
+    </div>
+
+    <!-- مودال الملف الشخصي للمستخدم -->
+    <div id="userProfileModal" class="modal-overlay">
         <div class="modal-content">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="font-bold text-lg">إرسال هدية</h3>
-                <button onclick="closeGiftSheet()" class="w-8 h-8 rounded-full flex items-center justify-center bg-white/10 hover:bg-white/20">
+                <h3 class="font-bold text-lg">الملف الشخصي</h3>
+                <button onclick="closeUserProfileModal()" class="w-8 h-8 rounded-full flex items-center justify-center bg-white/10 hover:bg-white/20">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             
-            <div class="user-selector flex gap-3 overflow-x-auto pb-3 mb-3 border-b border-white/10">
-                <!-- مستخدمين الروم -->
-            </div>
-            
-            <div class="gifts-grid grid grid-cols-4 gap-2 max-h-64 overflow-y-auto">
-                <!-- الهدايا -->
-                <div class="gift-card glass rounded-xl p-3 text-center cursor-pointer">
-                    <div class="text-2xl mb-1">🌹</div>
-                    <div class="text-xs">50 💰</div>
-                </div>
-                <div class="gift-card glass rounded-xl p-3 text-center cursor-pointer">
-                    <div class="text-2xl mb-1">💎</div>
-                    <div class="text-xs">100 💰</div>
-                </div>
-                <div class="gift-card glass rounded-xl p-3 text-center cursor-pointer">
-                    <div class="text-2xl mb-1">🎁</div>
-                    <div class="text-xs">200 💰</div>
-                </div>
-                <div class="gift-card glass rounded-xl p-3 text-center cursor-center cursor-pointer">
-                    <div class="text-2xl mb-1">👑</div>
-                    <div class="text-xs">500 💰</div>
+            <div class="text-center mb-6">
+                <img id="profileAvatar" src="" class="w-24 h-24 rounded-full mx-auto border-4 border-accent mb-3">
+                <h4 id="profileName" class="font-bold text-xl"></h4>
+                <p id="profileId" class="text-gray-400 text-sm">ID: ---</p>
+                <div class="flex justify-center gap-2 mt-2">
+                    <span id="profileMagic" class="badge b-magic">✨ 0</span>
+                    <span id="profileWealth" class="badge b-wealth">💰 0</span>
                 </div>
             </div>
             
-            <div class="flex items-center justify-between mt-4">
-                <div class="text-sm">
-                    رصيدك: <span class="text-accent font-bold" id="userBalance">0</span> 💰
-                </div>
-                <button onclick="sendGift()" class="px-4 py-2 rounded-xl bg-accent hover:opacity-90 transition">
-                    إرسال الهدية
+            <!-- إجراءات للمالك أو المشرف -->
+            <div id="adminActions" class="space-y-2 hidden">
+                <button onclick="kickFromMic()" class="w-full py-3 rounded-xl bg-red-500/20 text-red-400 hover:bg-red-500/30 transition">
+                    <i class="fas fa-microphone-slash ml-2"></i> طرد من الميك
+                </button>
+                <button onclick="kickFromRoom()" class="w-full py-3 rounded-xl bg-red-500/20 text-red-400 hover:bg-red-500/30 transition">
+                    <i class="fas fa-sign-out-alt ml-2"></i> طرد من الروم
+                </button>
+                <button onclick="banUser()" class="w-full py-3 rounded-xl bg-red-500/20 text-red-400 hover:bg-red-500/30 transition">
+                    <i class="fas fa-ban ml-2"></i> حظر للأبد
+                </button>
+            </div>
+            
+            <!-- إجراءات للمستخدم العادي -->
+            <div id="userActions" class="space-y-2">
+                <button onclick="sendPrivateMessage()" class="w-full py-3 rounded-xl bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition">
+                    <i class="fas fa-envelope ml-2"></i> رسالة خاصة
+                </button>
+                <button onclick="followUser()" class="w-full py-3 rounded-xl bg-green-500/20 text-green-400 hover:bg-green-500/30 transition">
+                    <i class="fas fa-user-plus ml-2"></i> متابعة
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Scripts -->
     <script>
         // تهيئة Firebase
         const firebaseConfig = {
@@ -533,6 +650,8 @@
         let isMuted = false;
         let selectedGift = null;
         let selectedRecipient = null;
+        let selectedUserId = null;
+        let gifts = [];
 
         // تهيئة التطبيق
         document.addEventListener('DOMContentLoaded', async () => {
@@ -543,6 +662,7 @@
                     await loadUserData();
                     await checkCurrentRoom();
                     await loadRooms();
+                    await loadGifts(); // تحميل الهدايا عند بدء التطبيق
                 } else {
                     // إذا لم يكن مسجل الدخول، توجيه لصفحة تسجيل الدخول
                     window.location.href = 'login.html';
@@ -557,9 +677,6 @@
                 if (userDoc.exists) {
                     currentUserData = userDoc.data();
                     
-                    // تحديث رصيد المستخدم
-                    document.getElementById('userBalance').textContent = currentUserData.balance || 0;
-                    
                     // التحقق إذا كان لديه غرفة نشطة
                     if (currentUserData.currentRoom) {
                         currentRoom = currentUserData.currentRoom;
@@ -568,6 +685,7 @@
                 }
             } catch (error) {
                 console.error('Error loading user data:', error);
+                showNotification('حدث خطأ في تحميل بيانات المستخدم', 'error');
             }
         }
 
@@ -579,6 +697,7 @@
                 const roomDoc = await db.collection('rooms').doc(currentUserData.currentRoom).get();
                 if (roomDoc.exists) {
                     currentRoom = currentUserData.currentRoom;
+                    roomData = roomDoc.data();
                     await joinExistingRoom(currentRoom);
                 } else {
                     // إزالة الغرفة من بيانات المستخدم
@@ -594,6 +713,8 @@
         // تحميل الرومات
         async function loadRooms() {
             try {
+                showLoading();
+                
                 // تحميل الرومات العامة
                 const publicRoomsSnap = await db.collection('rooms')
                     .where('type', '==', 'public')
@@ -605,13 +726,24 @@
                 displayPublicRooms(publicRoomsSnap.docs);
                 
                 // تحميل الرومات الخاصة للمستخدم
-                if (currentUserData && currentUserData.joinedRooms) {
-                    loadPrivateRooms();
-                }
+                await loadPrivateRooms();
+                
+                hideLoading();
                 
             } catch (error) {
                 console.error('Error loading rooms:', error);
                 showNotification('حدث خطأ في تحميل الرومات', 'error');
+                
+                const publicRoomsList = document.getElementById('publicRoomsList');
+                publicRoomsList.innerHTML = `
+                    <div class="col-span-2 text-center py-8 text-gray-500">
+                        <i class="fas fa-exclamation-triangle text-3xl mb-3"></i>
+                        <p>حدث خطأ في تحميل الرومات</p>
+                        <button onclick="loadRooms()" class="mt-4 px-4 py-2 rounded-xl bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition">
+                            إعادة المحاولة
+                        </button>
+                    </div>
+                `;
             }
         }
 
@@ -635,8 +767,9 @@
             let html = '';
             rooms.forEach(roomDoc => {
                 const room = roomDoc.data();
-                const isFull = room.users?.length >= room.maxUsers;
-                const isInRoom = room.users?.some(u => u.uid === currentUser?.uid);
+                const userCount = room.users ? room.users.length : 0;
+                const isFull = userCount >= room.maxUsers;
+                const isInRoom = room.users ? room.users.some(u => u.uid === currentUser?.uid) : false;
                 
                 html += `
                     <div class="glass-card rounded-2xl overflow-hidden cursor-pointer" onclick="previewRoom('${roomDoc.id}')">
@@ -644,15 +777,17 @@
                             <img src="${room.image || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80'}" 
                                  class="w-full h-full object-cover">
                             <div class="absolute bottom-2 right-2 bg-black/60 px-2 py-1 rounded-lg text-xs">
-                                ${room.users?.length || 0}/${room.maxUsers}
+                                ${userCount}/${room.maxUsers}
                             </div>
+                            ${isFull ? '<div class="absolute top-2 left-2 bg-red-500/80 px-2 py-1 rounded-lg text-xs">ممتلئ</div>' : ''}
                         </div>
                         <div class="p-3">
                             <h4 class="font-bold text-sm truncate">${room.name}</h4>
                             <div class="flex items-center gap-2 mt-2">
-                                <img src="${room.ownerAvatar}" class="w-6 h-6 rounded-full">
-                                <span class="text-xs text-gray-400">${room.ownerName}</span>
+                                <img src="${room.ownerAvatar || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="w-6 h-6 rounded-full">
+                                <span class="text-xs text-gray-400">${room.ownerName || 'مستخدم'}</span>
                             </div>
+                            ${isInRoom ? '<div class="mt-2 text-xs text-green-400"><i class="fas fa-check ml-1"></i>أنت في هذه الغرفة</div>' : ''}
                         </div>
                     </div>
                 `;
@@ -670,6 +805,7 @@
                 const createdRoomsSnap = await db.collection('rooms')
                     .where('ownerId', '==', currentUser.uid)
                     .where('type', '==', 'private')
+                    .where('isActive', '==', true)
                     .orderBy('createdAt', 'desc')
                     .get();
                 
@@ -686,6 +822,7 @@
                 let html = '';
                 createdRoomsSnap.forEach(doc => {
                     const room = doc.data();
+                    const userCount = room.users ? room.users.length : 0;
                     
                     html += `
                         <div class="glass-card rounded-2xl p-3 flex items-center justify-between">
@@ -694,7 +831,7 @@
                                      class="w-12 h-12 rounded-lg object-cover">
                                 <div>
                                     <h4 class="font-bold">${room.name}</h4>
-                                    <p class="text-xs text-gray-400">${room.users?.length || 0} أعضاء</p>
+                                    <p class="text-xs text-gray-400">${userCount} أعضاء</p>
                                 </div>
                             </div>
                             <button onclick="joinRoom('${doc.id}')" class="px-3 py-1 rounded-lg bg-blue-500 hover:bg-blue-600 transition text-sm">
@@ -722,9 +859,10 @@
                 }
 
                 const room = roomDoc.data();
+                const userCount = room.users ? room.users.length : 0;
                 
                 // التحقق إذا كانت الغرفة ممتلئة
-                if (room.users?.length >= room.maxUsers) {
+                if (userCount >= room.maxUsers) {
                     showNotification('الغرفة ممتلئة', 'warning');
                     return;
                 }
@@ -757,9 +895,10 @@
                 }
 
                 const room = roomDoc.data();
+                const userCount = room.users ? room.users.length : 0;
                 
                 // التحقق من عدم وجود غرفة أخرى
-                if (currentUserData.currentRoom && currentUserData.currentRoom !== roomId) {
+                if (currentUserData && currentUserData.currentRoom && currentUserData.currentRoom !== roomId) {
                     if (!confirm('لديك غرفة نشطة. هل تريد مغادرتها والانضمام لهذه الغرفة؟')) {
                         return;
                     }
@@ -767,19 +906,20 @@
                 }
 
                 // التحقق إذا كان المستخدم موجوداً بالفعل
-                const userExists = room.users?.some(u => u.uid === currentUser.uid);
+                const userExists = room.users ? room.users.some(u => u.uid === currentUser.uid) : false;
                 
                 if (!userExists) {
                     // إضافة المستخدم للغرفة
                     const userData = {
                         uid: currentUser.uid,
-                        name: currentUserData.displayName,
-                        avatar: currentUserData.photoURL,
+                        name: currentUser.displayName || 'مستخدم',
+                        avatar: currentUser.photoURL || 'https://cdn-icons-png.flaticon.com/512/149/149071.png',
                         isMuted: false,
                         isSpeaker: true,
                         joinedAt: new Date(),
-                        magicLevel: currentUserData.magicLevel || 1,
-                        wealthLevel: currentUserData.wealthLevel || 1
+                        magicLevel: currentUserData?.magicLevel || 1,
+                        wealthLevel: currentUserData?.wealthLevel || 1,
+                        isOwner: room.ownerId === currentUser.uid
                     };
 
                     await db.collection('rooms').doc(roomId).update({
@@ -807,6 +947,9 @@
                 // بدء اتصال WebRTC
                 await startWebRTCConnection();
                 
+                // الاستماع للتحديثات
+                setupRoomListeners();
+                
                 showNotification(`تم الانضمام لـ ${room.name}`, 'success');
                 
             } catch (error) {
@@ -831,10 +974,41 @@
                     
                     // بدء اتصال WebRTC
                     await startWebRTCConnection();
+                    
+                    // الاستماع للتحديثات
+                    setupRoomListeners();
                 }
             } catch (error) {
                 console.error('Error joining existing room:', error);
             }
+        }
+
+        // إعداد المستمعين للتحديثات
+        function setupRoomListeners() {
+            if (!currentRoom) return;
+            
+            // الاستماع لتحديثات الغرفة
+            db.collection('rooms').doc(currentRoom)
+                .onSnapshot((doc) => {
+                    if (doc.exists) {
+                        roomData = doc.data();
+                        updateRoomUI();
+                    }
+                });
+            
+            // الاستماع للرسائل الجديدة
+            db.collection('rooms').doc(currentRoom)
+                .collection('messages')
+                .orderBy('timestamp', 'desc')
+                .limit(20)
+                .onSnapshot((snapshot) => {
+                    snapshot.docChanges().forEach((change) => {
+                        if (change.type === 'added') {
+                            const message = change.doc.data();
+                            displayMessage(message);
+                        }
+                    });
+                });
         }
 
         // تحديث واجهة الروم
@@ -842,31 +1016,100 @@
             if (!roomData) return;
             
             document.getElementById('roomTitle').textContent = roomData.name;
-            document.getElementById('roomOwnerAvatar').src = roomData.ownerAvatar;
-            document.getElementById('roomOwnerId').textContent = `ID: ${roomData.ownerId?.substring(0, 6)}`;
+            document.getElementById('roomOwnerAvatar').src = roomData.ownerAvatar || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+            const userCount = roomData.users ? roomData.users.length : 0;
+            document.getElementById('roomOnlineCount').textContent = `${userCount}/${roomData.maxUsers || 10}`;
             
-            // تحديث شبكة المستخدمين
+            // تحديث شبكة المستخدمين (10 ميكات)
             updateMicsGrid();
         }
 
-        // تحديث شبكة الميكروفونات
+        // تحديث شبكة الميكروفونات (10 ميكات)
         function updateMicsGrid() {
-            if (!roomData || !roomData.users) return;
+            if (!roomData) return;
             
-            const micsGrid = document.getElementById('micsGrid');
-            micsGrid.innerHTML = '';
+            const users = roomData.users || [];
+            const topMicsGrid = document.getElementById('topMicsGrid');
+            const bottomMicsGrid = document.getElementById('bottomMicsGrid');
             
-            roomData.users.forEach(user => {
+            topMicsGrid.innerHTML = '';
+            bottomMicsGrid.innerHTML = '';
+            
+            // 5 ميكات علوية
+            for (let i = 0; i < 5; i++) {
                 const micItem = document.createElement('div');
-                micItem.className = 'mic-item flex flex-col items-center';
-                micItem.innerHTML = `
-                    <div class="avatar-ring" onclick="showUserProfile('${user.uid}')">
-                        <img src="${user.avatar}" class="mic-img">
-                    </div>
-                    <span style="font-size:10px; color:#aaa; margin-top:5px">${user.name}</span>
-                `;
-                micsGrid.appendChild(micItem);
-            });
+                micItem.className = 'mic-item';
+                
+                if (i < users.length) {
+                    const user = users[i];
+                    micItem.innerHTML = `
+                        <img src="${user.avatar}" 
+                             class="mic-img" 
+                             onclick="openUserProfile('${user.uid}')">
+                        ${user.isMuted ? `
+                        <div class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
+                            <i class="fas fa-microphone-slash text-xs"></i>
+                        </div>` : ''}
+                        ${user.isOwner ? `
+                        <div class="absolute -bottom-1 -left-1 w-5 h-5 bg-yellow-500 rounded-full flex items-center justify-center">
+                            <i class="fas fa-crown text-xs"></i>
+                        </div>` : ''}
+                        <div class="absolute -bottom-4 right-0 left-0 text-center">
+                            <span class="text-xs truncate max-w-full block px-1">${user.name}</span>
+                        </div>
+                    `;
+                } else {
+                    // ميكات فارغة
+                    micItem.innerHTML = `
+                        <div class="mic-img bg-gray-800 flex items-center justify-center">
+                            <i class="fas fa-plus text-gray-600"></i>
+                        </div>
+                        <div class="absolute -bottom-4 right-0 left-0 text-center">
+                            <span class="text-xs text-gray-500">فارغ</span>
+                        </div>
+                    `;
+                }
+                
+                topMicsGrid.appendChild(micItem);
+            }
+            
+            // 5 ميكات سفلية
+            for (let i = 5; i < 10; i++) {
+                const micItem = document.createElement('div');
+                micItem.className = 'mic-item';
+                
+                if (i < users.length) {
+                    const user = users[i];
+                    micItem.innerHTML = `
+                        <img src="${user.avatar}" 
+                             class="mic-img" 
+                             onclick="openUserProfile('${user.uid}')">
+                        ${user.isMuted ? `
+                        <div class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
+                            <i class="fas fa-microphone-slash text-xs"></i>
+                        </div>` : ''}
+                        ${user.isOwner ? `
+                        <div class="absolute -bottom-1 -left-1 w-5 h-5 bg-yellow-500 rounded-full flex items-center justify-center">
+                            <i class="fas fa-crown text-xs"></i>
+                        </div>` : ''}
+                        <div class="absolute -bottom-4 right-0 left-0 text-center">
+                            <span class="text-xs truncate max-w-full block px-1">${user.name}</span>
+                        </div>
+                    `;
+                } else {
+                    // ميكات فارغة
+                    micItem.innerHTML = `
+                        <div class="mic-img bg-gray-800 flex items-center justify-center">
+                            <i class="fas fa-plus text-gray-600"></i>
+                        </div>
+                        <div class="absolute -bottom-4 right-0 left-0 text-center">
+                            <span class="text-xs text-gray-500">فارغ</span>
+                        </div>
+                    `;
+                }
+                
+                bottomMicsGrid.appendChild(micItem);
+            }
         }
 
         // بدء اتصال WebRTC
@@ -889,185 +1132,12 @@
                     ]
                 };
 
-                // الاستماع لإشارات WebRTC من المستخدمين الآخرين
-                listenForSignals();
-                
-                // إرسال إشارة دخول
-                sendSignal('join', null);
+                showNotification('تم تفعيل الميكروفون', 'success');
                 
             } catch (error) {
                 console.error('Error starting WebRTC:', error);
                 showNotification('يجب السماح باستخدام الميكروفون', 'warning');
             }
-        }
-
-        // الاستماع لإشارات WebRTC
-        function listenForSignals() {
-            if (!currentRoom) return;
-            
-            const signalsRef = rtdb.ref(`rooms/${currentRoom}/signals`);
-            
-            signalsRef.on('child_added', async (snapshot) => {
-                const signal = snapshot.val();
-                
-                if (signal.userId === currentUser.uid) return;
-                
-                try {
-                    if (signal.type === 'join') {
-                        await handleUserJoin(signal.userId);
-                    } else if (signal.type === 'offer') {
-                        await handleOffer(signal.userId, signal.offer);
-                    } else if (signal.type === 'answer') {
-                        await handleAnswer(signal.userId, signal.answer);
-                    } else if (signal.type === 'ice-candidate') {
-                        await handleIceCandidate(signal.userId, signal.candidate);
-                    } else if (signal.type === 'leave') {
-                        handleUserLeave(signal.userId);
-                    }
-                } catch (error) {
-                    console.error('Error handling signal:', error);
-                }
-            });
-        }
-
-        // معالجة دخول مستخدم جديد
-        async function handleUserJoin(userId) {
-            const pc = new RTCPeerConnection({
-                iceServers: [
-                    { urls: 'stun:stun.l.google.com:19302' }
-                ]
-            });
-            
-            peerConnections[userId] = pc;
-            
-            // إضافة المسار المحلي
-            localStream.getTracks().forEach(track => {
-                pc.addTrack(track, localStream);
-            });
-            
-            // معالجة مرشحات ICE
-            pc.onicecandidate = (event) => {
-                if (event.candidate) {
-                    sendSignalToUser(userId, 'ice-candidate', event.candidate);
-                }
-            };
-            
-            // معالجة المسار الوارد
-            pc.ontrack = (event) => {
-                const audioElement = document.createElement('audio');
-                audioElement.id = `audio-${userId}`;
-                audioElement.autoplay = true;
-                audioElement.controls = false;
-                audioElement.style.display = 'none';
-                document.body.appendChild(audioElement);
-                audioElement.srcObject = event.streams[0];
-            };
-            
-            // إنشاء عرض اتصال
-            const offer = await pc.createOffer();
-            await pc.setLocalDescription(offer);
-            
-            sendSignalToUser(userId, 'offer', offer);
-        }
-
-        // معالجة عرض الاتصال
-        async function handleOffer(userId, offer) {
-            const pc = new RTCPeerConnection({
-                iceServers: [
-                    { urls: 'stun:stun.l.google.com:19302' }
-                ]
-            });
-            
-            peerConnections[userId] = pc;
-            
-            // إضافة المسار المحلي
-            localStream.getTracks().forEach(track => {
-                pc.addTrack(track, localStream);
-            });
-            
-            pc.onicecandidate = (event) => {
-                if (event.candidate) {
-                    sendSignalToUser(userId, 'ice-candidate', event.candidate);
-                }
-            };
-            
-            pc.ontrack = (event) => {
-                const audioElement = document.createElement('audio');
-                audioElement.id = `audio-${userId}`;
-                audioElement.autoplay = true;
-                audioElement.controls = false;
-                audioElement.style.display = 'none';
-                document.body.appendChild(audioElement);
-                audioElement.srcObject = event.streams[0];
-            };
-            
-            await pc.setRemoteDescription(new RTCSessionDescription(offer));
-            
-            const answer = await pc.createAnswer();
-            await pc.setLocalDescription(answer);
-            
-            sendSignalToUser(userId, 'answer', answer);
-        }
-
-        // معالجة الإجابة
-        async function handleAnswer(userId, answer) {
-            const pc = peerConnections[userId];
-            if (pc) {
-                await pc.setRemoteDescription(new RTCSessionDescription(answer));
-            }
-        }
-
-        // معالجة مرشح ICE
-        async function handleIceCandidate(userId, candidate) {
-            const pc = peerConnections[userId];
-            if (pc) {
-                await pc.addIceCandidate(new RTCIceCandidate(candidate));
-            }
-        }
-
-        // معالجة خروج مستخدم
-        function handleUserLeave(userId) {
-            // إغلاق الاتصال
-            if (peerConnections[userId]) {
-                peerConnections[userId].close();
-                delete peerConnections[userId];
-            }
-            
-            // إزالة عنصر الصوت
-            const audioElement = document.getElementById(`audio-${userId}`);
-            if (audioElement) {
-                audioElement.remove();
-            }
-            
-            // إضافة رسالة في الشات
-            addChatMessage('النظام', `غادر مستخدم من الغرفة`, 'system');
-        }
-
-        // إرسال إشارة
-        function sendSignal(type, data) {
-            if (!currentRoom || !currentUser) return;
-            
-            const signalRef = rtdb.ref(`rooms/${currentRoom}/signals`).push();
-            signalRef.set({
-                type: type,
-                userId: currentUser.uid,
-                data: data,
-                timestamp: Date.now()
-            });
-        }
-
-        // إرسال إشارة لمستخدم محدد
-        function sendSignalToUser(targetUserId, type, data) {
-            if (!currentRoom || !currentUser) return;
-            
-            const signalRef = rtdb.ref(`rooms/${currentRoom}/signals`).push();
-            signalRef.set({
-                type: type,
-                userId: currentUser.uid,
-                targetUserId: targetUserId,
-                data: data,
-                timestamp: Date.now()
-            });
         }
 
         // إرسال رسالة
@@ -1079,17 +1149,25 @@
             
             try {
                 // إضافة رسالة في الشات
-                addChatMessage(currentUserData.displayName, text, 'user');
+                displayMessage({
+                    senderId: currentUser.uid,
+                    senderName: currentUser.displayName || 'مستخدم',
+                    senderAvatar: currentUser.photoURL || 'https://cdn-icons-png.flaticon.com/512/149/149071.png',
+                    text: text,
+                    timestamp: new Date(),
+                    type: 'text'
+                });
                 
                 // حفظ في قاعدة البيانات
                 await db.collection('rooms').doc(currentRoom)
                     .collection('messages')
                     .add({
                         senderId: currentUser.uid,
-                        senderName: currentUserData.displayName,
-                        senderAvatar: currentUserData.photoURL,
+                        senderName: currentUser.displayName || 'مستخدم',
+                        senderAvatar: currentUser.photoURL || 'https://cdn-icons-png.flaticon.com/512/149/149071.png',
                         text: text,
-                        timestamp: new Date()
+                        timestamp: new Date(),
+                        type: 'text'
                     });
                 
                 input.value = '';
@@ -1099,28 +1177,44 @@
             }
         }
 
-        // إضافة رسالة في الشات
-        function addChatMessage(sender, text, type = 'user') {
+        // عرض رسالة
+        function displayMessage(message) {
             const chatArea = document.getElementById('chatArea');
             
             const messageDiv = document.createElement('div');
             messageDiv.className = 'msg-bubble mb-3';
             
-            // تحديد لون الرسالة حسب النوع
-            if (type === 'system') {
+            if (message.type === 'system') {
                 messageDiv.style.background = 'rgba(59, 130, 246, 0.2)';
-            } else if (type === 'user') {
+            } else if (message.type === 'gift') {
+                messageDiv.style.background = 'rgba(245, 158, 11, 0.2)';
+            } else {
                 messageDiv.style.background = 'rgba(139, 92, 246, 0.2)';
             }
             
-            messageDiv.innerHTML = `
-                <div class="msg-content">
-                    <div class="msg-user">
-                        ${sender}
+            if (message.type === 'gift') {
+                messageDiv.innerHTML = `
+                    <img src="${message.giftData.senderAvatar}" class="msg-avatar">
+                    <div class="msg-content">
+                        <div class="msg-user text-sm font-bold">
+                            ${message.giftData.senderName}
+                        </div>
+                        <div class="msg-text text-sm">
+                            🎁 أرسل هدية ${message.giftData.giftIcon} لـ ${message.giftData.receiverName}
+                        </div>
                     </div>
-                    <div class="msg-text">${text}</div>
-                </div>
-            `;
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    <img src="${message.senderAvatar}" class="msg-avatar" onclick="openUserProfile('${message.senderId}')">
+                    <div class="msg-content">
+                        <div class="msg-user text-sm font-bold">
+                            ${message.senderName}
+                        </div>
+                        <div class="msg-text text-sm">${message.text}</div>
+                    </div>
+                `;
+            }
             
             chatArea.appendChild(messageDiv);
             chatArea.scrollTop = chatArea.scrollHeight;
@@ -1131,13 +1225,7 @@
             if (!currentRoom) return;
             
             try {
-                // إرسال إشارة مغادرة
-                sendSignal('leave', null);
-                
                 // إغلاق جميع الاتصالات
-                Object.values(peerConnections).forEach(pc => pc.close());
-                peerConnections = {};
-                
                 if (localStream) {
                     localStream.getTracks().forEach(track => track.stop());
                     localStream = null;
@@ -1150,7 +1238,6 @@
                     if (updatedUsers.length === 0) {
                         // حذف الغرفة إذا أصبحت فارغة
                         await db.collection('rooms').doc(currentRoom).delete();
-                        await rtdb.ref(`rooms/${currentRoom}`).remove();
                     } else {
                         await db.collection('rooms').doc(currentRoom).update({
                             users: updatedUsers
@@ -1196,7 +1283,7 @@
                 }
 
                 // التحقق إذا كان المستخدم لديه غرفة نشطة
-                if (currentUserData.currentRoom) {
+                if (currentUserData && currentUserData.currentRoom) {
                     showNotification('لديك غرفة نشطة بالفعل. يجب مغادرتها أولاً', 'warning');
                     return;
                 }
@@ -1213,30 +1300,26 @@
                     image: roomImage || '',
                     type: roomType,
                     ownerId: currentUser.uid,
-                    ownerName: currentUserData.displayName,
-                    ownerAvatar: currentUserData.photoURL,
+                    ownerName: currentUser.displayName || 'مستخدم',
+                    ownerAvatar: currentUser.photoURL || 'https://cdn-icons-png.flaticon.com/512/149/149071.png',
                     maxUsers: maxUsers,
                     users: [{
                         uid: currentUser.uid,
-                        name: currentUserData.displayName,
-                        avatar: currentUserData.photoURL,
+                        name: currentUser.displayName || 'مستخدم',
+                        avatar: currentUser.photoURL || 'https://cdn-icons-png.flaticon.com/512/149/149071.png',
                         isMuted: false,
                         isSpeaker: true,
                         joinedAt: new Date(),
-                        magicLevel: currentUserData.magicLevel || 1,
-                        wealthLevel: currentUserData.wealthLevel || 1,
+                        magicLevel: currentUserData?.magicLevel || 1,
+                        wealthLevel: currentUserData?.wealthLevel || 1,
                         isOwner: true
                     }],
                     createdAt: new Date(),
-                    isActive: true,
-                    currentSpeakers: 1
+                    isActive: true
                 };
 
                 // حفظ الغرفة في Firestore
                 await db.collection('rooms').doc(roomId).set(roomData);
-                
-                // إنشاء node في Realtime Database للإشارات
-                await rtdb.ref(`rooms/${roomId}/signals`).set({});
                 
                 // تحديث بيانات المستخدم
                 await db.collection('users').doc(currentUser.uid).update({
@@ -1256,6 +1339,362 @@
                 console.error('Error creating room:', error);
                 showNotification(error.message || 'حدث خطأ في إنشاء الغرفة', 'error');
             }
+        }
+
+        // تحميل الهدايا من Firebase
+        async function loadGifts() {
+            try {
+                const giftsSnap = await db.collection('gifts').orderBy('price', 'asc').get();
+                gifts = [];
+                
+                giftsSnap.forEach(doc => {
+                    gifts.push({ id: doc.id, ...doc.data() });
+                });
+                
+                // إذا لم تكن هناك هدايا، ننشئ بعض الهدايا الافتراضية
+                if (gifts.length === 0) {
+                    const defaultGifts = [
+                        { id: '1', name: 'وردة', icon: '🌹', price: 50 },
+                        { id: '2', name: 'ألماس', icon: '💎', price: 100 },
+                        { id: '3', name: 'هدية', icon: '🎁', price: 200 },
+                        { id: '4', name: 'تاج', icon: '👑', price: 500 },
+                        { id: '5', name: 'قلب', icon: '❤️', price: 20 },
+                        { id: '6', name: 'نجمة', icon: '⭐', price: 80 },
+                        { id: '7', name: 'كرة', icon: '⚽', price: 150 },
+                        { id: '8', name: 'كأس', icon: '🏆', price: 300 }
+                    ];
+                    
+                    defaultGifts.forEach(async gift => {
+                        await db.collection('gifts').doc(gift.id).set(gift);
+                    });
+                    
+                    gifts = defaultGifts;
+                }
+                
+            } catch (error) {
+                console.error('Error loading gifts:', error);
+            }
+        }
+
+        // فتح صندوق الهدايا
+        async function openGiftSheet() {
+            if (!currentRoom || !roomData) {
+                showNotification('يجب الانضمام لغرفة أولاً', 'warning');
+                return;
+            }
+            
+            const userSelector = document.getElementById('userSelector');
+            const giftsGrid = document.getElementById('giftsGrid');
+            
+            userSelector.innerHTML = '';
+            giftsGrid.innerHTML = '';
+            
+            // عرض مستخدمين الروم
+            if (roomData.users) {
+                roomData.users.forEach(user => {
+                    if (user.uid === currentUser.uid) return;
+                    
+                    const userOption = document.createElement('div');
+                    userOption.className = 'flex flex-col items-center cursor-pointer min-w-[70px]';
+                    userOption.onclick = () => {
+                        selectedRecipient = user;
+                        document.querySelectorAll('#userSelector > div').forEach(el => {
+                            el.classList.remove('border-accent');
+                        });
+                        userOption.classList.add('border-accent');
+                        document.getElementById('selectedRecipientName').textContent = user.name;
+                    };
+                    
+                    userOption.innerHTML = `
+                        <img src="${user.avatar}" class="w-12 h-12 rounded-full border-2 border-transparent mb-1 object-cover">
+                        <span class="text-xs truncate max-w-full">${user.name}</span>
+                    `;
+                    
+                    userSelector.appendChild(userOption);
+                });
+            }
+            
+            // عرض الهدايا
+            gifts.forEach(gift => {
+                const giftCard = document.createElement('div');
+                giftCard.className = 'glass-card rounded-xl p-3 text-center cursor-pointer';
+                giftCard.onclick = () => {
+                    selectedGift = gift;
+                    document.querySelectorAll('#giftsGrid > div').forEach(el => {
+                        el.classList.remove('border-2', 'border-accent');
+                    });
+                    giftCard.classList.add('border-2', 'border-accent');
+                    document.getElementById('selectedGiftName').textContent = gift.name;
+                    document.getElementById('selectedGiftPrice').textContent = `${gift.price} 💰`;
+                };
+                
+                giftCard.innerHTML = `
+                    <div class="text-2xl mb-1">${gift.icon}</div>
+                    <div class="text-xs">${gift.price} 💰</div>
+                `;
+                
+                giftsGrid.appendChild(giftCard);
+            });
+            
+            document.getElementById('giftSheet').classList.add('active');
+        }
+
+        // إغلاق صندوق الهدايا
+        function closeGiftSheet() {
+            document.getElementById('giftSheet').classList.remove('active');
+            selectedGift = null;
+            selectedRecipient = null;
+        }
+
+        // إرسال هدية
+        async function sendGift() {
+            if (!selectedGift || !selectedRecipient) {
+                showNotification('يرجى اختيار هدية ومستلم', 'warning');
+                return;
+            }
+
+            try {
+                // التحقق من الرصيد
+                const userBalance = currentUserData?.balance || 0;
+                if (userBalance < selectedGift.price) {
+                    showNotification('رصيدك غير كافٍ', 'warning');
+                    return;
+                }
+
+                // خصم السعر من رصيد المرسل
+                await db.collection('users').doc(currentUser.uid).update({
+                    balance: firebase.firestore.FieldValue.increment(-selectedGift.price)
+                });
+
+                // إضافة الهدية للمستقبل
+                const giftData = {
+                    giftId: selectedGift.id,
+                    giftName: selectedGift.name,
+                    giftIcon: selectedGift.icon,
+                    senderId: currentUser.uid,
+                    senderName: currentUser.displayName || 'مستخدم',
+                    senderAvatar: currentUser.photoURL || 'https://cdn-icons-png.flaticon.com/512/149/149071.png',
+                    receiverId: selectedRecipient.uid,
+                    receiverName: selectedRecipient.name,
+                    price: selectedGift.price,
+                    sentAt: new Date()
+                };
+
+                await db.collection('gifts_sent').add(giftData);
+                
+                // إضافة خبرة السحر للمرسل
+                await db.collection('users').doc(currentUser.uid).update({
+                    magicExp: firebase.firestore.FieldValue.increment(selectedGift.price * 0.1),
+                    magicLevel: Math.floor((currentUserData?.magicExp || 0 + selectedGift.price * 0.1) / 100) + 1
+                });
+
+                // إضافة خبرة الثروة للمستقبل
+                await db.collection('users').doc(selectedRecipient.uid).update({
+                    wealthExp: firebase.firestore.FieldValue.increment(selectedGift.price * 0.05),
+                    wealthLevel: Math.floor((currentUserData?.wealthExp || 0 + selectedGift.price * 0.05) / 100) + 1
+                });
+
+                // إرسال رسالة في الشات
+                const messageData = {
+                    type: 'gift',
+                    giftData: giftData,
+                    timestamp: new Date()
+                };
+
+                await db.collection('rooms').doc(currentRoom)
+                    .collection('messages')
+                    .add(messageData);
+
+                // إظهار تأثير الهدية
+                showGiftEffect(selectedGift.icon);
+                
+                closeGiftSheet();
+                showNotification('تم إرسال الهدية بنجاح', 'success');
+                
+                // تحديث بيانات المستخدم
+                await loadUserData();
+                
+            } catch (error) {
+                console.error('Error sending gift:', error);
+                showNotification('حدث خطأ في إرسال الهدية', 'error');
+            }
+        }
+
+        // إظهار تأثير الهدية
+        function showGiftEffect(giftIcon) {
+            const effect = document.createElement('div');
+            effect.className = 'gift-effect';
+            effect.innerHTML = `
+                <div class="text-8xl animate-ping">${giftIcon}</div>
+            `;
+            
+            document.body.appendChild(effect);
+            
+            setTimeout(() => {
+                effect.remove();
+            }, 1500);
+        }
+
+        // فتح ملف المستخدم
+        async function openUserProfile(userId) {
+            selectedUserId = userId;
+            
+            try {
+                const userDoc = await db.collection('users').doc(userId).get();
+                if (userDoc.exists) {
+                    const userData = userDoc.data();
+                    
+                    document.getElementById('profileAvatar').src = userData.photoURL || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+                    document.getElementById('profileName').textContent = userData.displayName || 'مستخدم';
+                    document.getElementById('profileId').textContent = `ID: ${userId.substring(0, 8)}`;
+                    document.getElementById('profileMagic').textContent = `✨ ${userData.magicLevel || 1}`;
+                    document.getElementById('profileWealth').textContent = `💰 ${userData.wealthLevel || 1}`;
+                    
+                    // إذا كان المستخدم الحالي هو مالك الغرفة وليس الملف الشخصي لنفسه، نعرض الإجراءات الإدارية
+                    if (roomData.ownerId === currentUser.uid && userId !== currentUser.uid) {
+                        document.getElementById('adminActions').classList.remove('hidden');
+                        document.getElementById('userActions').classList.add('hidden');
+                    } else {
+                        document.getElementById('adminActions').classList.add('hidden');
+                        document.getElementById('userActions').classList.remove('hidden');
+                    }
+                    
+                    document.getElementById('userProfileModal').classList.add('active');
+                }
+            } catch (error) {
+                console.error('Error loading user profile:', error);
+                showNotification('حدث خطأ في تحميل الملف الشخصي', 'error');
+            }
+        }
+
+        // إغلاق نافذة الملف الشخصي
+        function closeUserProfileModal() {
+            document.getElementById('userProfileModal').classList.remove('active');
+        }
+
+        // طرد من الميك
+        async function kickFromMic() {
+            if (!selectedUserId || !currentRoom) return;
+            
+            try {
+                // تحديث حالة المستخدم في الغرفة
+                const roomDoc = await db.collection('rooms').doc(currentRoom).get();
+                const roomData = roomDoc.data();
+                const updatedUsers = roomData.users.map(user => {
+                    if (user.uid === selectedUserId) {
+                        return { ...user, isSpeaker: false };
+                    }
+                    return user;
+                });
+                
+                await db.collection('rooms').doc(currentRoom).update({
+                    users: updatedUsers
+                });
+                
+                showNotification('تم طرد المستخدم من الميك', 'success');
+                closeUserProfileModal();
+            } catch (error) {
+                console.error('Error kicking from mic:', error);
+                showNotification('حدث خطأ في طرد المستخدم من الميك', 'error');
+            }
+        }
+
+        // طرد من الروم
+        async function kickFromRoom() {
+            if (!selectedUserId || !currentRoom) return;
+            
+            try {
+                // إزالة المستخدم من قائمة المستخدمين في الغرفة
+                const roomDoc = await db.collection('rooms').doc(currentRoom).get();
+                const roomData = roomDoc.data();
+                const updatedUsers = roomData.users.filter(user => user.uid !== selectedUserId);
+                
+                await db.collection('rooms').doc(currentRoom).update({
+                    users: updatedUsers
+                });
+                
+                // إرسال رسالة نظام
+                await db.collection('rooms').doc(currentRoom)
+                    .collection('messages')
+                    .add({
+                        type: 'system',
+                        text: `تم طرد المستخدم من الغرفة`,
+                        timestamp: new Date()
+                    });
+                
+                showNotification('تم طرد المستخدم من الغرفة', 'success');
+                closeUserProfileModal();
+            } catch (error) {
+                console.error('Error kicking from room:', error);
+                showNotification('حدث خطأ في طرد المستخدم من الغرفة', 'error');
+            }
+        }
+
+        // حظر المستخدم
+        async function banUser() {
+            if (!selectedUserId || !currentRoom) return;
+            
+            try {
+                // إضافة المستخدم إلى قائمة المحظورين في الغرفة
+                await db.collection('rooms').doc(currentRoom).update({
+                    bannedUsers: firebase.firestore.FieldValue.arrayUnion(selectedUserId)
+                });
+                
+                // طرده من الغرفة
+                await kickFromRoom();
+                
+                showNotification('تم حظر المستخدم للأبد من هذه الغرفة', 'success');
+                closeUserProfileModal();
+            } catch (error) {
+                console.error('Error banning user:', error);
+                showNotification('حدث خطأ في حظر المستخدم', 'error');
+            }
+        }
+
+        // تبديل كتم الصوت
+        async function toggleMute() {
+            if (!localStream) {
+                try {
+                    localStream = await navigator.mediaDevices.getUserMedia({
+                        audio: {
+                            echoCancellation: true,
+                            noiseSuppression: true,
+                            autoGainControl: true
+                        }
+                    });
+                    isMuted = false;
+                } catch (error) {
+                    showNotification('يجب السماح باستخدام الميكروفون', 'warning');
+                    return;
+                }
+            }
+            
+            isMuted = !isMuted;
+            const audioTracks = localStream.getAudioTracks();
+            
+            audioTracks.forEach(track => {
+                track.enabled = !isMuted;
+            });
+            
+            const muteIcon = document.getElementById('muteIcon');
+            const muteBtn = document.getElementById('muteBtn');
+            
+            if (isMuted) {
+                muteIcon.className = 'fa-solid fa-microphone-slash';
+                muteBtn.classList.add('bg-red-500');
+                showNotification('تم كتم الميكروفون', 'warning');
+            } else {
+                muteIcon.className = 'fa-solid fa-microphone';
+                muteBtn.classList.remove('bg-red-500');
+                showNotification('تم تفعيل الميكروفون', 'success');
+            }
+        }
+
+        // تصغير الغرفة والعودة للرئيسية
+        function minimizeRoom() {
+            document.getElementById('roomPage').classList.remove('active');
+            document.getElementById('mainPage').style.display = 'block';
+            showNotification('تم تصغير الغرفة', 'info');
         }
 
         // تبديل التبويب
@@ -1297,131 +1736,6 @@
             document.getElementById('createRoomModal').classList.remove('active');
         }
 
-        // فتح شيت الهدايا
-        function openGiftSheet() {
-            if (!currentRoom || !roomData || !roomData.users) return;
-            
-            const userSelector = document.querySelector('.user-selector');
-            userSelector.innerHTML = '';
-            
-            // عرض مستخدمين الروم
-            roomData.users.forEach(user => {
-                if (user.uid === currentUser.uid) return;
-                
-                const userOption = document.createElement('div');
-                userOption.className = 'flex flex-col items-center cursor-pointer';
-                userOption.onclick = () => {
-                    selectedRecipient = user;
-                    document.querySelectorAll('.user-selector > div').forEach(el => {
-                        el.classList.remove('border-accent');
-                    });
-                    userOption.classList.add('border-accent');
-                };
-                
-                userOption.innerHTML = `
-                    <img src="${user.avatar}" class="w-10 h-10 rounded-full border-2 border-transparent mb-1">
-                    <span class="text-xs">${user.name}</span>
-                `;
-                
-                userSelector.appendChild(userOption);
-            });
-            
-            document.getElementById('giftSheet').classList.add('active');
-        }
-
-        // إغلاق شيت الهدايا
-        function closeGiftSheet() {
-            document.getElementById('giftSheet').classList.remove('active');
-            selectedGift = null;
-            selectedRecipient = null;
-        }
-
-        // إرسال هدية
-        async function sendGift() {
-            if (!selectedGift || !selectedRecipient) {
-                showNotification('يرجى اختيار هدية ومستلم', 'warning');
-                return;
-            }
-
-            try {
-                // التحقق من الرصيد
-                if (currentUserData.balance < selectedGift.price) {
-                    showNotification('رصيدك غير كافٍ', 'warning');
-                    return;
-                }
-
-                // خصم السعر من رصيد المرسل
-                await db.collection('users').doc(currentUser.uid).update({
-                    balance: firebase.firestore.FieldValue.increment(-selectedGift.price)
-                });
-
-                // إضافة الهدية للمستقبل
-                const giftData = {
-                    giftId: selectedGift.id,
-                    giftName: selectedGift.name,
-                    giftIcon: selectedGift.icon,
-                    senderId: currentUser.uid,
-                    senderName: currentUserData.displayName,
-                    receiverId: selectedRecipient.uid,
-                    receiverName: selectedRecipient.name,
-                    price: selectedGift.price,
-                    sentAt: new Date()
-                };
-
-                await db.collection('gifts').add(giftData);
-                
-                // إضافة خبرة السحر للمرسل
-                await db.collection('users').doc(currentUser.uid).update({
-                    magicExp: firebase.firestore.FieldValue.increment(selectedGift.price * 0.1)
-                });
-
-                // إضافة خبرة الثروة للمستقبل
-                await db.collection('users').doc(selectedRecipient.uid).update({
-                    wealthExp: firebase.firestore.FieldValue.increment(selectedGift.price * 0.05)
-                });
-
-                // إرسال رسالة في الشات
-                addChatMessage('النظام', `🎁 أرسل ${currentUserData.displayName} هدية لـ ${selectedRecipient.name}`, 'system');
-                
-                // حفظ في قاعدة بيانات الروم
-                await db.collection('rooms').doc(currentRoom)
-                    .collection('messages')
-                    .add({
-                        type: 'gift',
-                        giftData: giftData,
-                        timestamp: new Date()
-                    });
-
-                // إظهار تأثير الهدية
-                showGiftEffect(selectedGift.icon);
-                
-                closeGiftSheet();
-                showNotification('تم إرسال الهدية بنجاح', 'success');
-                
-                // تحديث رصيد المستخدم
-                await loadUserData();
-                
-            } catch (error) {
-                console.error('Error sending gift:', error);
-                showNotification('حدث خطأ في إرسال الهدية', 'error');
-            }
-        }
-
-        // إظهار تأثير الهدية
-        function showGiftEffect(giftIcon) {
-            const effect = document.createElement('div');
-            effect.className = 'fixed inset-0 flex items-center justify-center pointer-events-none z-3000';
-            effect.innerHTML = `
-                <div class="text-6xl animate-ping">${giftIcon}</div>
-            `;
-            
-            document.body.appendChild(effect);
-            
-            setTimeout(() => {
-                effect.remove();
-            }, 1500);
-        }
-
         // توليد ID للغرفة
         function generateRoomId() {
             return Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 10);
@@ -1429,48 +1743,84 @@
 
         // إظهار الإشعارات
         function showNotification(message, type = 'info') {
+            // إزالة الإشعارات القديمة
+            const oldNotifications = document.querySelectorAll('.notification');
+            oldNotifications.forEach(notification => notification.remove());
+            
             const notification = document.createElement('div');
-            notification.className = `fixed top-4 right-4 px-4 py-3 rounded-xl z-50 ${
+            notification.className = `notification fixed top-4 right-4 px-4 py-3 rounded-xl z-50 ${
                 type === 'success' ? 'bg-green-500' :
                 type === 'error' ? 'bg-red-500' :
                 type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500'
             }`;
             notification.textContent = message;
+            notification.style.animation = 'slideIn 0.3s ease';
             document.body.appendChild(notification);
             
             setTimeout(() => {
-                notification.remove();
+                notification.style.animation = 'slideIn 0.3s ease reverse';
+                setTimeout(() => {
+                    notification.remove();
+                }, 300);
             }, 3000);
+        }
+
+        // إظهار التحميل
+        function showLoading() {
+            let loader = document.getElementById('loadingOverlay');
+            if (!loader) {
+                loader = document.createElement('div');
+                loader.id = 'loadingOverlay';
+                loader.className = 'fixed inset-0 bg-black/70 flex items-center justify-center z-50';
+                loader.innerHTML = `
+                    <div class="glass-card p-6 rounded-2xl flex flex-col items-center">
+                        <div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                        <p class="text-white">جاري التحميل...</p>
+                    </div>
+                `;
+                document.body.appendChild(loader);
+            }
+        }
+
+        // إخفاء التحميل
+        function hideLoading() {
+            const loader = document.getElementById('loadingOverlay');
+            if (loader) {
+                loader.remove();
+            }
         }
 
         // دوال التنقل
         function goToHome() {
             if (currentRoom) {
-                if (confirm('أنت في غرفة حالياً. هل تريد المغادرة؟')) {
-                    leaveCurrentRoom();
-                }
+                minimizeRoom();
             }
         }
 
         function goToFriends() {
-            showNotification('قريباً: قائمة الأصدقاء', 'info');
+            window.location.href = 'chat.html';
         }
 
         function goToProfile() {
-            showNotification('قريباً: الملف الشخصي', 'info');
+            window.location.href = 'me.html';
         }
 
         function goToChat() {
-            showNotification('قريباً: الدردشة الخاصة', 'info');
+            window.location.href = 'chat.html';
         }
 
         // دوال الروم
-        function toggleFullscreen() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(console.error);
-            } else {
-                document.exitFullscreen();
-            }
+        function showRoomInfo() {
+            if (!roomData) return;
+            
+            const info = `
+اسم الغرفة: ${roomData.name}
+النوع: ${roomData.type === 'public' ? 'عام' : 'خاص'}
+عدد الأعضاء: ${roomData.users ? roomData.users.length : 0}/${roomData.maxUsers}
+تاريخ الإنشاء: ${new Date(roomData.createdAt.seconds * 1000).toLocaleDateString('ar-SA')}
+            `.trim();
+            
+            alert(info);
         }
 
         function leaveRoom() {
@@ -1479,8 +1829,13 @@
             }
         }
 
-        function showUserProfile(userId) {
-            showNotification('قريباً: عرض الملف الشخصي', 'info');
+        // دوال إضافية للملف الشخصي
+        function sendPrivateMessage() {
+            showNotification('قريباً: إرسال رسالة خاصة', 'info');
+        }
+
+        function followUser() {
+            showNotification('قريباً: متابعة المستخدم', 'info');
         }
 
         // منع الإغلاق المفاجئ
@@ -1488,9 +1843,6 @@
             if (currentRoom) {
                 e.preventDefault();
                 e.returnValue = 'أنت في غرفة صوتية حالياً. هل تريد المغادرة؟';
-                
-                // محاولة مغادرة الغرفة قبل الإغلاق
-                await leaveCurrentRoom();
             }
         });
     </script>
