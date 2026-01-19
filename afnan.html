@@ -10,41 +10,54 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
     
     <!-- Fonts and Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <style>
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            font-family: 'Noto Sans Arabic', sans-serif;
-            touch-action: manipulation;
+        :root {
+            --primary: #8b5cf6;
+            --accent: #f59e0b;
+            --bg-black: #000000;
+            --glass: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --wealth: #facc15;
+            --magic: #d946ef;
         }
 
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            outline: none; 
+            -webkit-tap-highlight-color: transparent; 
+            font-family: 'Cairo', sans-serif;
+        }
+        
         body {
-            background: radial-gradient(circle at 0% 0%, #0f172a 0%, #1e293b 50%, #334155 100%);
-            color: #f1f5f9;
+            background-color: var(--bg-black);
+            color: #fff; 
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
+        /* التصميم الأساسي */
         .glass {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.15);
         }
 
         .glass-card {
             background: rgba(255, 255, 255, 0.08);
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             transition: all 0.3s ease;
         }
 
@@ -53,32 +66,86 @@
             transform: translateY(-2px);
         }
 
-        .room-pulse {
-            animation: pulse 2s infinite;
+        /* تصميم الروم الصوتي */
+        .room-container {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at 10% 10%, #1e1b4b 0%, #000000 50%);
+            z-index: 1000;
+            display: none;
         }
 
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+        .room-container.active {
+            display: block;
         }
 
-        .speaking {
-            box-shadow: 0 0 20px rgba(34, 197, 94, 0.5);
-            border-color: #22c55e;
+        .mic-item {
+            width: 62px; 
+            height: 62px; 
+            border-radius: 50%; 
+            background: var(--glass);
+            border: 1px solid var(--glass-border); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            backdrop-filter: blur(5px); 
+            transition: 0.3s;
         }
 
-        .muted {
-            opacity: 0.6;
-            filter: grayscale(50%);
+        .mic-img { 
+            width: 90%; 
+            height: 90%; 
+            border-radius: 50%; 
+            object-fit: cover; 
         }
 
+        .msg-bubble {
+            background: rgba(255,255,255,0.08); 
+            border: 1px solid var(--glass-border);
+            padding: 10px; 
+            border-radius: 18px; 
+            border-bottom-right-radius: 2px;
+            backdrop-filter: blur(10px); 
+            display: flex; 
+            align-items: flex-start; 
+            gap: 10px;
+            max-width: 85%; 
+            animation: slideIn 0.3s ease;
+        }
+
+        .msg-avatar { 
+            width: 35px; 
+            height: 35px; 
+            border-radius: 50%; 
+            border: 1px solid var(--accent); 
+            cursor: pointer; 
+            transition: 0.2s; 
+        }
+
+        .badge { 
+            font-size: 8px; 
+            padding: 1px 6px; 
+            border-radius: 10px; 
+            font-weight: bold; 
+        }
+        
+        .b-wealth { 
+            background: var(--wealth); 
+            color: #000; 
+        }
+        
+        .b-magic { 
+            background: var(--magic); 
+            color: #fff; 
+        }
+
+        /* المودالات */
         .modal-overlay {
             position: fixed;
             inset: 0;
             background: rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(10px);
-            z-index: 1000;
+            z-index: 2000;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -107,129 +174,238 @@
             transform: translateY(0);
         }
 
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        /* البنر */
+        .banner {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+        }
 
-        .page-section { display: none; }
-        .page-section.active { display: block; }
+        .banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            opacity: 0.3;
+            mix-blend-mode: overlay;
+        }
+
+        /* التبويبات */
+        .tab-button {
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .tab-button.active {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* أنيميشن */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0% { 
+                box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7); 
+            }
+            70% { 
+                box-shadow: 0 0 0 10px rgba(139, 92, 246, 0); 
+            }
+            100% { 
+                box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); 
+            }
+        }
+
+        .room-pulse {
+            animation: pulse 2s infinite;
+        }
+
+        .hidden { 
+            display: none !important; 
+        }
+
+        .no-scrollbar::-webkit-scrollbar { 
+            display: none; 
+        }
+        
+        .no-scrollbar { 
+            -ms-overflow-style: none; 
+            scrollbar-width: none; 
+        }
     </style>
 </head>
 <body class="antialiased">
     <!-- الصفحة الرئيسية -->
-    <div id="main-app" class="min-h-screen pb-24">
+    <div id="mainPage" class="min-h-screen pb-24">
         
-        <!-- الهيدر -->
-        <header class="glass fixed top-0 left-0 right-0 h-16 z-50 px-4 flex items-center justify-between">
-            <h1 class="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                رومات الصوت 💬
-            </h1>
-            <div class="flex items-center gap-3">
-                <button onclick="switchPage('profile')" class="w-10 h-10 rounded-full glass flex items-center justify-center">
-                    <i class="fas fa-user"></i>
-                </button>
-                <button onclick="refreshRooms()" class="w-10 h-10 rounded-full glass flex items-center justify-center">
-                    <i class="fas fa-sync-alt"></i>
-                </button>
+        <!-- البنر العلوي -->
+        <div class="banner h-48 mx-4 mt-4 mb-6 rounded-2xl flex items-center justify-center relative">
+            <div class="relative z-10 text-center">
+                <h1 class="text-3xl font-bold mb-2">🎤 رومات الصوت الحية</h1>
+                <p class="text-gray-300">انضم للدردشة الصوتية مع الأصدقاء</p>
             </div>
-        </header>
+        </div>
 
-        <!-- المحتوى الرئيسي -->
-        <main class="pt-20 px-4">
-            <!-- قسم إنشاء روم جديد -->
+        <!-- شريط التبويب العلوي -->
+        <div class="flex justify-center gap-4 mb-6 px-4">
+            <button id="tabPublic" class="tab-button active" onclick="switchTab('public')">
+                <i class="fas fa-globe ml-2"></i> عام
+            </button>
+            <button id="tabPrivate" class="tab-button" onclick="switchTab('private')">
+                <i class="fas fa-lock ml-2"></i> خاص
+            </button>
+        </div>
+
+        <!-- قسم البحث -->
+        <div class="px-4 mb-6">
+            <div class="glass-card rounded-2xl p-3 flex items-center">
+                <i class="fas fa-search text-gray-400 mx-2"></i>
+                <input type="text" 
+                       id="roomSearch" 
+                       placeholder="ابحث عن غرفة..." 
+                       class="flex-1 bg-transparent border-0 focus:outline-none text-white">
+            </div>
+        </div>
+
+        <!-- قسم الرومات العامة -->
+        <div id="publicRoomsSection" class="px-4">
+            <h2 class="text-xl font-bold mb-4">🔊 الرومات العامة</h2>
+            
+            <div id="publicRoomsList" class="grid grid-cols-2 gap-3 mb-8">
+                <!-- سيتم تعبئتها بالرومات -->
+                <div class="text-center py-8 text-gray-500">
+                    <i class="fas fa-comments text-3xl mb-3"></i>
+                    <p>لا توجد رومات عامة حالياً</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- قسم الرومات الخاصة -->
+        <div id="privateRoomsSection" class="px-4 hidden">
+            <!-- زر إنشاء غرفة -->
             <div class="mb-6">
-                <div class="glass-card p-4 rounded-3xl">
-                    <h3 class="font-bold text-lg mb-3">إنشاء روم صوتي جديد</h3>
-                    <div class="space-y-3">
-                        <input type="text" id="roomNameInput" 
-                               placeholder="اسم الروم (مثال: دردشة الأصدقاء)" 
-                               class="w-full p-3 rounded-2xl bg-white/5 border border-white/10 focus:border-blue-500 focus:outline-none">
-                        
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-sm mb-1">عدد الأعضاء</label>
-                                <select id="maxUsersInput" class="w-full p-3 rounded-2xl bg-white/5 border border-white/10 focus:border-blue-500 focus:outline-none">
-                                    <option value="5">5 أشخاص</option>
-                                    <option value="10" selected>10 أشخاص</option>
-                                    <option value="20">20 شخصاً</option>
-                                    <option value="50">50 شخصاً</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm mb-1">نوع الروم</label>
-                                <select id="roomTypeInput" class="w-full p-3 rounded-2xl bg-white/5 border border-white/10 focus:border-blue-500 focus:outline-none">
-                                    <option value="public">عام</option>
-                                    <option value="private">خاص</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <button onclick="createNewRoom()" 
-                                class="w-full py-3 rounded-2xl bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold hover:opacity-90 transition">
-                            <i class="fas fa-plus ml-2"></i> إنشاء روم جديد
-                        </button>
+                <div class="glass-card rounded-2xl p-5 text-center cursor-pointer hover:bg-white/10 transition"
+                     onclick="openCreateRoomModal()">
+                    <div class="w-16 h-16 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center mx-auto mb-3">
+                        <i class="fas fa-plus text-white text-2xl"></i>
                     </div>
+                    <h3 class="font-bold text-lg mb-1">إنشاء غرفتك الآن</h3>
+                    <p class="text-sm text-gray-400">ابدأ محادثة صوتية خاصة</p>
                 </div>
             </div>
 
-            <!-- قسم الرومات النشطة -->
-            <div class="mb-4">
-                <div class="flex items-center justify-between mb-3">
-                    <h3 class="font-bold text-lg">🎤 الرومات النشطة</h3>
-                    <span id="activeRoomsCount" class="text-sm text-gray-400">0 روم</span>
-                </div>
-                
-                <div id="roomsList" class="space-y-3">
-                    <!-- الرومات ستحمل هنا -->
-                    <div class="text-center py-8 text-gray-500">
-                        <i class="fas fa-comments text-3xl mb-3"></i>
-                        <p>لا توجد رومات نشطة حالياً</p>
-                    </div>
+            <h2 class="text-xl font-bold mb-4">🔐 غرفك الخاصة</h2>
+            
+            <div id="privateRoomsList" class="space-y-3">
+                <!-- سيتم تعبئتها بالرومات الخاصة -->
+                <div class="text-center py-8 text-gray-500">
+                    <i class="fas fa-users-slash text-3xl mb-3"></i>
+                    <p>لم تنشئ أي غرف خاصة بعد</p>
+                    <button onclick="openCreateRoomModal()" class="mt-4 px-4 py-2 rounded-xl bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition">
+                        أنشئ أول غرفة
+                    </button>
                 </div>
             </div>
-
-            <!-- الرومات التي شاركت بها -->
-            <div class="mb-6">
-                <h3 class="font-bold text-lg mb-3">🏆 روماتك النشطة</h3>
-                <div id="myRoomsList" class="space-y-3">
-                    <!-- رومات المستخدم ستحمل هنا -->
-                </div>
-            </div>
-
-            <!-- روم حالي -->
-            <div id="currentRoomSection" class="hidden">
-                <div id="roomContainer" class="mb-6"></div>
-            </div>
-        </main>
+        </div>
 
         <!-- البار السفلي -->
-        <nav class="glass fixed bottom-0 left-0 right-0 h-16 flex items-center justify-around">
-            <button onclick="switchPage('home')" class="tab-button active flex flex-col items-center">
+        <nav class="glass fixed bottom-0 left-0 right-0 h-16 flex items-center justify-around border-t border-white/10">
+            <button onclick="goToHome()" class="flex flex-col items-center text-blue-400">
                 <i class="fas fa-home text-lg mb-1"></i>
                 <span class="text-xs">الرئيسية</span>
             </button>
-            <button onclick="switchPage('rooms')" class="tab-button flex flex-col items-center">
-                <i class="fas fa-users text-lg mb-1"></i>
-                <span class="text-xs">الرومات</span>
-            </button>
-            <button onclick="openCreateRoomModal()" class="w-14 h-14 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center -mt-6 shadow-lg">
-                <i class="fas fa-plus text-white text-xl"></i>
-            </button>
-            <button onclick="switchPage('friends')" class="tab-button flex flex-col items-center">
+            <button onclick="goToFriends()" class="flex flex-col items-center text-gray-400 hover:text-white">
                 <i class="fas fa-user-friends text-lg mb-1"></i>
                 <span class="text-xs">الأصدقاء</span>
             </button>
-            <button onclick="switchPage('chat')" class="tab-button flex flex-col items-center">
+            <button onclick="goToProfile()" class="flex flex-col items-center text-gray-400 hover:text-white">
+                <i class="fas fa-user text-lg mb-1"></i>
+                <span class="text-xs">الملف</span>
+            </button>
+            <button onclick="goToChat()" class="flex flex-col items-center text-gray-400 hover:text-white">
                 <i class="fas fa-comment text-lg mb-1"></i>
                 <span class="text-xs">الدردشة</span>
             </button>
         </nav>
     </div>
 
-    <!-- مودال إنشاء روم -->
+    <!-- الروم الصوتي -->
+    <div id="roomPage" class="room-container">
+        <div class="app-container w-full h-full flex flex-col">
+            <!-- هيدر الروم -->
+            <header class="header p-4 flex justify-between items-center border-b border-white/10">
+                <div class="room-info glass rounded-3xl p-2 flex items-center gap-2 cursor-pointer">
+                    <img id="roomOwnerAvatar" src="" class="owner-img w-10 h-10 rounded-full border-2 border-accent">
+                    <div>
+                        <span class="text-xs text-accent" id="roomOwnerId">ID: ---</span>
+                        <div class="text-sm font-bold" id="roomTitle">---</div>
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <button class="btn-control w-10 h-10 rounded-full glass flex items-center justify-center" onclick="toggleFullscreen()">
+                        <i class="fa-solid fa-expand"></i>
+                    </button>
+                    <button class="btn-control w-10 h-10 rounded-full bg-red-500 flex items-center justify-center" onclick="leaveRoom()">
+                        <i class="fa-solid fa-phone-slash"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- شبكة الميكات -->
+            <div class="mics-grid flex-1 p-4 overflow-y-auto">
+                <div id="micsGrid" class="flex flex-wrap justify-center gap-4">
+                    <!-- سيتم تعبئتها بالمستخدمين -->
+                </div>
+            </div>
+
+            <!-- منطقة الشات -->
+            <div class="chat-area flex-1 overflow-y-auto p-4" id="chatArea">
+                <!-- الرسائل ستظهر هنا -->
+            </div>
+
+            <!-- الفوتر -->
+            <footer class="footer p-4 border-t border-white/10">
+                <div class="flex items-center gap-2">
+                    <div class="input-box flex-1 glass rounded-3xl p-2 flex items-center">
+                        <input type="text" 
+                               id="chatInput" 
+                               class="main-input flex-1 bg-transparent border-0 focus:outline-none text-white" 
+                               placeholder="اكتب رسالة...">
+                    </div>
+                    <button id="giftBtn" class="btn-action w-12 h-12 rounded-full glass flex items-center justify-center" onclick="openGiftSheet()">
+                        <i class="fa-solid fa-gift text-accent"></i>
+                    </button>
+                    <button id="sendBtn" class="btn-action w-12 h-12 rounded-full bg-primary flex items-center justify-center" onclick="sendMessage()">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- مودال إنشاء غرفة -->
     <div id="createRoomModal" class="modal-overlay">
         <div class="modal-content">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="font-bold text-lg">إنشاء روم صوتي</h3>
+                <h3 class="font-bold text-lg">إنشاء غرفة صوتية</h3>
                 <button onclick="closeCreateRoomModal()" class="w-8 h-8 rounded-full flex items-center justify-center bg-white/10 hover:bg-white/20">
                     <i class="fas fa-times"></i>
                 </button>
@@ -237,38 +413,37 @@
             
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm mb-2">اسم الروم</label>
-                    <input type="text" id="modalRoomName" 
-                           placeholder="أدخل اسم الروم" 
-                           class="w-full p-3 rounded-2xl bg-white/5 border border-white/10 focus:border-blue-500 focus:outline-none">
+                    <label class="block text-sm mb-2">اسم الغرفة</label>
+                    <input type="text" 
+                           id="roomNameInput" 
+                           placeholder="مثال: دردشة الأصدقاء" 
+                           class="w-full p-3 rounded-2xl glass border border-white/10 focus:border-accent focus:outline-none">
                 </div>
                 
                 <div>
-                    <label class="block text-sm mb-2">وصف الروم (اختياري)</label>
-                    <textarea id="modalRoomDesc" 
-                              rows="2"
-                              placeholder="وصف مختصر للروم..." 
-                              class="w-full p-3 rounded-2xl bg-white/5 border border-white/10 focus:border-blue-500 focus:outline-none resize-none"></textarea>
+                    <label class="block text-sm mb-2">صورة الغرفة (اختياري)</label>
+                    <input type="text" 
+                           id="roomImageInput" 
+                           placeholder="رابط الصورة" 
+                           class="w-full p-3 rounded-2xl glass border border-white/10 focus:border-accent focus:outline-none">
+                    <p class="text-xs text-gray-400 mt-1">اتركه فارغاً لاستخدام صورة افتراضية</p>
                 </div>
                 
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-sm mb-2">السعة</label>
-                        <select id="modalMaxUsers" class="w-full p-3 rounded-2xl bg-white/5 border border-white/10 focus:border-blue-500 focus:outline-none">
-                            <option value="2">2 أشخاص</option>
-                            <option value="5">5 أشخاص</option>
-                            <option value="10" selected>10 أشخاص</option>
-                            <option value="20">20 شخصاً</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm mb-2">الخصوصية</label>
-                        <select id="modalRoomPrivacy" class="w-full p-3 rounded-2xl bg-white/5 border border-white/10 focus:border-blue-500 focus:outline-none">
-                            <option value="public">عام</option>
-                            <option value="private">خاص</option>
-                            <option value="friends">الأصدقاء فقط</option>
-                        </select>
-                    </div>
+                <div>
+                    <label class="block text-sm mb-2">نوع الغرفة</label>
+                    <select id="roomTypeInput" class="w-full p-3 rounded-2xl glass border border-white/10 focus:border-accent focus:outline-none">
+                        <option value="private">خاص</option>
+                        <option value="public">عام</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm mb-2">عدد الأعضاء</label>
+                    <select id="maxUsersInput" class="w-full p-3 rounded-2xl glass border border-white/10 focus:border-accent focus:outline-none">
+                        <option value="5">5 أشخاص</option>
+                        <option value="10" selected>10 أشخاص</option>
+                        <option value="20">20 شخصاً</option>
+                    </select>
                 </div>
                 
                 <div class="flex gap-3 pt-4">
@@ -276,125 +451,181 @@
                             class="flex-1 py-3 rounded-2xl bg-white/10 hover:bg-white/20 transition">
                         إلغاء
                     </button>
-                    <button onclick="createRoomFromModal()" 
+                    <button onclick="createRoom()" 
                             class="flex-1 py-3 rounded-2xl bg-gradient-to-r from-blue-500 to-purple-500 hover:opacity-90 transition">
-                        إنشاء الروم
+                        إنشاء الغرفة
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- مودال انضمام للروم -->
-    <div id="joinRoomModal" class="modal-overlay">
+    <!-- مودال إرسال هدية -->
+    <div id="giftSheet" class="modal-overlay">
         <div class="modal-content">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="font-bold text-lg">انضمام للروم</h3>
-                <button onclick="closeJoinRoomModal()" class="w-8 h-8 rounded-full flex items-center justify-center bg-white/10 hover:bg-white/20">
+                <h3 class="font-bold text-lg">إرسال هدية</h3>
+                <button onclick="closeGiftSheet()" class="w-8 h-8 rounded-full flex items-center justify-center bg-white/10 hover:bg-white/20">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             
-            <div id="roomPreview">
-                <!-- معاينة الروم ستحمل هنا -->
+            <div class="user-selector flex gap-3 overflow-x-auto pb-3 mb-3 border-b border-white/10">
+                <!-- مستخدمين الروم -->
             </div>
             
-            <div class="flex gap-3 pt-4">
-                <button onclick="closeJoinRoomModal()" 
-                        class="flex-1 py-3 rounded-2xl bg-white/10 hover:bg-white/20 transition">
-                    إلغاء
-                </button>
-                <button onclick="joinSelectedRoom()" 
-                        class="flex-1 py-3 rounded-2xl bg-gradient-to-r from-green-500 to-blue-500 hover:opacity-90 transition">
-                    الانضمام
+            <div class="gifts-grid grid grid-cols-4 gap-2 max-h-64 overflow-y-auto">
+                <!-- الهدايا -->
+                <div class="gift-card glass rounded-xl p-3 text-center cursor-pointer">
+                    <div class="text-2xl mb-1">🌹</div>
+                    <div class="text-xs">50 💰</div>
+                </div>
+                <div class="gift-card glass rounded-xl p-3 text-center cursor-pointer">
+                    <div class="text-2xl mb-1">💎</div>
+                    <div class="text-xs">100 💰</div>
+                </div>
+                <div class="gift-card glass rounded-xl p-3 text-center cursor-pointer">
+                    <div class="text-2xl mb-1">🎁</div>
+                    <div class="text-xs">200 💰</div>
+                </div>
+                <div class="gift-card glass rounded-xl p-3 text-center cursor-center cursor-pointer">
+                    <div class="text-2xl mb-1">👑</div>
+                    <div class="text-xs">500 💰</div>
+                </div>
+            </div>
+            
+            <div class="flex items-center justify-between mt-4">
+                <div class="text-sm">
+                    رصيدك: <span class="text-accent font-bold" id="userBalance">0</span> 💰
+                </div>
+                <button onclick="sendGift()" class="px-4 py-2 rounded-xl bg-accent hover:opacity-90 transition">
+                    إرسال الهدية
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- الأقسام الأخرى (مخفية) -->
-    <div id="profile-page" class="page-section">
-        <!-- محتوى الملف الشخصي -->
-    </div>
-    
-    <div id="friends-page" class="page-section">
-        <!-- محتوى الأصدقاء -->
-    </div>
-    
-    <div id="chat-page" class="page-section">
-        <!-- محتوى الدردشة -->
-    </div>
-
     <!-- Scripts -->
-    <script src="firebase-config.js"></script>
-    <script src="rooms-system.js"></script>
-    
     <script>
+        // تهيئة Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBnmqWRY6lV54meFvO89QeXwtd28w81FcY",
+            authDomain: "rtx3090-28439.firebaseapp.com",
+            projectId: "rtx3090-28439",
+            storageBucket: "rtx3090-28439.firebasestorage.app",
+            messagingSenderId: "178612030690",
+            appId: "1:178612030690:web:883189ced2ed3a78e3e2bb",
+            databaseURL: "https://rtx3090-28439-default-rtdb.firebaseio.com/"
+        };
+        
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const rtdb = firebase.database();
+
+        // متغيرات التطبيق
         let currentUser = null;
         let currentUserData = null;
-        let selectedRoomToJoin = null;
+        let currentRoom = null;
+        let roomData = null;
+        let localStream = null;
+        let peerConnections = {};
+        let isMuted = false;
+        let selectedGift = null;
+        let selectedRecipient = null;
 
         // تهيئة التطبيق
         document.addEventListener('DOMContentLoaded', async () => {
             // التحقق من تسجيل الدخول
-            const isAuthenticated = await checkAuth();
-            if (!isAuthenticated) {
-                window.location.href = 'login.html';
-                return;
-            }
-
-            // الحصول على بيانات المستخدم
-            currentUser = auth.currentUser;
-            currentUserData = await getCurrentUser();
-            
-            if (!currentUserData) {
-                window.location.href = 'login.html';
-                return;
-            }
-
-            // تحميل الرومات
-            await loadRooms();
-            
-            // التحقق إذا كان المستخدم في روم حالياً
-            if (currentUserData.currentRoom) {
-                await joinExistingRoom(currentUserData.currentRoom);
-            }
-
-            // تحديث كل 30 ثانية
-            setInterval(loadRooms, 30000);
+            auth.onAuthStateChanged(async (user) => {
+                if (user) {
+                    currentUser = user;
+                    await loadUserData();
+                    await checkCurrentRoom();
+                    await loadRooms();
+                } else {
+                    // إذا لم يكن مسجل الدخول، توجيه لصفحة تسجيل الدخول
+                    window.location.href = 'login.html';
+                }
+            });
         });
+
+        // تحميل بيانات المستخدم
+        async function loadUserData() {
+            try {
+                const userDoc = await db.collection('users').doc(currentUser.uid).get();
+                if (userDoc.exists) {
+                    currentUserData = userDoc.data();
+                    
+                    // تحديث رصيد المستخدم
+                    document.getElementById('userBalance').textContent = currentUserData.balance || 0;
+                    
+                    // التحقق إذا كان لديه غرفة نشطة
+                    if (currentUserData.currentRoom) {
+                        currentRoom = currentUserData.currentRoom;
+                        await joinExistingRoom(currentRoom);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
+            }
+        }
+
+        // التحقق من الغرفة الحالية
+        async function checkCurrentRoom() {
+            if (!currentUserData || !currentUserData.currentRoom) return;
+            
+            try {
+                const roomDoc = await db.collection('rooms').doc(currentUserData.currentRoom).get();
+                if (roomDoc.exists) {
+                    currentRoom = currentUserData.currentRoom;
+                    await joinExistingRoom(currentRoom);
+                } else {
+                    // إزالة الغرفة من بيانات المستخدم
+                    await db.collection('users').doc(currentUser.uid).update({
+                        currentRoom: null
+                    });
+                }
+            } catch (error) {
+                console.error('Error checking current room:', error);
+            }
+        }
 
         // تحميل الرومات
         async function loadRooms() {
             try {
-                const rooms = await roomsSystem.getActiveRooms();
-                displayRooms(rooms);
+                // تحميل الرومات العامة
+                const publicRoomsSnap = await db.collection('rooms')
+                    .where('type', '==', 'public')
+                    .where('isActive', '==', true)
+                    .orderBy('createdAt', 'desc')
+                    .limit(20)
+                    .get();
                 
-                // تحديث العداد
-                document.getElementById('activeRoomsCount').textContent = `${rooms.length} روم`;
+                displayPublicRooms(publicRoomsSnap.docs);
                 
-                // تحميل رومات المستخدم
+                // تحميل الرومات الخاصة للمستخدم
                 if (currentUserData && currentUserData.joinedRooms) {
-                    loadUserRooms(currentUserData.joinedRooms);
+                    loadPrivateRooms();
                 }
                 
             } catch (error) {
                 console.error('Error loading rooms:', error);
-                showToast('حدث خطأ في تحميل الرومات', 'error');
+                showNotification('حدث خطأ في تحميل الرومات', 'error');
             }
         }
 
-        // عرض الرومات
-        function displayRooms(rooms) {
-            const roomsList = document.getElementById('roomsList');
+        // عرض الرومات العامة
+        function displayPublicRooms(rooms) {
+            const publicRoomsList = document.getElementById('publicRoomsList');
             
             if (rooms.length === 0) {
-                roomsList.innerHTML = `
-                    <div class="text-center py-8 text-gray-500">
+                publicRoomsList.innerHTML = `
+                    <div class="col-span-2 text-center py-8 text-gray-500">
                         <i class="fas fa-comments text-3xl mb-3"></i>
-                        <p>لا توجد رومات نشطة حالياً</p>
+                        <p>لا توجد رومات عامة حالياً</p>
                         <button onclick="openCreateRoomModal()" class="mt-4 px-4 py-2 rounded-xl bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition">
-                            <i class="fas fa-plus ml-2"></i> أنشئ أول روم
+                            أنشئ أول روم
                         </button>
                     </div>
                 `;
@@ -402,442 +633,865 @@
             }
 
             let html = '';
-            rooms.forEach(room => {
-                const isFull = room.users.length >= room.maxUsers;
-                const isInRoom = room.users.some(u => u.uid === currentUser?.uid);
+            rooms.forEach(roomDoc => {
+                const room = roomDoc.data();
+                const isFull = room.users?.length >= room.maxUsers;
+                const isInRoom = room.users?.some(u => u.uid === currentUser?.uid);
                 
                 html += `
-                    <div class="glass-card p-4 rounded-3xl ${isInRoom ? 'border-2 border-blue-500' : ''}">
-                        <div class="flex items-start justify-between mb-3">
-                            <div class="flex items-center gap-3">
-                                <img src="${room.ownerAvatar}" class="w-12 h-12 rounded-full border-2 border-${room.isPublic ? 'green' : 'purple'}-500">
-                                <div>
-                                    <h4 class="font-bold">${room.name}</h4>
-                                    <p class="text-xs text-gray-400">أنشأه: ${room.ownerName}</p>
-                                </div>
-                            </div>
-                            <div class="text-center">
-                                <div class="text-xl font-bold ${isFull ? 'text-red-400' : 'text-green-400'}">
-                                    ${room.users.length}/${room.maxUsers}
-                                </div>
-                                <div class="text-xs text-gray-400">${room.isPublic ? 'عام' : 'خاص'}</div>
+                    <div class="glass-card rounded-2xl overflow-hidden cursor-pointer" onclick="previewRoom('${roomDoc.id}')">
+                        <div class="h-32 relative">
+                            <img src="${room.image || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80'}" 
+                                 class="w-full h-full object-cover">
+                            <div class="absolute bottom-2 right-2 bg-black/60 px-2 py-1 rounded-lg text-xs">
+                                ${room.users?.length || 0}/${room.maxUsers}
                             </div>
                         </div>
-                        
-                        <div class="flex items-center justify-between mb-3">
-                            <div class="flex -space-x-2">
-                                ${room.users.slice(0, 4).map(user => `
-                                    <img src="${user.avatar}" class="w-8 h-8 rounded-full border-2 border-gray-800" title="${user.name}">
-                                `).join('')}
-                                ${room.users.length > 4 ? `
-                                    <div class="w-8 h-8 rounded-full bg-gray-700 border-2 border-gray-800 flex items-center justify-center text-xs">
-                                        +${room.users.length - 4}
-                                    </div>
-                                ` : ''}
+                        <div class="p-3">
+                            <h4 class="font-bold text-sm truncate">${room.name}</h4>
+                            <div class="flex items-center gap-2 mt-2">
+                                <img src="${room.ownerAvatar}" class="w-6 h-6 rounded-full">
+                                <span class="text-xs text-gray-400">${room.ownerName}</span>
                             </div>
-                            <span class="text-sm text-gray-400">
-                                <i class="fas fa-clock ml-1"></i> ${formatTimeAgo(room.createdAt)}
-                            </span>
-                        </div>
-                        
-                        <div class="flex gap-2">
-                            ${isInRoom ? `
-                                <button onclick="openRoom('${room.id}')" class="flex-1 py-2 rounded-xl bg-blue-500 hover:bg-blue-600 transition">
-                                    <i class="fas fa-door-open ml-2"></i> دخول الروم
-                                </button>
-                            ` : `
-                                <button onclick="previewRoom('${room.id}')" 
-                                        class="flex-1 py-2 rounded-xl ${isFull ? 'bg-gray-600 cursor-not-allowed' : 'bg-green-500 hover:bg-green-600'} transition"
-                                        ${isFull ? 'disabled' : ''}>
-                                    <i class="fas fa-sign-in-alt ml-2"></i> ${isFull ? 'ممتلئ' : 'انضمام'}
-                                </button>
-                            `}
-                            <button onclick="showRoomInfo('${room.id}')" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 transition">
-                                <i class="fas fa-info"></i>
-                            </button>
                         </div>
                     </div>
                 `;
             });
 
-            roomsList.innerHTML = html;
+            publicRoomsList.innerHTML = html;
         }
 
-        // تحميل رومات المستخدم
-        function loadUserRooms(roomIds) {
-            const myRoomsList = document.getElementById('myRoomsList');
-            
-            if (!roomIds || roomIds.length === 0) {
-                myRoomsList.innerHTML = `
-                    <div class="text-center py-4 text-gray-500 text-sm">
-                        لم تنضم لأي روم بعد
-                    </div>
-                `;
-                return;
-            }
-
-            // عرض رومات المستخدم المفضلة
-            myRoomsList.innerHTML = `
-                <div class="text-center py-4 text-gray-500 text-sm">
-                    جاري تحميل روماتك...
-                </div>
-            `;
-        }
-
-        // إنشاء روم جديد
-        async function createNewRoom() {
+        // تحميل الرومات الخاصة
+        async function loadPrivateRooms() {
             try {
-                const roomName = document.getElementById('roomNameInput').value.trim();
-                const maxUsers = parseInt(document.getElementById('maxUsersInput').value);
-                const roomType = document.getElementById('roomTypeInput').value;
+                const privateRoomsList = document.getElementById('privateRoomsList');
                 
-                if (!roomName) {
-                    showToast('يرجى إدخال اسم للروم', 'warning');
+                // الرومات التي أنشأها المستخدم
+                const createdRoomsSnap = await db.collection('rooms')
+                    .where('ownerId', '==', currentUser.uid)
+                    .where('type', '==', 'private')
+                    .orderBy('createdAt', 'desc')
+                    .get();
+                
+                if (createdRoomsSnap.empty) {
+                    privateRoomsList.innerHTML = `
+                        <div class="text-center py-8 text-gray-500">
+                            <i class="fas fa-users-slash text-3xl mb-3"></i>
+                            <p>لم تنشئ أي غرف خاصة بعد</p>
+                        </div>
+                    `;
                     return;
                 }
 
-                showToast('جاري إنشاء الروم...', 'info');
-                
-                const roomId = await roomsSystem.createRoom(
-                    roomName, 
-                    maxUsers, 
-                    roomType === 'public'
-                );
-
-                showToast('تم إنشاء الروم بنجاح!', 'success');
-                
-                // تحميل الرومات من جديد
-                await loadRooms();
-                
-                // تفريغ الحقول
-                document.getElementById('roomNameInput').value = '';
-                
-            } catch (error) {
-                console.error('Error creating room:', error);
-                showToast(error.message || 'حدث خطأ في إنشاء الروم', 'error');
-            }
-        }
-
-        // إنشاء روم من المودال
-        async function createRoomFromModal() {
-            try {
-                const roomName = document.getElementById('modalRoomName').value.trim();
-                const roomDesc = document.getElementById('modalRoomDesc').value.trim();
-                const maxUsers = parseInt(document.getElementById('modalMaxUsers').value);
-                const privacy = document.getElementById('modalRoomPrivacy').value;
-                
-                if (!roomName) {
-                    showToast('يرجى إدخال اسم للروم', 'warning');
-                    return;
-                }
-
-                showToast('جاري إنشاء الروم...', 'info');
-                
-                // إنشاء الروم مع بيانات إضافية
-                const user = auth.currentUser;
-                const userData = await getCurrentUser();
-                
-                const roomId = roomsSystem.generateRoomId();
-                const roomData = {
-                    id: roomId,
-                    name: roomName,
-                    description: roomDesc || 'روم صوتي للدردشة والتواصل',
-                    ownerId: user.uid,
-                    ownerName: userData.displayName,
-                    ownerAvatar: userData.photoURL,
-                    maxUsers: maxUsers,
-                    isPublic: privacy === 'public',
-                    privacy: privacy,
-                    users: [{
-                        uid: user.uid,
-                        name: userData.displayName,
-                        avatar: userData.photoURL,
-                        isMuted: false,
-                        isSpeaker: true,
-                        joinedAt: new Date(),
-                        magicLevel: userData.magicLevel || 1,
-                        wealthLevel: userData.wealthLevel || 1,
-                        isOwner: true
-                    }],
-                    createdAt: new Date(),
-                    isActive: true,
-                    currentSpeakers: 1,
-                    tags: ['صوتي', 'دردشة']
-                };
-
-                await db.collection('rooms').doc(roomId).set(roomData);
-                await rtdb.ref(`rooms/${roomId}/signals`).set({});
-                
-                await db.collection('users').doc(user.uid).update({
-                    currentRoom: roomId,
-                    createdRooms: firebase.firestore.FieldValue.arrayUnion(roomId),
-                    joinedRooms: firebase.firestore.FieldValue.arrayUnion(roomId)
+                let html = '';
+                createdRoomsSnap.forEach(doc => {
+                    const room = doc.data();
+                    
+                    html += `
+                        <div class="glass-card rounded-2xl p-3 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <img src="${room.image || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80'}" 
+                                     class="w-12 h-12 rounded-lg object-cover">
+                                <div>
+                                    <h4 class="font-bold">${room.name}</h4>
+                                    <p class="text-xs text-gray-400">${room.users?.length || 0} أعضاء</p>
+                                </div>
+                            </div>
+                            <button onclick="joinRoom('${doc.id}')" class="px-3 py-1 rounded-lg bg-blue-500 hover:bg-blue-600 transition text-sm">
+                                دخول
+                            </button>
+                        </div>
+                    `;
                 });
 
-                roomsSystem.currentRoom = roomId;
-                closeCreateRoomModal();
-                
-                showToast('تم إنشاء الروم بنجاح!', 'success');
-                await loadRooms();
-                
-                // الانضمام تلقائياً للروم
-                await roomsSystem.joinRoom(roomId);
+                privateRoomsList.innerHTML = html;
                 
             } catch (error) {
-                console.error('Error creating room:', error);
-                showToast(error.message || 'حدث خطأ في إنشاء الروم', 'error');
+                console.error('Error loading private rooms:', error);
             }
         }
 
-        // معاينة الروم قبل الانضمام
+        // معاينة الروم
         async function previewRoom(roomId) {
             try {
                 const roomDoc = await db.collection('rooms').doc(roomId).get();
                 
                 if (!roomDoc.exists) {
-                    showToast('الروم غير موجود', 'error');
+                    showNotification('الغرفة غير موجودة', 'error');
                     return;
                 }
 
-                const roomData = roomDoc.data();
-                selectedRoomToJoin = roomId;
+                const room = roomDoc.data();
+                
+                // التحقق إذا كانت الغرفة ممتلئة
+                if (room.users?.length >= room.maxUsers) {
+                    showNotification('الغرفة ممتلئة', 'warning');
+                    return;
+                }
 
-                const roomPreview = document.getElementById('roomPreview');
-                roomPreview.innerHTML = `
-                    <div class="space-y-4">
-                        <div class="flex items-center gap-3 p-3 rounded-2xl bg-white/5">
-                            <img src="${roomData.ownerAvatar}" class="w-16 h-16 rounded-full border-2 border-yellow-500">
-                            <div>
-                                <h4 class="font-bold text-lg">${roomData.name}</h4>
-                                <p class="text-sm text-gray-400">${roomData.description || 'روم صوتي للدردشة'}</p>
-                            </div>
-                        </div>
-                        
-                        <div class="grid grid-cols-3 gap-3">
-                            <div class="text-center p-3 rounded-2xl bg-white/5">
-                                <div class="text-2xl font-bold">${roomData.users.length}</div>
-                                <div class="text-xs text-gray-400">مستخدمين</div>
-                            </div>
-                            <div class="text-center p-3 rounded-2xl bg-white/5">
-                                <div class="text-2xl font-bold">${roomData.currentSpeakers}</div>
-                                <div class="text-xs text-gray-400">متحدثين</div>
-                            </div>
-                            <div class="text-center p-3 rounded-2xl bg-white/5">
-                                <div class="text-2xl font-bold">${roomData.maxUsers}</div>
-                                <div class="text-xs text-gray-400">السعة</div>
-                            </div>
-                        </div>
-                        
-                        <div>
-                            <h5 class="font-bold mb-2">الأعضاء الحاليون:</h5>
-                            <div class="flex flex-wrap gap-2">
-                                ${roomData.users.slice(0, 8).map(user => `
-                                    <div class="flex items-center gap-2 px-3 py-1 rounded-full bg-white/5">
-                                        <img src="${user.avatar}" class="w-6 h-6 rounded-full">
-                                        <span class="text-sm">${user.name}</span>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    </div>
-                `;
-
-                openJoinRoomModal();
+                // التحقق إذا كان المستخدم في غرفة حالياً
+                if (currentRoom) {
+                    if (confirm('أنت في غرفة حالياً. هل تريد المغادرة والانضمام لهذه الغرفة؟')) {
+                        await leaveCurrentRoom();
+                        await joinRoom(roomId);
+                    }
+                } else {
+                    await joinRoom(roomId);
+                }
                 
             } catch (error) {
                 console.error('Error previewing room:', error);
-                showToast('حدث خطأ في معاينة الروم', 'error');
+                showNotification('حدث خطأ في معاينة الغرفة', 'error');
             }
         }
 
-        // الانضمام للروم المحدد
-        async function joinSelectedRoom() {
-            if (!selectedRoomToJoin) return;
-            
+        // الانضمام للروم
+        async function joinRoom(roomId) {
             try {
-                closeJoinRoomModal();
-                showToast('جاري الانضمام للروم...', 'info');
+                showNotification('جاري الانضمام للغرفة...', 'info');
                 
-                await roomsSystem.joinRoom(selectedRoomToJoin);
-                showToast('تم الانضمام للروم بنجاح!', 'success');
+                const roomDoc = await db.collection('rooms').doc(roomId).get();
+                if (!roomDoc.exists) {
+                    showNotification('الغرفة غير موجودة', 'error');
+                    return;
+                }
+
+                const room = roomDoc.data();
                 
-                // تحديث العرض
-                document.getElementById('currentRoomSection').classList.remove('hidden');
+                // التحقق من عدم وجود غرفة أخرى
+                if (currentUserData.currentRoom && currentUserData.currentRoom !== roomId) {
+                    if (!confirm('لديك غرفة نشطة. هل تريد مغادرتها والانضمام لهذه الغرفة؟')) {
+                        return;
+                    }
+                    await leaveCurrentRoom();
+                }
+
+                // التحقق إذا كان المستخدم موجوداً بالفعل
+                const userExists = room.users?.some(u => u.uid === currentUser.uid);
+                
+                if (!userExists) {
+                    // إضافة المستخدم للغرفة
+                    const userData = {
+                        uid: currentUser.uid,
+                        name: currentUserData.displayName,
+                        avatar: currentUserData.photoURL,
+                        isMuted: false,
+                        isSpeaker: true,
+                        joinedAt: new Date(),
+                        magicLevel: currentUserData.magicLevel || 1,
+                        wealthLevel: currentUserData.wealthLevel || 1
+                    };
+
+                    await db.collection('rooms').doc(roomId).update({
+                        users: firebase.firestore.FieldValue.arrayUnion(userData)
+                    });
+                }
+
+                // تحديث بيانات المستخدم
+                await db.collection('users').doc(currentUser.uid).update({
+                    currentRoom: roomId,
+                    joinedRooms: firebase.firestore.FieldValue.arrayUnion(roomId)
+                });
+
+                // تعيين المتغيرات
+                currentRoom = roomId;
+                roomData = room;
+                
+                // تبديل الصفحات
+                document.getElementById('mainPage').style.display = 'none';
+                document.getElementById('roomPage').classList.add('active');
+                
+                // تحديث واجهة الروم
+                updateRoomUI();
+                
+                // بدء اتصال WebRTC
+                await startWebRTCConnection();
+                
+                showNotification(`تم الانضمام لـ ${room.name}`, 'success');
                 
             } catch (error) {
                 console.error('Error joining room:', error);
-                showToast(error.message || 'حدث خطأ في الانضمام للروم', 'error');
+                showNotification(error.message || 'حدث خطأ في الانضمام للغرفة', 'error');
             }
         }
 
-        // الانضمام لروم موجود (إذا كان المستخدم فيه سابقاً)
+        // الانضمام لروم موجود
         async function joinExistingRoom(roomId) {
             try {
                 const roomDoc = await db.collection('rooms').doc(roomId).get();
-                
                 if (roomDoc.exists) {
-                    await roomsSystem.joinRoom(roomId);
-                    document.getElementById('currentRoomSection').classList.remove('hidden');
+                    roomData = roomDoc.data();
+                    
+                    // تبديل الصفحات
+                    document.getElementById('mainPage').style.display = 'none';
+                    document.getElementById('roomPage').classList.add('active');
+                    
+                    // تحديث واجهة الروم
+                    updateRoomUI();
+                    
+                    // بدء اتصال WebRTC
+                    await startWebRTCConnection();
                 }
             } catch (error) {
                 console.error('Error joining existing room:', error);
-                // إذا فشل الانضمام، نزيل الروم من بيانات المستخدم
-                await db.collection('users').doc(currentUser.uid).update({
-                    currentRoom: null
-                });
             }
         }
 
-        // فتح الروم
-        function openRoom(roomId) {
-            // إعادة تحميل الصفحة للروم
-            window.location.href = `room.html?id=${roomId}`;
+        // تحديث واجهة الروم
+        function updateRoomUI() {
+            if (!roomData) return;
+            
+            document.getElementById('roomTitle').textContent = roomData.name;
+            document.getElementById('roomOwnerAvatar').src = roomData.ownerAvatar;
+            document.getElementById('roomOwnerId').textContent = `ID: ${roomData.ownerId?.substring(0, 6)}`;
+            
+            // تحديث شبكة المستخدمين
+            updateMicsGrid();
+        }
+
+        // تحديث شبكة الميكروفونات
+        function updateMicsGrid() {
+            if (!roomData || !roomData.users) return;
+            
+            const micsGrid = document.getElementById('micsGrid');
+            micsGrid.innerHTML = '';
+            
+            roomData.users.forEach(user => {
+                const micItem = document.createElement('div');
+                micItem.className = 'mic-item flex flex-col items-center';
+                micItem.innerHTML = `
+                    <div class="avatar-ring" onclick="showUserProfile('${user.uid}')">
+                        <img src="${user.avatar}" class="mic-img">
+                    </div>
+                    <span style="font-size:10px; color:#aaa; margin-top:5px">${user.name}</span>
+                `;
+                micsGrid.appendChild(micItem);
+            });
+        }
+
+        // بدء اتصال WebRTC
+        async function startWebRTCConnection() {
+            try {
+                // الحصول على صلاحيات الميكروفون
+                localStream = await navigator.mediaDevices.getUserMedia({
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        autoGainControl: true
+                    }
+                });
+
+                // تكوين ICE servers
+                const rtcConfig = {
+                    iceServers: [
+                        { urls: 'stun:stun.l.google.com:19302' },
+                        { urls: 'stun:stun1.l.google.com:19302' }
+                    ]
+                };
+
+                // الاستماع لإشارات WebRTC من المستخدمين الآخرين
+                listenForSignals();
+                
+                // إرسال إشارة دخول
+                sendSignal('join', null);
+                
+            } catch (error) {
+                console.error('Error starting WebRTC:', error);
+                showNotification('يجب السماح باستخدام الميكروفون', 'warning');
+            }
+        }
+
+        // الاستماع لإشارات WebRTC
+        function listenForSignals() {
+            if (!currentRoom) return;
+            
+            const signalsRef = rtdb.ref(`rooms/${currentRoom}/signals`);
+            
+            signalsRef.on('child_added', async (snapshot) => {
+                const signal = snapshot.val();
+                
+                if (signal.userId === currentUser.uid) return;
+                
+                try {
+                    if (signal.type === 'join') {
+                        await handleUserJoin(signal.userId);
+                    } else if (signal.type === 'offer') {
+                        await handleOffer(signal.userId, signal.offer);
+                    } else if (signal.type === 'answer') {
+                        await handleAnswer(signal.userId, signal.answer);
+                    } else if (signal.type === 'ice-candidate') {
+                        await handleIceCandidate(signal.userId, signal.candidate);
+                    } else if (signal.type === 'leave') {
+                        handleUserLeave(signal.userId);
+                    }
+                } catch (error) {
+                    console.error('Error handling signal:', error);
+                }
+            });
+        }
+
+        // معالجة دخول مستخدم جديد
+        async function handleUserJoin(userId) {
+            const pc = new RTCPeerConnection({
+                iceServers: [
+                    { urls: 'stun:stun.l.google.com:19302' }
+                ]
+            });
+            
+            peerConnections[userId] = pc;
+            
+            // إضافة المسار المحلي
+            localStream.getTracks().forEach(track => {
+                pc.addTrack(track, localStream);
+            });
+            
+            // معالجة مرشحات ICE
+            pc.onicecandidate = (event) => {
+                if (event.candidate) {
+                    sendSignalToUser(userId, 'ice-candidate', event.candidate);
+                }
+            };
+            
+            // معالجة المسار الوارد
+            pc.ontrack = (event) => {
+                const audioElement = document.createElement('audio');
+                audioElement.id = `audio-${userId}`;
+                audioElement.autoplay = true;
+                audioElement.controls = false;
+                audioElement.style.display = 'none';
+                document.body.appendChild(audioElement);
+                audioElement.srcObject = event.streams[0];
+            };
+            
+            // إنشاء عرض اتصال
+            const offer = await pc.createOffer();
+            await pc.setLocalDescription(offer);
+            
+            sendSignalToUser(userId, 'offer', offer);
+        }
+
+        // معالجة عرض الاتصال
+        async function handleOffer(userId, offer) {
+            const pc = new RTCPeerConnection({
+                iceServers: [
+                    { urls: 'stun:stun.l.google.com:19302' }
+                ]
+            });
+            
+            peerConnections[userId] = pc;
+            
+            // إضافة المسار المحلي
+            localStream.getTracks().forEach(track => {
+                pc.addTrack(track, localStream);
+            });
+            
+            pc.onicecandidate = (event) => {
+                if (event.candidate) {
+                    sendSignalToUser(userId, 'ice-candidate', event.candidate);
+                }
+            };
+            
+            pc.ontrack = (event) => {
+                const audioElement = document.createElement('audio');
+                audioElement.id = `audio-${userId}`;
+                audioElement.autoplay = true;
+                audioElement.controls = false;
+                audioElement.style.display = 'none';
+                document.body.appendChild(audioElement);
+                audioElement.srcObject = event.streams[0];
+            };
+            
+            await pc.setRemoteDescription(new RTCSessionDescription(offer));
+            
+            const answer = await pc.createAnswer();
+            await pc.setLocalDescription(answer);
+            
+            sendSignalToUser(userId, 'answer', answer);
+        }
+
+        // معالجة الإجابة
+        async function handleAnswer(userId, answer) {
+            const pc = peerConnections[userId];
+            if (pc) {
+                await pc.setRemoteDescription(new RTCSessionDescription(answer));
+            }
+        }
+
+        // معالجة مرشح ICE
+        async function handleIceCandidate(userId, candidate) {
+            const pc = peerConnections[userId];
+            if (pc) {
+                await pc.addIceCandidate(new RTCIceCandidate(candidate));
+            }
+        }
+
+        // معالجة خروج مستخدم
+        function handleUserLeave(userId) {
+            // إغلاق الاتصال
+            if (peerConnections[userId]) {
+                peerConnections[userId].close();
+                delete peerConnections[userId];
+            }
+            
+            // إزالة عنصر الصوت
+            const audioElement = document.getElementById(`audio-${userId}`);
+            if (audioElement) {
+                audioElement.remove();
+            }
+            
+            // إضافة رسالة في الشات
+            addChatMessage('النظام', `غادر مستخدم من الغرفة`, 'system');
+        }
+
+        // إرسال إشارة
+        function sendSignal(type, data) {
+            if (!currentRoom || !currentUser) return;
+            
+            const signalRef = rtdb.ref(`rooms/${currentRoom}/signals`).push();
+            signalRef.set({
+                type: type,
+                userId: currentUser.uid,
+                data: data,
+                timestamp: Date.now()
+            });
+        }
+
+        // إرسال إشارة لمستخدم محدد
+        function sendSignalToUser(targetUserId, type, data) {
+            if (!currentRoom || !currentUser) return;
+            
+            const signalRef = rtdb.ref(`rooms/${currentRoom}/signals`).push();
+            signalRef.set({
+                type: type,
+                userId: currentUser.uid,
+                targetUserId: targetUserId,
+                data: data,
+                timestamp: Date.now()
+            });
+        }
+
+        // إرسال رسالة
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            
+            if (!text) return;
+            
+            try {
+                // إضافة رسالة في الشات
+                addChatMessage(currentUserData.displayName, text, 'user');
+                
+                // حفظ في قاعدة البيانات
+                await db.collection('rooms').doc(currentRoom)
+                    .collection('messages')
+                    .add({
+                        senderId: currentUser.uid,
+                        senderName: currentUserData.displayName,
+                        senderAvatar: currentUserData.photoURL,
+                        text: text,
+                        timestamp: new Date()
+                    });
+                
+                input.value = '';
+                
+            } catch (error) {
+                console.error('Error sending message:', error);
+            }
+        }
+
+        // إضافة رسالة في الشات
+        function addChatMessage(sender, text, type = 'user') {
+            const chatArea = document.getElementById('chatArea');
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'msg-bubble mb-3';
+            
+            // تحديد لون الرسالة حسب النوع
+            if (type === 'system') {
+                messageDiv.style.background = 'rgba(59, 130, 246, 0.2)';
+            } else if (type === 'user') {
+                messageDiv.style.background = 'rgba(139, 92, 246, 0.2)';
+            }
+            
+            messageDiv.innerHTML = `
+                <div class="msg-content">
+                    <div class="msg-user">
+                        ${sender}
+                    </div>
+                    <div class="msg-text">${text}</div>
+                </div>
+            `;
+            
+            chatArea.appendChild(messageDiv);
+            chatArea.scrollTop = chatArea.scrollHeight;
         }
 
         // مغادرة الروم الحالي
         async function leaveCurrentRoom() {
-            if (!roomsSystem.currentRoom) return;
+            if (!currentRoom) return;
             
             try {
-                showToast('جاري مغادرة الروم...', 'info');
-                await roomsSystem.leaveRoom(roomsSystem.currentRoom);
+                // إرسال إشارة مغادرة
+                sendSignal('leave', null);
                 
-                document.getElementById('currentRoomSection').classList.add('hidden');
-                showToast('تم مغادرة الروم', 'success');
+                // إغلاق جميع الاتصالات
+                Object.values(peerConnections).forEach(pc => pc.close());
+                peerConnections = {};
                 
+                if (localStream) {
+                    localStream.getTracks().forEach(track => track.stop());
+                    localStream = null;
+                }
+                
+                // إزالة المستخدم من الغرفة
+                if (roomData && roomData.users) {
+                    const updatedUsers = roomData.users.filter(u => u.uid !== currentUser.uid);
+                    
+                    if (updatedUsers.length === 0) {
+                        // حذف الغرفة إذا أصبحت فارغة
+                        await db.collection('rooms').doc(currentRoom).delete();
+                        await rtdb.ref(`rooms/${currentRoom}`).remove();
+                    } else {
+                        await db.collection('rooms').doc(currentRoom).update({
+                            users: updatedUsers
+                        });
+                    }
+                }
+                
+                // تحديث بيانات المستخدم
+                await db.collection('users').doc(currentUser.uid).update({
+                    currentRoom: null
+                });
+                
+                // إعادة تعيين المتغيرات
+                currentRoom = null;
+                roomData = null;
+                
+                // تبديل الصفحات
+                document.getElementById('roomPage').classList.remove('active');
+                document.getElementById('mainPage').style.display = 'block';
+                
+                // تحديث الرومات
                 await loadRooms();
+                
+                showNotification('تم مغادرة الغرفة', 'success');
                 
             } catch (error) {
                 console.error('Error leaving room:', error);
-                showToast('حدث خطأ في مغادرة الروم', 'error');
+                showNotification('حدث خطأ في مغادرة الغرفة', 'error');
             }
         }
 
-        // تبديل حالة الميكروفون
-        async function toggleMute() {
-            await roomsSystem.toggleMute();
+        // إنشاء غرفة جديدة
+        async function createRoom() {
+            try {
+                const roomName = document.getElementById('roomNameInput').value.trim();
+                const roomImage = document.getElementById('roomImageInput').value.trim();
+                const roomType = document.getElementById('roomTypeInput').value;
+                const maxUsers = parseInt(document.getElementById('maxUsersInput').value);
+                
+                if (!roomName) {
+                    showNotification('يرجى إدخال اسم للغرفة', 'warning');
+                    return;
+                }
+
+                // التحقق إذا كان المستخدم لديه غرفة نشطة
+                if (currentUserData.currentRoom) {
+                    showNotification('لديك غرفة نشطة بالفعل. يجب مغادرتها أولاً', 'warning');
+                    return;
+                }
+
+                showNotification('جاري إنشاء الغرفة...', 'info');
+                
+                // إنشاء ID للغرفة
+                const roomId = generateRoomId();
+                
+                // بيانات الغرفة
+                const roomData = {
+                    id: roomId,
+                    name: roomName,
+                    image: roomImage || '',
+                    type: roomType,
+                    ownerId: currentUser.uid,
+                    ownerName: currentUserData.displayName,
+                    ownerAvatar: currentUserData.photoURL,
+                    maxUsers: maxUsers,
+                    users: [{
+                        uid: currentUser.uid,
+                        name: currentUserData.displayName,
+                        avatar: currentUserData.photoURL,
+                        isMuted: false,
+                        isSpeaker: true,
+                        joinedAt: new Date(),
+                        magicLevel: currentUserData.magicLevel || 1,
+                        wealthLevel: currentUserData.wealthLevel || 1,
+                        isOwner: true
+                    }],
+                    createdAt: new Date(),
+                    isActive: true,
+                    currentSpeakers: 1
+                };
+
+                // حفظ الغرفة في Firestore
+                await db.collection('rooms').doc(roomId).set(roomData);
+                
+                // إنشاء node في Realtime Database للإشارات
+                await rtdb.ref(`rooms/${roomId}/signals`).set({});
+                
+                // تحديث بيانات المستخدم
+                await db.collection('users').doc(currentUser.uid).update({
+                    currentRoom: roomId,
+                    createdRooms: firebase.firestore.FieldValue.arrayUnion(roomId),
+                    joinedRooms: firebase.firestore.FieldValue.arrayUnion(roomId)
+                });
+
+                closeCreateRoomModal();
+                showNotification('تم إنشاء الغرفة بنجاح!', 'success');
+                
+                // الانضمام للغرفة مباشرة
+                currentRoom = roomId;
+                await joinRoom(roomId);
+                
+            } catch (error) {
+                console.error('Error creating room:', error);
+                showNotification(error.message || 'حدث خطأ في إنشاء الغرفة', 'error');
+            }
         }
 
-        // فتح مودال إنشاء روم
+        // تبديل التبويب
+        function switchTab(tab) {
+            const publicTabBtn = document.getElementById('tabPublic');
+            const privateTabBtn = document.getElementById('tabPrivate');
+            const publicSection = document.getElementById('publicRoomsSection');
+            const privateSection = document.getElementById('privateRoomsSection');
+            
+            if (tab === 'public') {
+                publicTabBtn.classList.add('active');
+                privateTabBtn.classList.remove('active');
+                publicSection.classList.remove('hidden');
+                privateSection.classList.add('hidden');
+            } else {
+                publicTabBtn.classList.remove('active');
+                privateTabBtn.classList.add('active');
+                publicSection.classList.add('hidden');
+                privateSection.classList.remove('hidden');
+                
+                // تحميل الرومات الخاصة
+                loadPrivateRooms();
+            }
+        }
+
+        // فتح مودال إنشاء غرفة
         function openCreateRoomModal() {
+            // تفريغ الحقول
+            document.getElementById('roomNameInput').value = '';
+            document.getElementById('roomImageInput').value = '';
+            document.getElementById('roomTypeInput').value = 'private';
+            document.getElementById('maxUsersInput').value = '10';
+            
             document.getElementById('createRoomModal').classList.add('active');
         }
 
-        // إغلاق مودال إنشاء روم
+        // إغلاق مودال إنشاء غرفة
         function closeCreateRoomModal() {
             document.getElementById('createRoomModal').classList.remove('active');
         }
 
-        // فتح مودال الانضمام للروم
-        function openJoinRoomModal() {
-            document.getElementById('joinRoomModal').classList.add('active');
-        }
-
-        // إغلاق مودال الانضمام للروم
-        function closeJoinRoomModal() {
-            document.getElementById('joinRoomModal').classList.remove('active');
-            selectedRoomToJoin = null;
-        }
-
-        // إظهار معلومات الروم
-        async function showRoomInfo(roomId) {
-            const roomDoc = await db.collection('rooms').doc(roomId).get();
-            if (roomDoc.exists) {
-                const roomData = roomDoc.data();
+        // فتح شيت الهدايا
+        function openGiftSheet() {
+            if (!currentRoom || !roomData || !roomData.users) return;
+            
+            const userSelector = document.querySelector('.user-selector');
+            userSelector.innerHTML = '';
+            
+            // عرض مستخدمين الروم
+            roomData.users.forEach(user => {
+                if (user.uid === currentUser.uid) return;
                 
-                const info = `
-اسم الروم: ${roomData.name}
-المالك: ${roomData.ownerName}
-عدد الأعضاء: ${roomData.users.length}/${roomData.maxUsers}
-النوع: ${roomData.isPublic ? 'عام' : 'خاص'}
-تاريخ الإنشاء: ${new Date(roomData.createdAt.toDate()).toLocaleDateString('ar-SA')}
+                const userOption = document.createElement('div');
+                userOption.className = 'flex flex-col items-center cursor-pointer';
+                userOption.onclick = () => {
+                    selectedRecipient = user;
+                    document.querySelectorAll('.user-selector > div').forEach(el => {
+                        el.classList.remove('border-accent');
+                    });
+                    userOption.classList.add('border-accent');
+                };
+                
+                userOption.innerHTML = `
+                    <img src="${user.avatar}" class="w-10 h-10 rounded-full border-2 border-transparent mb-1">
+                    <span class="text-xs">${user.name}</span>
                 `;
                 
-                alert(info);
+                userSelector.appendChild(userOption);
+            });
+            
+            document.getElementById('giftSheet').classList.add('active');
+        }
+
+        // إغلاق شيت الهدايا
+        function closeGiftSheet() {
+            document.getElementById('giftSheet').classList.remove('active');
+            selectedGift = null;
+            selectedRecipient = null;
+        }
+
+        // إرسال هدية
+        async function sendGift() {
+            if (!selectedGift || !selectedRecipient) {
+                showNotification('يرجى اختيار هدية ومستلم', 'warning');
+                return;
+            }
+
+            try {
+                // التحقق من الرصيد
+                if (currentUserData.balance < selectedGift.price) {
+                    showNotification('رصيدك غير كافٍ', 'warning');
+                    return;
+                }
+
+                // خصم السعر من رصيد المرسل
+                await db.collection('users').doc(currentUser.uid).update({
+                    balance: firebase.firestore.FieldValue.increment(-selectedGift.price)
+                });
+
+                // إضافة الهدية للمستقبل
+                const giftData = {
+                    giftId: selectedGift.id,
+                    giftName: selectedGift.name,
+                    giftIcon: selectedGift.icon,
+                    senderId: currentUser.uid,
+                    senderName: currentUserData.displayName,
+                    receiverId: selectedRecipient.uid,
+                    receiverName: selectedRecipient.name,
+                    price: selectedGift.price,
+                    sentAt: new Date()
+                };
+
+                await db.collection('gifts').add(giftData);
+                
+                // إضافة خبرة السحر للمرسل
+                await db.collection('users').doc(currentUser.uid).update({
+                    magicExp: firebase.firestore.FieldValue.increment(selectedGift.price * 0.1)
+                });
+
+                // إضافة خبرة الثروة للمستقبل
+                await db.collection('users').doc(selectedRecipient.uid).update({
+                    wealthExp: firebase.firestore.FieldValue.increment(selectedGift.price * 0.05)
+                });
+
+                // إرسال رسالة في الشات
+                addChatMessage('النظام', `🎁 أرسل ${currentUserData.displayName} هدية لـ ${selectedRecipient.name}`, 'system');
+                
+                // حفظ في قاعدة بيانات الروم
+                await db.collection('rooms').doc(currentRoom)
+                    .collection('messages')
+                    .add({
+                        type: 'gift',
+                        giftData: giftData,
+                        timestamp: new Date()
+                    });
+
+                // إظهار تأثير الهدية
+                showGiftEffect(selectedGift.icon);
+                
+                closeGiftSheet();
+                showNotification('تم إرسال الهدية بنجاح', 'success');
+                
+                // تحديث رصيد المستخدم
+                await loadUserData();
+                
+            } catch (error) {
+                console.error('Error sending gift:', error);
+                showNotification('حدث خطأ في إرسال الهدية', 'error');
             }
         }
 
-        // تحديث الرومات
-        function refreshRooms() {
-            loadRooms();
-            showToast('جاري تحديث الرومات...', 'info');
+        // إظهار تأثير الهدية
+        function showGiftEffect(giftIcon) {
+            const effect = document.createElement('div');
+            effect.className = 'fixed inset-0 flex items-center justify-center pointer-events-none z-3000';
+            effect.innerHTML = `
+                <div class="text-6xl animate-ping">${giftIcon}</div>
+            `;
+            
+            document.body.appendChild(effect);
+            
+            setTimeout(() => {
+                effect.remove();
+            }, 1500);
         }
 
-        // تبديل الصفحات
-        function switchPage(page) {
-            // إخفاء جميع الصفحات
-            document.querySelectorAll('.page-section').forEach(section => {
-                section.classList.remove('active');
-            });
-            
-            // إخفاء الصفحة الرئيسية
-            document.getElementById('main-app').style.display = 'none';
-            
-            // إظهار الصفحة المطلوبة
-            document.getElementById(`${page}-page`).classList.add('active');
-            document.getElementById(`${page}-page`).style.display = 'block';
-            
-            // تحديث التبويبات النشطة
-            document.querySelectorAll('.tab-button').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            // يمكن إضافة منطق إضافي لكل صفحة
-        }
-
-        // العودة للصفحة الرئيسية
-        function goHome() {
-            document.getElementById('main-app').style.display = 'block';
-            document.querySelectorAll('.page-section').forEach(section => {
-                section.classList.remove('active');
-                section.style.display = 'none';
-            });
-        }
-
-        // تنسيق الوقت
-        function formatTimeAgo(timestamp) {
-            const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-            const now = new Date();
-            const diffMs = now - date;
-            const diffMins = Math.floor(diffMs / 60000);
-            
-            if (diffMins < 1) return 'الآن';
-            if (diffMins < 60) return `قبل ${diffMins} دقيقة`;
-            if (diffMins < 1440) return `قبل ${Math.floor(diffMins / 60)} ساعة`;
-            return `قبل ${Math.floor(diffMins / 1440)} يوم`;
+        // توليد ID للغرفة
+        function generateRoomId() {
+            return Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 10);
         }
 
         // إظهار الإشعارات
-        function showToast(message, type = 'info') {
-            // يمكن استخدام مكتبة Toast أو إنشاء إشعار بسيط
-            const toast = document.createElement('div');
-            toast.className = `fixed top-20 right-4 px-4 py-3 rounded-xl z-50 ${
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 px-4 py-3 rounded-xl z-50 ${
                 type === 'success' ? 'bg-green-500' :
                 type === 'error' ? 'bg-red-500' :
                 type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500'
             }`;
-            toast.textContent = message;
-            document.body.appendChild(toast);
+            notification.textContent = message;
+            document.body.appendChild(notification);
             
             setTimeout(() => {
-                toast.remove();
+                notification.remove();
             }, 3000);
         }
 
-        // منع الإغلاق المفاجئ إذا كان المستخدم في روم
-        window.addEventListener('beforeunload', async (e) => {
-            if (roomsSystem.currentRoom) {
-                e.preventDefault();
-                e.returnValue = 'أنت في روم صوتي حالياً. هل تريد المغادرة؟';
-                
-                // محاولة مغادرة الروم قبل الإغلاق
-                await roomsSystem.leaveRoom(roomsSystem.currentRoom);
+        // دوال التنقل
+        function goToHome() {
+            if (currentRoom) {
+                if (confirm('أنت في غرفة حالياً. هل تريد المغادرة؟')) {
+                    leaveCurrentRoom();
+                }
             }
-        });
+        }
 
-        // إدارة حالة الميكروفون
-        navigator.mediaDevices.addEventListener('devicechange', () => {
-            console.log('تغيرت أجهزة الصوت');
+        function goToFriends() {
+            showNotification('قريباً: قائمة الأصدقاء', 'info');
+        }
+
+        function goToProfile() {
+            showNotification('قريباً: الملف الشخصي', 'info');
+        }
+
+        function goToChat() {
+            showNotification('قريباً: الدردشة الخاصة', 'info');
+        }
+
+        // دوال الروم
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(console.error);
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        function leaveRoom() {
+            if (confirm('هل تريد مغادرة الغرفة؟')) {
+                leaveCurrentRoom();
+            }
+        }
+
+        function showUserProfile(userId) {
+            showNotification('قريباً: عرض الملف الشخصي', 'info');
+        }
+
+        // منع الإغلاق المفاجئ
+        window.addEventListener('beforeunload', async (e) => {
+            if (currentRoom) {
+                e.preventDefault();
+                e.returnValue = 'أنت في غرفة صوتية حالياً. هل تريد المغادرة؟';
+                
+                // محاولة مغادرة الغرفة قبل الإغلاق
+                await leaveCurrentRoom();
+            }
         });
     </script>
 </body>
